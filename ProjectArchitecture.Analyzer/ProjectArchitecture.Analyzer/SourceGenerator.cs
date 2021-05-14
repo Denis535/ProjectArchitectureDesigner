@@ -69,7 +69,7 @@ namespace ProjectArchitecture.Analyzer {
         private static CompilationUnitSyntax? CreateCompilationUnit(CompilationUnitSyntax unit) {
             var members = unit.Members.Select( CreateMemberDeclaration ).OfType<MemberDeclarationSyntax>().ToArray();
             if (!members.Any()) return null;
-            return SyntaxFactoryUtils.CreateCompilationUnit( unit ).AddMembers( members );
+            return SyntaxFactoryUtils.CompilationUnit( unit ).AddMembers( members );
         }
         // Helpers/Generation/Member
         private static MemberDeclarationSyntax? CreateMemberDeclaration(MemberDeclarationSyntax member) {
@@ -92,7 +92,7 @@ namespace ProjectArchitecture.Analyzer {
         private static NamespaceDeclarationSyntax? CreateNamespaceDeclaration(NamespaceDeclarationSyntax @namespace) {
             var members = @namespace.Members.Select( CreateMemberDeclaration ).OfType<MemberDeclarationSyntax>().ToArray();
             if (!members.Any()) return null;
-            return SyntaxFactoryUtils.CreateNamespaceDeclaration( @namespace ).AddMembers( members );
+            return SyntaxFactoryUtils.NamespaceDeclaration( @namespace ).AddMembers( members );
         }
 
 

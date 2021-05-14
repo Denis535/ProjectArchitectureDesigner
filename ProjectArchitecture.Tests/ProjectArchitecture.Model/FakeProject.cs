@@ -13,10 +13,6 @@ namespace ProjectArchitecture.Model {
 
     [Namespace( "FakeProject" )]
     [Type( typeof( object ) )]
-    // Group 0 // Comment
-    [Type( typeof( object ) )]
-    // Group 1 // Comment
-    [Type( typeof( object ) )]
     public partial class FakeModule_Domain : ModuleNode {
     }
 
@@ -24,6 +20,7 @@ namespace ProjectArchitecture.Model {
     [Type( typeof( object ) )]
     [Namespace( "System" )]
     [Type( typeof( object ) )]
+    // String
     [Type( typeof( string ) )]
     public partial class FakeModule_Infrastructure : ModuleNode {
     }

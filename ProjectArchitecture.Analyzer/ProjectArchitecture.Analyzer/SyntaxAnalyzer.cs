@@ -14,7 +14,7 @@ namespace ProjectArchitecture.Analyzer {
 
         // Project
         public static string[] GetProjectData(TypeDeclarationSyntax @class) {
-            return @class.GetAttributes().Where( IsModule ).Select( GetModuleType ).ToArray();
+            return @class.GetAttributes().Where( IsModule ).Select( GetModule ).ToArray();
         }
 
         // Module
@@ -23,59 +23,26 @@ namespace ProjectArchitecture.Analyzer {
         }
         private static (string, (string, string[])[]) GetNamespace(this IEnumerable<AttributeSyntax> attributes) {
             if (!IsNamespace( attributes.First() )) {
-                var @namespace = "Namespace_Global";
+                var @namespace = "Global";
                 var group = attributes.Split( HasGroupName ).Select( GetGroup ).ToArray();
                 return (@namespace, group);
             } else {
-                var @namespace = GetNamespaceType( attributes.First() );
+                var @namespace = GetNamespace( attributes.First() );
                 var group = attributes.Skip( 1 ).Split( HasGroupName ).Select( GetGroup ).ToArray();
                 return (@namespace, group);
             }
         }
         private static (string, string[]) GetGroup(this IEnumerable<AttributeSyntax> attributes) {
             if (!HasGroupName( attributes.First() )) {
-                var group = "Group_Default";
+                var group = "Default";
                 var types = attributes.Select( GetType ).ToArray();
                 return (group, types);
             } else {
-                var group = GetGroupType( attributes.First() );
+                var group = GetGroup( attributes.First() );
                 var types = attributes.Select( GetType ).ToArray();
                 return (group, types);
             }
         }
-
-
-        //public static (string Namespace, (string Group, string[] Types)[] Groups)[] GetModuleData(ClassDeclarationSyntax @class) {
-        //    return @class.GetAttributes().GetModuleData().ToNamespaceHierarchy().ToArray();
-        //}
-        //private static IEnumerable<(string Value, int Level)> GetModuleData(this IEnumerable<AttributeSyntax> attributes) {
-        //    foreach (var attribute in attributes) {
-        //        if (IsNamespace( attribute )) {
-        //            var @namespace = GetNamespaceType( attribute );
-        //            yield return (@namespace, 0);
-        //        } else
-        //        if (IsType( attribute )) {
-        //            var group = GetGroupType( attribute );
-        //            var type = GetType( attribute );
-        //            if (group != null) {
-        //                yield return (group, 1);
-        //                yield return (type, 2);
-        //            } else {
-        //                yield return (type, 2);
-        //            }
-        //        }
-        //    }
-        //}
-        //private static IEnumerable<(string Namespace, (string Group, string[] Types)[] Groups)> ToNamespaceHierarchy(this IEnumerable<(string Value, int Level)> flatten) {
-        //    return flatten
-        //        .Unflatten( i => i.Level == 0, key => key.Value, child => child )
-        //        .Select( i => (i.Key ?? "Namespace_Global", i.Children.ToGroupHierarchy().ToArray()) );
-        //}
-        //private static IEnumerable<(string Group, string[] Types)> ToGroupHierarchy(this IEnumerable<(string Value, int Level)> flatten) {
-        //    return flatten
-        //        .Unflatten( i => i.Level == 1, key => key.Value, child => child.Value )
-        //        .Select( i => (i.Key ?? "Group_Default", i.Children) );
-        //}
 
 
         // Helpers/Syntax/Attribute
@@ -95,21 +62,19 @@ namespace ProjectArchitecture.Analyzer {
 
 
         // Helpers/Syntax/Attribute
-        private static string GetModuleType(AttributeSyntax attribute) {
+        private static string GetModule(AttributeSyntax attribute) {
             var arg = attribute.ArgumentList!.Arguments.First();
             var module = ((TypeOfExpressionSyntax) arg.Expression).Type.ToString();
             return module;
         }
-        private static string GetNamespaceType(AttributeSyntax attribute) {
+        private static string GetNamespace(AttributeSyntax attribute) {
             var arg = attribute.ArgumentList!.Arguments.First();
             var @namespace = ((LiteralExpressionSyntax) arg.Expression).Token.ValueText;
-            @namespace = "Namespace_" + @namespace.Replace( '.', '_' );
             return @namespace;
         }
-        private static string GetGroupType(AttributeSyntax attribute) {
+        private static string GetGroup(AttributeSyntax attribute) {
             var comment = attribute.Parent!.GetLeadingTrivia().Where( i => i.Kind() == SyntaxKind.SingleLineCommentTrivia ).LastOrDefault();
             var group = GetCommentContent( comment.ToString() );
-            group = "Group_" + group.Replace( '.', '_' ).Replace( '-', '_' ).Replace( ' ', '_' );
             return group;
         }
         private static string GetType(AttributeSyntax attribute) {

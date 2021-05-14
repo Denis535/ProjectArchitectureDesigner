@@ -12,8 +12,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
 
 
         // CompilationUnit
-        public static CompilationUnitSyntax CreateCompilationUnit(CompilationUnitSyntax unit) {
-            return CompilationUnit(
+        public static CompilationUnitSyntax CompilationUnit(CompilationUnitSyntax unit) {
+            return SyntaxFactory.CompilationUnit(
                 unit.Externs,
                 unit.Usings,
                 List<AttributeListSyntax>(),
@@ -22,15 +22,15 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
 
 
         // Member
-        public static NamespaceDeclarationSyntax CreateNamespaceDeclaration(NamespaceDeclarationSyntax @namespace) {
-            return NamespaceDeclaration(
+        public static NamespaceDeclarationSyntax NamespaceDeclaration(NamespaceDeclarationSyntax @namespace) {
+            return SyntaxFactory.NamespaceDeclaration(
                 @namespace.Name,
                 @namespace.Externs,
                 @namespace.Usings,
                 List<MemberDeclarationSyntax>() );
         }
-        public static ClassDeclarationSyntax CreateClassDeclaration(ClassDeclarationSyntax @class) {
-            return ClassDeclaration(
+        public static ClassDeclarationSyntax ClassDeclaration(ClassDeclarationSyntax @class) {
+            return SyntaxFactory.ClassDeclaration(
                 List<AttributeListSyntax>(),
                 @class.Modifiers,
                 @class.Identifier,
@@ -39,8 +39,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
                 @class.ConstraintClauses,
                 List<MemberDeclarationSyntax>() );
         }
-        public static ClassDeclarationSyntax CreateClassDeclaration(string identifier, string @base) {
-            return ClassDeclaration(
+        public static ClassDeclarationSyntax ClassDeclaration(string identifier, string @base) {
+            return SyntaxFactory.ClassDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( Token( SyntaxKind.PublicKeyword ) ),
                 Identifier( identifier ),
@@ -49,8 +49,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
                 List<TypeParameterConstraintClauseSyntax>(),
                 List<MemberDeclarationSyntax>() );
         }
-        public static PropertyDeclarationSyntax CreatePropertyDeclaration(string type, string identifier, ExpressionSyntax expression) {
-            return PropertyDeclaration(
+        public static PropertyDeclarationSyntax PropertyDeclaration(string type, string identifier, ExpressionSyntax expression) {
+            return SyntaxFactory.PropertyDeclaration(
                 List<AttributeListSyntax>(),
                 TokenList( Token( SyntaxKind.PublicKeyword ) ),
                 ParseTypeName( type ),
@@ -64,20 +64,20 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
 
 
         // Expression
-        public static ExpressionSyntax CreateObjectCreationExpression(string type) {
-            return ObjectCreationExpression(
+        public static ExpressionSyntax ObjectCreationExpression(string type) {
+            return SyntaxFactory.ObjectCreationExpression(
                 ParseTypeName( type ),
                 ArgumentList(),
                 null );
         }
-        public static ExpressionSyntax CreateObjectCreationExpression(string type, string argument) {
-            return ObjectCreationExpression(
+        public static ExpressionSyntax ObjectCreationExpression(string type, string argument) {
+            return SyntaxFactory.ObjectCreationExpression(
                 ParseTypeName( type ),
                 ArgumentList( SeparatedList<ArgumentSyntax>( NodeOrTokenList( Literal( argument ) ) ) ),
                 null );
         }
-        public static ExpressionSyntax CreateTypeOfExpression(string type) {
-            return TypeOfExpression(
+        public static ExpressionSyntax TypeOfExpression(string type) {
+            return SyntaxFactory.TypeOfExpression(
                 ParseTypeName( type )
                 );
         }
