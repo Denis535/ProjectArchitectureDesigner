@@ -16,7 +16,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\ProjectArchitecture\ProjectArchitecture.csproj" />
-        <ProjectReference Include="..\ProjectArchitecture.Roslyn\ProjectArchitecture.Roslyn.csproj">
+        <ProjectReference Include="..\ProjectArchitecture.Analyzer\ProjectArchitecture.Analyzer.csproj">
             <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
             <OutputItemType>Analyzer</OutputItemType>
         </ProjectReference>

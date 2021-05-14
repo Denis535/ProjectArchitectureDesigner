@@ -1,7 +1,7 @@
 ﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-namespace ProjectArchitecture {
+namespace ProjectArchitecture.Analyzer {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -12,13 +12,13 @@ namespace ProjectArchitecture {
     internal static class SyntaxAnalyzer {
 
 
-        // Class/Project
-        public static string[] GetProjectData(ClassDeclarationSyntax @class) {
+        // Project
+        public static string[] GetProjectData(TypeDeclarationSyntax @class) {
             return @class.GetAttributes().Where( IsModule ).Select( GetModuleType ).ToArray();
         }
 
-        // Class/Module
-        public static (string Namespace, (string Group, string[] Types)[] Groups)[] GetModuleData(ClassDeclarationSyntax @class) {
+        // Module
+        public static (string Namespace, (string Group, string[] Types)[] Groups)[] GetModuleData(TypeDeclarationSyntax @class) {
             return @class.GetAttributes().Where( i => IsNamespace( i ) || IsType( i ) ).Split( IsNamespace ).Select( GetNamespace ).ToArray();
         }
         private static (string, (string, string[])[]) GetNamespace(this IEnumerable<AttributeSyntax> attributes) {

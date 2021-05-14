@@ -1,7 +1,7 @@
 ﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-namespace ProjectArchitecture {
+namespace ProjectArchitecture.Analyzer {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -12,13 +12,13 @@ namespace ProjectArchitecture {
     internal static class SyntaxGenerator {
 
 
-        // Class/Project
+        // Project
         public static ClassDeclarationSyntax CreateClassDeclaration_Project(ClassDeclarationSyntax @class, string[] modules) {
             var properties = modules.Select( CreatePropertyDeclaration_Module ).ToArray();
             return SyntaxFactoryUtils.CreateClassDeclaration( @class ).AddMembers( properties );
         }
 
-        // Class/Module
+        // Module
         public static ClassDeclarationSyntax CreateClassDeclaration_Module(ClassDeclarationSyntax @class, (string Namespace, (string Group, string[] Types)[] Groups)[] namespaces) {
             var classes = namespaces.Select( i => CreateClassDeclaration_Namespace( i.Namespace, i.Groups ) ).ToArray();
             var properties = namespaces.Select( i => CreatePropertyDeclaration_Namespace( i.Namespace ) ).ToArray();
@@ -34,7 +34,7 @@ namespace ProjectArchitecture {
             return SyntaxFactoryUtils.CreateClassDeclaration( group, "GroupNode" ).AddMembers( properties );
         }
 
-        // Property
+        // Properties
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Module(string module) {
             var identifier = module.Map( WithoutPrefix ).Map( EscapeIdentifier );
             return SyntaxFactoryUtils.CreatePropertyDeclaration( module, identifier, SyntaxFactoryUtils.CreateObjectCreationExpression( module ) );

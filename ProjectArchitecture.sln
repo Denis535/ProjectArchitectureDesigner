@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectArchitecture", "Proj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectArchitecture.Tests", "ProjectArchitecture.Tests\ProjectArchitecture.Tests.csproj", "{93FA3ABC-8328-443D-BD68-A4057468D094}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectArchitecture.Roslyn", "ProjectArchitecture.Roslyn\ProjectArchitecture.Roslyn.csproj", "{1A48DB5C-AEE6-4C44-935E-696CAE6AFB78}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectArchitecture.Analyzer", "ProjectArchitecture.Analyzer\ProjectArchitecture.Analyzer.csproj", "{1A48DB5C-AEE6-4C44-935E-696CAE6AFB78}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared", "Shared\Shared.shproj", "{BD32A4F2-A9CD-4254-AB6E-9BF649BA4598}"
 EndProject
