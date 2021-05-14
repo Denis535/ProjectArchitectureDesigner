@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>netstandard2.0</TargetFramework>
         <RootNamespace></RootNamespace>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
@@ -9,6 +9,14 @@
         <EnableNETAnalyzers>true</EnableNETAnalyzers>
         <AnalysisLevel>latest</AnalysisLevel>
     </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="ProjectArchitecture\SourceGenerator.cs~RF3e0eb214.TMP" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.9.0" />
+    </ItemGroup>
 
     <Import Project="..\Shared\Shared.projitems" Label="Shared" />
 

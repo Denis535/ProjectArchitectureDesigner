@@ -3,11 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31220.234
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectArchitecture", "ProjectArchitecture\ProjectArchitecture.csproj", "{6B8B89E5-CAAF-4E1C-9F80-03456CAF5A5E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectArchitecture", "ProjectArchitecture\ProjectArchitecture.csproj", "{6B8B89E5-CAAF-4E1C-9F80-03456CAF5A5E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectArchitecture.Tests", "ProjectArchitecture.Tests\ProjectArchitecture.Tests.csproj", "{93FA3ABC-8328-443D-BD68-A4057468D094}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectArchitecture.Tests", "ProjectArchitecture.Tests\ProjectArchitecture.Tests.csproj", "{93FA3ABC-8328-443D-BD68-A4057468D094}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectArchitecture.Roslyn", "ProjectArchitecture.Roslyn\ProjectArchitecture.Roslyn.csproj", "{1A48DB5C-AEE6-4C44-935E-696CAE6AFB78}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared", "Shared\Shared.shproj", "{BD32A4F2-A9CD-4254-AB6E-9BF649BA4598}"
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Shared\Shared.projitems*{1a48db5c-aee6-4c44-935e-696cae6afb78}*SharedItemsImports = 5
+		Shared\Shared.projitems*{6b8b89e5-caaf-4e1c-9f80-03456caf5a5e}*SharedItemsImports = 5
+		Shared\Shared.projitems*{bd32a4f2-a9cd-4254-ab6e-9bf649ba4598}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -21,6 +30,10 @@ Global
 		{93FA3ABC-8328-443D-BD68-A4057468D094}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93FA3ABC-8328-443D-BD68-A4057468D094}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93FA3ABC-8328-443D-BD68-A4057468D094}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A48DB5C-AEE6-4C44-935E-696CAE6AFB78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A48DB5C-AEE6-4C44-935E-696CAE6AFB78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A48DB5C-AEE6-4C44-935E-696CAE6AFB78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A48DB5C-AEE6-4C44-935E-696CAE6AFB78}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

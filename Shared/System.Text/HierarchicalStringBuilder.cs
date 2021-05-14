@@ -5,7 +5,7 @@ namespace System.Text {
     using System;
     using System.Collections.Generic;
 
-    public class HierarchicalStringBuilder {
+    internal class HierarchicalStringBuilder {
         private struct Node {
             public int Level { get; }
             public string Prefix { get; }

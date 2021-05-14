@@ -1,7 +1,7 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-namespace ProjectArchitecture.Renderer {
+namespace ProjectArchitecture.Renderers {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -32,7 +32,7 @@ namespace ProjectArchitecture.Renderer {
                 builder.AppendLine( node.GetString() );
             }
         }
-        // Helpers/INode
+        // Helpers/Node
         private static string GetString(this Node node, string link, string uri) {
             return node switch {
                 Project proj
@@ -59,7 +59,7 @@ namespace ProjectArchitecture.Renderer {
                 => "### " + @namespace,
                 Group group
                 => "#### " + group,
-                TypeItem type
+                TypeNode type
                 => "* " + type.Name,
                 { }
                 => throw new NotImplementedException( node.ToString() ),
@@ -67,7 +67,7 @@ namespace ProjectArchitecture.Renderer {
                 => throw new NullReferenceException( "Null" ),
             };
         }
-        // Helpers/INode/Link
+        // Helpers/Node/Link
         private static IEnumerable<(Node, string, string)> GetLinks(this IEnumerable<Node> nodes) {
             var prevs = new List<string>();
             return nodes.Select( i => i.GetLink( prevs ) );

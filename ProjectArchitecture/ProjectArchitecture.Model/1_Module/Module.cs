@@ -4,11 +4,13 @@
 namespace ProjectArchitecture.Model {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
 
     public abstract class Module : Node {
 
-        public abstract Namespace[] Namespaces { get; }
+        public override string Name => GetName( this );
+        public virtual Namespace[] Namespaces => GetChildren<Namespace>( this ).ToArray();
 
 
         // Utils

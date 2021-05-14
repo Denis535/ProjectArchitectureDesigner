@@ -6,13 +6,13 @@ namespace ProjectArchitecture.Model {
     using System.Collections.Generic;
     using System.Text;
 
-    public sealed class TypeItem : Node {
+    public class TypeNode : Node {
 
         public override string Name => Type.Name;
         public Type Type { get; }
 
 
-        public TypeItem(Type type) {
+        public TypeNode(Type type) {
             Type = type;
         }
 
@@ -23,8 +23,8 @@ namespace ProjectArchitecture.Model {
         }
 
 
-        // Conversion
-        public static implicit operator TypeItem(Type type) => new TypeItem( type );
+        // Conversions
+        public static implicit operator TypeNode(Type type) => new TypeNode( type );
 
 
     }

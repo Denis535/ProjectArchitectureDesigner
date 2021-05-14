@@ -10,23 +10,24 @@ namespace ProjectArchitecture.Model {
 
     public abstract class Project : Node {
 
-        public abstract Module[] Modules { get; }
+        public override string Name => GetName( this );
+        public virtual Module[] Modules => GetChildren<Module>( this ).ToArray();
 
 
         // Compare/Assembly
         public void Compare(Assembly assembly, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = Flatten<TypeItem>().Select( i => i.Type );
+            var actual = Flatten<TypeNode>().Select( i => i.Type );
             var expected = assembly.DefinedTypes.Where( IsSupported );
             Utils.Compare( actual, expected, out intersected, out missing, out extra );
         }
         public void Compare(Assembly[] assemblies, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = Flatten<TypeItem>().Select( i => i.Type );
+            var actual = Flatten<TypeNode>().Select( i => i.Type );
             var expected = assemblies.SelectMany( i => i.DefinedTypes ).Where( IsSupported );
             Utils.Compare( actual, expected, out intersected, out missing, out extra );
         }
         // Compare/Type
         public void Compare(IEnumerable<Type> types, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = Flatten<TypeItem>().Select( i => i.Type );
+            var actual = Flatten<TypeNode>().Select( i => i.Type );
             var expected = types.Where( IsSupported );
             Utils.Compare( actual, expected, out intersected, out missing, out extra );
         }

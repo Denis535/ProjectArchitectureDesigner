@@ -4,6 +4,8 @@
 namespace ProjectArchitecture.Model {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
     using System.Text;
 
     public abstract class Node {
@@ -17,9 +19,19 @@ namespace ProjectArchitecture.Model {
         }
 
 
-        // Conversion
-        public static implicit operator Node(string group) => new Group( group );
-        public static implicit operator Node(Type type) => new TypeItem( type );
+        // Helpers
+        protected static string GetName(Node node) {
+            return node.GetType().Name.Replace( '_', '.' );
+        }
+        protected static IEnumerable<T> GetChildren<T>(Node node) {
+            return
+                node
+                .GetType()
+                .GetProperties( BindingFlags.Public | BindingFlags.Instance )
+                .Where( i => i.PropertyType.IsSubclassOf( typeof( T ) ) )
+                .Select( i => i.GetValue( node ) )
+                .Cast<T>();
+        }
 
 
     }

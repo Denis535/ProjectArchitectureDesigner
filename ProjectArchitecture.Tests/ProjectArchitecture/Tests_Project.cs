@@ -4,10 +4,12 @@
 namespace ProjectArchitecture {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Text;
     using NUnit.Framework;
-    using ProjectArchitecture.Renderer;
+    using ProjectArchitecture.Model;
+    using ProjectArchitecture.Renderers;
 
     public class Tests_Project {
 
@@ -16,6 +18,7 @@ namespace ProjectArchitecture {
 
         [SetUp]
         public void Setup() {
+            Trace.Listeners.Add( new TextWriterTraceListener( TestContext.Out ) );
             Project = new FakeProject();
         }
 
