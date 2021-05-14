@@ -11,7 +11,7 @@ namespace ProjectArchitecture.Renderers {
     public static class ProjectMarkdownRenderer {
 
 
-        public static string RenderMarkdown(this Project project) {
+        public static string RenderMarkdown(this ProjectNode project) {
             var builder = new StringBuilder();
             builder.AppendTableOfContents( project );
             builder.AppendLine();
@@ -21,54 +21,54 @@ namespace ProjectArchitecture.Renderers {
 
 
         // Helpers/Project
-        private static void AppendTableOfContents(this StringBuilder builder, Project project) {
+        private static void AppendTableOfContents(this StringBuilder builder, ProjectNode project) {
             builder.AppendLine( "# Table of Contents" );
-            foreach (var (node, link, uri) in project.Flatten().Where( i => i is Project or Module or Namespace ).GetLinks()) {
-                builder.AppendLine( node.GetString( link, uri ) );
+            foreach (var (node, link, uri) in project.Flatten().Where( i => i is ProjectNode or ModuleNode or NamespaceNode ).GetLinks()) {
+                builder.AppendLine( node.GetLinkString( link, uri ) );
             }
         }
-        private static void AppendBody(this StringBuilder builder, Project project) {
+        private static void AppendBody(this StringBuilder builder, ProjectNode project) {
             foreach (var node in project.Flatten()) {
-                builder.AppendLine( node.GetString() );
+                builder.AppendLine( node.GetItemString() );
             }
         }
         // Helpers/Node
-        private static string GetString(this Node node, string link, string uri) {
+        private static string GetLinkString(this Node node, string link, string uri) {
             return node switch {
-                Project proj
+                ProjectNode
                 => string.Format( "  - [{0}](#{1})", link, uri ),
-                Module module
+                ModuleNode
                 => string.Format( "    - [{0}](#{1})", link, uri ),
-                Namespace @namespace
+                NamespaceNode
                 => string.Format( "      - [{0}](#{1})", link, uri ),
-                Group group
+                GroupNode
                 => string.Format( "        - [{0}](#{1})", link, uri ),
                 { }
-                => throw new NotImplementedException( node.ToString() ),
+                => throw new NotSupportedException( "Node is not supported: " + node.GetType().ToString() ),
                 null
-                => throw new NullReferenceException( "Null" ),
+                => throw new ArgumentNullException( nameof( node ) ),
             };
         }
-        private static string GetString(this Node node) {
+        private static string GetItemString(this Node node) {
             return node switch {
-                Project proj
+                ProjectNode proj
                 => "# " + proj,
-                Module module
+                ModuleNode module
                 => "## " + module,
-                Namespace @namespace
+                NamespaceNode @namespace
                 => "### " + @namespace,
-                Group group
+                GroupNode group
                 => "#### " + group,
                 TypeNode type
                 => "* " + type.Name,
                 { }
-                => throw new NotImplementedException( node.ToString() ),
+                => throw new NotSupportedException( "Node is not supported: " + node.GetType().ToString() ),
                 null
-                => throw new NullReferenceException( "Null" ),
+                => throw new ArgumentNullException( nameof( node ) ),
             };
         }
-        // Helpers/Node/Link
-        private static IEnumerable<(Node, string, string)> GetLinks(this IEnumerable<Node> nodes) {
+        // Helpers/Node/Links
+        private static IEnumerable<(Node, string Link, string Uri)> GetLinks(this IEnumerable<Node> nodes) {
             var prevs = new List<string>();
             return nodes.Select( i => i.GetLink( prevs ) );
         }
@@ -86,14 +86,6 @@ namespace ProjectArchitecture.Renderers {
             if (id != 0) uri += "-" + id;
             return (node, link, uri);
         }
-        // Helpers/Linq
-        //private static IEnumerable<(T, IEnumerable<T>)> WithPrevious<T>(this IEnumerable<T> source) {
-        //    var previous = new List<T>();
-        //    foreach (var item in source) {
-        //        yield return (item, previous);
-        //        previous.Add( item );
-        //    }
-        //}
 
 
     }

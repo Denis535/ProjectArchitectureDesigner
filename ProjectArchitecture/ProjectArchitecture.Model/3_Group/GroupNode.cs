@@ -7,15 +7,15 @@ namespace ProjectArchitecture.Model {
     using System.Linq;
     using System.Text;
 
-    public abstract class Module : Node {
+    public abstract class GroupNode : Node {
 
         public override string Name => GetName( this );
-        public virtual Namespace[] Namespaces => GetChildren<Namespace>( this ).ToArray();
+        public TypeNode[] Types => GetChildren<TypeNode>( this ).ToArray();
 
 
         // Utils
         public override string ToString() {
-            return "Module: " + Name;
+            return "Group: " + Name;
         }
 
 

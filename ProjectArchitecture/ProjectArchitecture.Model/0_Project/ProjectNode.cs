@@ -8,10 +8,10 @@ namespace ProjectArchitecture.Model {
     using System.Reflection;
     using System.Text;
 
-    public abstract class Project : Node {
+    public abstract class ProjectNode : Node {
 
         public override string Name => GetName( this );
-        public virtual Module[] Modules => GetChildren<Module>( this ).ToArray();
+        public virtual ModuleNode[] Modules => GetChildren<ModuleNode>( this ).ToArray();
 
 
         // Compare/Assembly
@@ -66,7 +66,7 @@ namespace ProjectArchitecture.Model {
 
         // Infrastructure
         protected virtual bool IsSupported(Type type) {
-            return !type.IsObsolete() && !type.IsCompilerGenerated() && !type.IsNestedPrivate;
+            return !type.IsObsolete() && !type.IsCompilerGenerated();
         }
 
 

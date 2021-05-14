@@ -10,23 +10,29 @@ namespace ProjectArchitecture.Renderers {
     public static class ProjectRenderer {
 
 
-        public static string Render(this Project project) {
+        public static string Render(this ProjectNode project) {
             var builder = new HierarchicalStringBuilder();
             using (builder.AppendTitle( "Project: {0}", project.Name )) {
                 foreach (var module in project.Modules) {
+
                     using (builder.AppendSection( "Module: {0}", module.Name )) {
                         foreach (var @namespace in module.Namespaces) {
+
                             using (builder.AppendSection( "Namespace: {0}", @namespace.Name )) {
                                 foreach (var group in @namespace.Groups) {
+
                                     using (builder.AppendSection( group.Name )) {
                                         foreach (var type in group.Types) {
                                             builder.AppendLineWithPrefix( "| * ", type.Name );
                                         }
                                     }
+
                                 }
                             }
+
                         }
                     }
+
                 }
             }
             return builder.ToString();

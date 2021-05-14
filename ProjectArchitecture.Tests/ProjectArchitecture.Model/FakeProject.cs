@@ -8,7 +8,7 @@ namespace ProjectArchitecture.Model {
 
     [Module( typeof( FakeModule_Domain ) )]
     [Module( typeof( FakeModule_Infrastructure ) )]
-    public partial class FakeProject : Project {
+    public partial class FakeProject : ProjectNode {
     }
 
     [Namespace( "FakeProject" )]
@@ -17,7 +17,7 @@ namespace ProjectArchitecture.Model {
     [Type( typeof( object ) )]
     // Group 1 // Comment
     [Type( typeof( object ) )]
-    public partial class FakeModule_Domain : Module {
+    public partial class FakeModule_Domain : ModuleNode {
     }
 
     [Namespace( "Global" )]
@@ -25,7 +25,7 @@ namespace ProjectArchitecture.Model {
     [Namespace( "System" )]
     [Type( typeof( object ) )]
     [Type( typeof( string ) )]
-    public partial class FakeModule_Infrastructure : Module {
+    public partial class FakeModule_Infrastructure : ModuleNode {
     }
 
 }

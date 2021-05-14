@@ -16,7 +16,7 @@ namespace ProjectArchitecture {
     [Generator]
     public class SourceGenerator : ISourceGenerator {
 
-        private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
+        private static readonly DiagnosticDescriptor DiagnosticDescriptor = new DiagnosticDescriptor(
             "SourceGenerator",
             "SourceGenerator",
             "Error: {0}",
@@ -42,16 +42,20 @@ namespace ProjectArchitecture {
                 if (tree.FilePath.Contains( "\\obj\\Debug\\" )) continue;
                 if (tree.FilePath.Contains( "\\obj\\Release\\" )) continue;
 
-                var root = (CompilationUnitSyntax) tree.GetRoot( cancellationToken );
-                var source = CreateCompilationUnit( root );
-                if (source != null) {
-                    var name = GetSourceName( tree );
-                    var content = source.NormalizeWhitespace().ToFullString();
+                try {
+                    var root = (CompilationUnitSyntax) tree.GetRoot( cancellationToken );
+                    var source = CreateCompilationUnit( root );
+                    if (source != null) {
+                        var name = GetSourceName( tree );
+                        var content = source.NormalizeWhitespace().ToFullString();
 #if DEBUG
-                    Trace.WriteLine( "Generated source: " + name );
-                    Trace.WriteLine( content );
+                        Trace.WriteLine( "Generated source: " + name );
+                        Trace.WriteLine( content );
 #endif
-                    context.AddSource( name, content );
+                        context.AddSource( name, content );
+                    }
+                } catch (Exception ex) {
+                    context.ReportDiagnostic( Diagnostic.Create( DiagnosticDescriptor, null, ex.Message ) );
                 }
             }
         }
@@ -73,11 +77,11 @@ namespace ProjectArchitecture {
                 return CreateNamespaceDeclaration( @namespace );
             }
             if (member is ClassDeclarationSyntax @class) {
-                if (@class.IsPartial() && @class.IsChildOf( "Project" )) {
+                if (@class.IsPartial() && @class.IsChildOf( "ProjectNode" )) {
                     var modules = SyntaxAnalyzer.GetProjectData( @class ).ToArray();
                     return SyntaxGenerator.CreateClassDeclaration_Project( @class, modules );
                 }
-                if (@class.IsPartial() && @class.IsChildOf( "Module" )) {
+                if (@class.IsPartial() && @class.IsChildOf( "ModuleNode" )) {
                     var namespaces = SyntaxAnalyzer.GetModuleData( @class ).ToArray();
                     return SyntaxGenerator.CreateClassDeclaration_Module( @class, namespaces );
                 }

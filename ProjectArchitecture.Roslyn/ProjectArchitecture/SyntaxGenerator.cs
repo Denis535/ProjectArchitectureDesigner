@@ -27,11 +27,11 @@ namespace ProjectArchitecture {
         private static ClassDeclarationSyntax CreateClassDeclaration_Namespace(string @namespace, (string Group, string[] Types)[] groups) {
             var classes = groups.Select( i => CreateClassDeclaration_Group( i.Group, i.Types ) ).ToArray();
             var properties = groups.Select( i => CreatePropertyDeclaration_Group( i.Group ) ).ToArray();
-            return SyntaxFactoryUtils.CreateClassDeclaration( @namespace, "Namespace" ).AddMembers( classes ).AddMembers( properties );
+            return SyntaxFactoryUtils.CreateClassDeclaration( @namespace, "NamespaceNode" ).AddMembers( classes ).AddMembers( properties );
         }
         private static ClassDeclarationSyntax CreateClassDeclaration_Group(string group, string[] types) {
             var properties = types.Select( CreatePropertyDeclaration_Type ).ToArray();
-            return SyntaxFactoryUtils.CreateClassDeclaration( group, "Group" ).AddMembers( properties );
+            return SyntaxFactoryUtils.CreateClassDeclaration( group, "GroupNode" ).AddMembers( properties );
         }
 
         // Property

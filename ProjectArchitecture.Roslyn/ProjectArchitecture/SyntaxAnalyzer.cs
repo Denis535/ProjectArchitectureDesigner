@@ -98,24 +98,24 @@ namespace ProjectArchitecture {
         private static string GetModuleType(AttributeSyntax attribute) {
             var arg = attribute.ArgumentList!.Arguments.First();
             var module = ((TypeOfExpressionSyntax) arg.Expression).Type.ToString();
-            return SyntaxUtils.EnsureIdentifierIsValid( module );
+            return module;
         }
         private static string GetNamespaceType(AttributeSyntax attribute) {
             var arg = attribute.ArgumentList!.Arguments.First();
             var @namespace = ((LiteralExpressionSyntax) arg.Expression).Token.ValueText;
             @namespace = "Namespace_" + @namespace.Replace( '.', '_' );
-            return SyntaxUtils.EnsureIdentifierIsValid( @namespace );
+            return @namespace;
         }
         private static string GetGroupType(AttributeSyntax attribute) {
             var comment = attribute.Parent!.GetLeadingTrivia().Where( i => i.Kind() == SyntaxKind.SingleLineCommentTrivia ).LastOrDefault();
             var group = GetCommentContent( comment.ToString() );
             group = "Group_" + group.Replace( '.', '_' ).Replace( '-', '_' ).Replace( ' ', '_' );
-            return SyntaxUtils.EnsureIdentifierIsValid( group );
+            return group;
         }
         private static string GetType(AttributeSyntax attribute) {
             var arg = attribute.ArgumentList!.Arguments.First();
             var type = ((TypeOfExpressionSyntax) arg.Expression).Type.ToString();
-            return SyntaxUtils.EnsureIdentifierIsValid( type );
+            return type;
         }
 
 
