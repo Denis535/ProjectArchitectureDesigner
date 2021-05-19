@@ -16,7 +16,7 @@ namespace ProjectArchitecture.Analyzer {
     [Generator]
     public class SourceGenerator : ISourceGenerator {
 
-        private static readonly DiagnosticDescriptor DiagnosticDescriptor = new DiagnosticDescriptor(
+        private static readonly DiagnosticDescriptor ErrorDiagnosticDescriptor = new DiagnosticDescriptor(
             "SourceGenerator",
             "SourceGenerator",
             "Error: {0}",
@@ -31,39 +31,40 @@ namespace ProjectArchitecture.Analyzer {
 
         public void Execute(GeneratorExecutionContext context) {
 #if DEBUG
-            //Debugger.Launch();
+            Debugger.Launch();
 #endif
             var compilation = context.Compilation;
-            var trees = compilation.SyntaxTrees;
             var cancellationToken = context.CancellationToken;
 
-            foreach (var tree in trees) {
+            foreach (var tree in compilation.SyntaxTrees) {
                 if (tree.FilePath.Contains( ".nuget" )) continue;
                 if (tree.FilePath.Contains( "\\obj\\Debug\\" )) continue;
                 if (tree.FilePath.Contains( "\\obj\\Release\\" )) continue;
 
                 try {
-                    var root = (CompilationUnitSyntax) tree.GetRoot( cancellationToken );
-                    var source = CreateCompilationUnit( root );
-                    if (source != null) {
-                        var name = GetSourceName( tree );
-                        var content = source.NormalizeWhitespace().ToFullString();
-#if DEBUG
-                        Trace.WriteLine( "Generated source: " + name );
-                        Trace.WriteLine( content );
-#endif
-                        context.AddSource( name, content );
-                    }
+                    Execute( context, tree );
                 } catch (Exception ex) {
-                    context.ReportDiagnostic( Diagnostic.Create( DiagnosticDescriptor, null, ex.Message ) );
+                    context.ReportDiagnostic( Diagnostic.Create( ErrorDiagnosticDescriptor, null, ex.Message ) );
                 }
+            }
+        }
+        private static void Execute(GeneratorExecutionContext context, SyntaxTree tree) {
+            var name = GetGeneratedSourceName( tree );
+            var source = GetGeneratedSource( tree );
+            if (source != null) {
+                Debug.WriteLine( "Generated source: " + name );
+                Debug.WriteLine( source );
+                context.AddSource( name, source );
             }
         }
 
 
         // Helpers
-        private static string GetSourceName(SyntaxTree tree) {
+        private static string GetGeneratedSourceName(SyntaxTree tree) {
             return Path.GetFileNameWithoutExtension( tree.FilePath ) + $".Generated.{Guid.NewGuid()}.cs";
+        }
+        private static string? GetGeneratedSource(SyntaxTree tree) {
+            return CreateCompilationUnit( (CompilationUnitSyntax) tree.GetRoot( default ) )?.NormalizeWhitespace().ToString();
         }
         // Helpers/Generation/CompilationUnit
         private static CompilationUnitSyntax? CreateCompilationUnit(CompilationUnitSyntax unit) {

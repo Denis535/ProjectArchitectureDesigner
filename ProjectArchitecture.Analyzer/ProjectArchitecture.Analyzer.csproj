@@ -2,22 +2,11 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <RootNamespace></RootNamespace>
-        <LangVersion>latest</LangVersion>
-        <Nullable>enable</Nullable>
         <IsPackable>true</IsPackable>
-        <EnableNETAnalyzers>true</EnableNETAnalyzers>
-        <AnalysisLevel>latest</AnalysisLevel>
     </PropertyGroup>
-
-    <ItemGroup>
-      <None Remove="ProjectArchitecture.Analyzer\SourceGenerator.cs~RF3e0eb214.TMP" />
-    </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.9.0" />
     </ItemGroup>
-
-    <Import Project="..\Shared\Shared.projitems" Label="Shared" />
 
 </Project>

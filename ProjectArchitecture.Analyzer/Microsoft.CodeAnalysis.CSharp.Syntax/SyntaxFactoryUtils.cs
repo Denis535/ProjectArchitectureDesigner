@@ -14,29 +14,29 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         // CompilationUnit
         public static CompilationUnitSyntax CompilationUnit(CompilationUnitSyntax unit) {
             return SyntaxFactory.CompilationUnit(
-                unit.Externs,
-                unit.Usings,
+                unit.Externs.WithoutTrivia(),
+                unit.Usings.WithoutTrivia(),
                 List<AttributeListSyntax>(),
                 List<MemberDeclarationSyntax>() );
         }
 
 
-        // Member
+        // Members
         public static NamespaceDeclarationSyntax NamespaceDeclaration(NamespaceDeclarationSyntax @namespace) {
             return SyntaxFactory.NamespaceDeclaration(
-                @namespace.Name,
-                @namespace.Externs,
-                @namespace.Usings,
+                @namespace.Name.WithoutTrivia(),
+                @namespace.Externs.WithoutTrivia(),
+                @namespace.Usings.WithoutTrivia(),
                 List<MemberDeclarationSyntax>() );
         }
         public static ClassDeclarationSyntax ClassDeclaration(ClassDeclarationSyntax @class) {
             return SyntaxFactory.ClassDeclaration(
                 List<AttributeListSyntax>(),
-                @class.Modifiers,
-                @class.Identifier,
-                @class.TypeParameterList,
-                @class.BaseList,
-                @class.ConstraintClauses,
+                @class.Modifiers.WithoutTrivia(),
+                @class.Identifier.WithoutTrivia(),
+                @class.TypeParameterList?.WithoutTrivia(),
+                @class.BaseList?.WithoutTrivia(),
+                @class.ConstraintClauses.WithoutTrivia(),
                 List<MemberDeclarationSyntax>() );
         }
         public static ClassDeclarationSyntax ClassDeclaration(string identifier, string @base) {
@@ -63,7 +63,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         }
 
 
-        // Expression
+        // Expressions
         public static ExpressionSyntax ObjectCreationExpression(string type) {
             return SyntaxFactory.ObjectCreationExpression(
                 ParseTypeName( type ),
@@ -83,15 +83,27 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         }
 
 
+        // Comment
+        public static SyntaxTrivia Comment(string format, params object[] args) {
+            return SyntaxFactory.Comment( string.Format( format, args ) );
+        }
+
+
         // Helpers
         private static SyntaxList<TNode> List<TNode>() where TNode : SyntaxNode {
             return SyntaxFactory.List<TNode>();
         }
         private static SyntaxList<TNode> List<TNode>(TNode node) where TNode : SyntaxNode {
-            return SyntaxFactory.List<TNode>( new[] { node }.AsEnumerable() );
+            return SyntaxFactory.List( new[] { node }.AsEnumerable() );
         }
         private static SyntaxList<TNode> List<TNode>(params TNode[] nodes) where TNode : SyntaxNode {
-            return SyntaxFactory.List<TNode>( nodes );
+            return SyntaxFactory.List( nodes );
+        }
+        public static SyntaxList<TNode> WithoutTrivia<TNode>(this SyntaxList<TNode> nodes) where TNode : SyntaxNode {
+            return SyntaxFactory.List( nodes.Select( i => i.WithoutTrivia() ) );
+        }
+        public static SyntaxTokenList WithoutTrivia(this SyntaxTokenList tokens) {
+            return SyntaxFactory.TokenList( tokens.Select( i => i.WithoutTrivia() ) );
         }
 
 

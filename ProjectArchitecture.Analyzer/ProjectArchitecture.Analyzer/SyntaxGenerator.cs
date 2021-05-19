@@ -6,69 +6,81 @@ namespace ProjectArchitecture.Analyzer {
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     internal static class SyntaxGenerator {
 
 
-        // Project
-        public static ClassDeclarationSyntax CreateClassDeclaration_Project(ClassDeclarationSyntax @class, string[] modules) {
-            var properties = modules.Select( CreatePropertyDeclaration_Module ).ToArray();
-            return SyntaxFactoryUtils.ClassDeclaration( @class ).AddMembers( properties );
+        // Classes/Project
+        public static ClassDeclarationSyntax CreateClassDeclaration_Project(ClassDeclarationSyntax @class, SyntaxAnalyzer.Module[] modules) {
+            var properties = modules.Select( i => CreatePropertyDeclaration_Module( i ) ).ToArray();
+            var comment = SyntaxFactoryUtils.Comment( "// {0}: {1}", @class.Identifier, modules.Select( i => i.Value ).Join() );
+            return SyntaxFactoryUtils.ClassDeclaration( @class ).AddMembers( properties ).WithLeadingTrivia( comment );
+        }
+        // Classes/Module
+        public static ClassDeclarationSyntax CreateClassDeclaration_Module(ClassDeclarationSyntax @class, SyntaxAnalyzer.Namespace[] namespaces) {
+            var classes = namespaces.Select( CreateClassDeclaration_Namespace ).ToArray();
+            var properties = namespaces.Select( i => CreatePropertyDeclaration_Namespace( i ) ).ToArray();
+            var comment = SyntaxFactoryUtils.Comment( "// {0}: {1}", @class.Identifier, namespaces.Select( i => i.Value ).Join() );
+            return SyntaxFactoryUtils.ClassDeclaration( @class ).AddMembers( classes ).AddMembers( properties ).WithLeadingTrivia( comment );
+        }
+        private static ClassDeclarationSyntax CreateClassDeclaration_Namespace(SyntaxAnalyzer.Namespace @namespace) {
+            var type = @namespace.GetTypeName();
+            var classes = @namespace.Groups.Select( i => CreateClassDeclaration_Group( i ) ).ToArray();
+            var properties = @namespace.Groups.Select( i => CreatePropertyDeclaration_Group( i ) ).ToArray();
+            var comment = SyntaxFactoryUtils.Comment( "// {0}: {1}", @namespace.Value, @namespace.Groups.Select( i => i.Value ).Join() );
+            return SyntaxFactoryUtils.ClassDeclaration( type, "NamespaceNode" ).AddMembers( classes ).AddMembers( properties ).WithLeadingTrivia( comment );
+        }
+        private static ClassDeclarationSyntax CreateClassDeclaration_Group(SyntaxAnalyzer.Group group) {
+            var type = group.GetTypeName();
+            var properties = group.Types.Select( i => CreatePropertyDeclaration_Type( i ) ).ToArray();
+            var comment = SyntaxFactoryUtils.Comment( "// {0}: {1}", group.Value, group.Types.Select( i => i.Value ).Join() );
+            return SyntaxFactoryUtils.ClassDeclaration( type, "GroupNode" ).AddMembers( properties ).WithLeadingTrivia( comment );
         }
 
-        // Module
-        public static ClassDeclarationSyntax CreateClassDeclaration_Module(ClassDeclarationSyntax @class, (string Namespace, (string Group, string[] Types)[] Groups)[] namespaces) {
-            var classes = namespaces.Select( i => CreateClassDeclaration_Namespace( i.Namespace, i.Groups ) ).ToArray();
-            var properties = namespaces.Select( i => CreatePropertyDeclaration_Namespace( i.Namespace ) ).ToArray();
-            return SyntaxFactoryUtils.ClassDeclaration( @class ).AddMembers( classes ).AddMembers( properties );
-        }
-        private static ClassDeclarationSyntax CreateClassDeclaration_Namespace(string @namespace, (string Group, string[] Types)[] groups) {
-            var type = "Namespace_" + @namespace.EscapeTypeName();
-            var classes = groups.Select( i => CreateClassDeclaration_Group( i.Group, i.Types ) ).ToArray();
-            var properties = groups.Select( i => CreatePropertyDeclaration_Group( i.Group ) ).ToArray();
-            return SyntaxFactoryUtils.ClassDeclaration( type, "NamespaceNode" ).AddMembers( classes ).AddMembers( properties );
-        }
-        private static ClassDeclarationSyntax CreateClassDeclaration_Group(string group, string[] types) {
-            var type = "Group_" + group.EscapeTypeName();
-            var properties = types.Select( CreatePropertyDeclaration_Type ).ToArray();
-            return SyntaxFactoryUtils.ClassDeclaration( type, "GroupNode" ).AddMembers( properties );
-        }
 
-        // Properties
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Module(string module) {
+        // Properties/Project
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Module(SyntaxAnalyzer.Module module) {
             var type = module;
-            var identifier = module.WithoutPrefix().EscapeIdentifier();
+            var identifier = module.GetIdentifier();
             return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, SyntaxFactoryUtils.ObjectCreationExpression( type ) );
         }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Namespace(string @namespace) {
-            var type = "Namespace_" + @namespace.EscapeTypeName();
-            var identifier = @namespace.EscapeIdentifier();
+        // Properties/Module
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Namespace(SyntaxAnalyzer.Namespace @namespace) {
+            var type = @namespace.GetTypeName();
+            var identifier = @namespace.GetIdentifier();
             return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, SyntaxFactoryUtils.ObjectCreationExpression( type ) );
         }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Group(string group) {
-            var type = "Group_" + group.EscapeTypeName();
-            var identifier = group.EscapeIdentifier();
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Group(SyntaxAnalyzer.Group group) {
+            var type = group.GetTypeName();
+            var identifier = group.GetIdentifier();
             return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, SyntaxFactoryUtils.ObjectCreationExpression( type ) );
         }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Type(string type) {
-            var identifier = type.EscapeIdentifier();
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Type(SyntaxAnalyzer.Type type) {
+            var identifier = type.GetIdentifier();
             return SyntaxFactoryUtils.PropertyDeclaration( "TypeNode", identifier, SyntaxFactoryUtils.TypeOfExpression( type ) );
         }
 
 
-        // Helpers/String
-        private static string WithoutPrefix(this string value) {
-            var i = value.IndexOf( '_' );
-            if (i == -1) return value;
-            return value.Substring( i + 1 );
+        // Helpers/Type
+        private static string GetTypeName(this SyntaxAnalyzer.Namespace @namespace) => "Namespace_" + GetTypeName( @namespace.Value );
+        private static string GetTypeName(this SyntaxAnalyzer.Group group) => "Group_" + GetTypeName( group.Value );
+        private static string GetTypeName(string value) {
+            return value.Replace( '.', '_' ).Replace( '-', '_' ).Replace( ' ', '_' );
         }
-        private static string EscapeTypeName(this string value) {
-            value = value.Replace( '.', '_' ).Replace( '-', '_' ).Replace( ' ', '_' );
+        // Helpers/Identifier
+        private static string GetIdentifier(this SyntaxAnalyzer.Module module) {
+            var value = module.Value;
+            var i = value.IndexOf( "Module_" );
+            if (i != -1) value = value.Substring( i + 7 );
             return value;
         }
-        private static string EscapeIdentifier(this string value) {
+        private static string GetIdentifier(this SyntaxAnalyzer.Namespace @namespace) => GetIdentifier( @namespace.Value );
+        private static string GetIdentifier(this SyntaxAnalyzer.Group group) => GetIdentifier( group.Value );
+        private static string GetIdentifier(this SyntaxAnalyzer.Type type) => GetIdentifier( type.Value );
+        private static string GetIdentifier(string value) {
             value = value.Replace( '.', '_' ).Replace( '-', '_' ).Replace( ' ', '_' );
             if (SyntaxFacts.GetKeywordKind( value ) != SyntaxKind.None) value = "@" + value;
             return value;

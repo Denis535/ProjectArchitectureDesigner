@@ -14,6 +14,12 @@ namespace ProjectArchitecture.Model {
         public virtual ModuleNode[] Modules => GetChildren<ModuleNode>( this ).ToArray();
 
 
+        // SetModules
+        protected void SetModules(params Type[] modules) {
+            // used by source generator
+        }
+
+
         // Compare/Assembly
         public void Compare(Assembly assembly, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
             var actual = Flatten<TypeNode>().Select( i => i.Type );

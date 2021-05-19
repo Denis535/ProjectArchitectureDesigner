@@ -6,81 +6,114 @@ namespace ProjectArchitecture.Analyzer {
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
+    using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     internal static class SyntaxAnalyzer {
+        public record Module(string Value) {
+            public override string ToString() => Value;
+            public static implicit operator string(Module @object) => @object.Value;
+        }
+        public record Namespace(string Value, Group[] Groups) {
+            public override string ToString() => string.Format( "{0}: ({1})", Value, string.Join<Group>( ", ", Groups ) );
+            public static implicit operator string(Namespace @object) => @object.Value;
+        }
+        public record Group(string Value, Type[] Types) {
+            public override string ToString() => string.Format( "{0}: {1}", Value, string.Join<Type>( ", ", Types ) );
+            public static implicit operator string(Group @object) => @object.Value;
+        }
+        public record Type(string Value) {
+            public override string ToString() => Value;
+            public static implicit operator string(Type @object) => @object.Value;
+        }
 
 
         // Project
-        public static string[] GetProjectData(TypeDeclarationSyntax @class) {
-            return @class.GetAttributes().Where( IsModule ).Select( GetModule ).ToArray();
+        public static Module[] GetProjectData(ClassDeclarationSyntax @class) {
+            var constructor = @class.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault();
+            var body = (SyntaxNode?) constructor?.Body ?? constructor?.ExpressionBody;
+            if (body != null) {
+                return body.DescendantNodes().Where( IsModule ).Select( GetModule ).ToArray();
+            }
+            return Array.Empty<Module>();
         }
 
         // Module
-        public static (string Namespace, (string Group, string[] Types)[] Groups)[] GetModuleData(TypeDeclarationSyntax @class) {
-            return @class.GetAttributes().Where( i => IsNamespace( i ) || IsType( i ) ).Split( IsNamespace ).Select( GetNamespace ).ToArray();
+        public static Namespace[] GetModuleData(ClassDeclarationSyntax @class) {
+            var constructor = @class.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault();
+            var body = (SyntaxNode?) constructor?.Body ?? constructor?.ExpressionBody;
+            if (body != null) {
+                return GetNamespacesAndGroupsAndTypes( body ).Map( GetNamespaces ).ToArray();
+            }
+            return Array.Empty<Namespace>();
         }
-        private static (string, (string, string[])[]) GetNamespace(this IEnumerable<AttributeSyntax> attributes) {
-            if (!IsNamespace( attributes.First() )) {
-                var @namespace = "Global";
-                var group = attributes.Split( HasGroupName ).Select( GetGroup ).ToArray();
-                return (@namespace, group);
-            } else {
-                var @namespace = GetNamespace( attributes.First() );
-                var group = attributes.Skip( 1 ).Split( HasGroupName ).Select( GetGroup ).ToArray();
-                return (@namespace, group);
+
+
+        // Helpers/Module
+        private static IEnumerable<object> GetNamespacesAndGroupsAndTypes(SyntaxNode syntax) {
+            var nodes = syntax.DescendantNodes().Where( i => IsNamespace( i ) || IsType( i ) );
+            foreach (var node in nodes) {
+                if (IsNamespace( node )) {
+                    yield return GetNamespace( node );
+                } else
+                if (IsType( node )) {
+                    if (HasGroup( node )) {
+                        yield return GetGroup( node );
+                    }
+                    yield return GetType( node );
+                }
             }
         }
-        private static (string, string[]) GetGroup(this IEnumerable<AttributeSyntax> attributes) {
-            if (!HasGroupName( attributes.First() )) {
-                var group = "Default";
-                var types = attributes.Select( GetType ).ToArray();
-                return (group, types);
-            } else {
-                var group = GetGroup( attributes.First() );
-                var types = attributes.Select( GetType ).ToArray();
-                return (group, types);
-            }
+        private static IEnumerable<Namespace> GetNamespaces(IEnumerable<object> namespaces) {
+            return namespaces.Unflatten( i => i is Namespace ).Select( i => GetNamespace( i.Key, i.Children ) );
+        }
+        private static Namespace GetNamespace(object? @namespace, object[] groups) {
+            var namespace_ = (Namespace?) @namespace ?? new Namespace( "Global", null! );
+            var groups_ = groups.Map( GetGroups ).ToArray();
+            return new Namespace( namespace_, groups_ );
+        }
+        private static IEnumerable<Group> GetGroups(object[] groups) {
+            return groups.Unflatten( i => i is Group ).Select( i => GetGroup( i.Key, i.Children ) );
+        }
+        private static Group GetGroup(object? group, object[] types) {
+            var group_ = (Group?) group ?? new Group( "Default", null! );
+            var types_ = types.Cast<Type>().ToArray();
+            return new Group( group_, types_ );
         }
 
+        // Helpers/Syntax
+        private static bool IsModule(SyntaxNode syntax) {
+            return syntax is TypeOfExpressionSyntax;
+        }
+        private static bool IsNamespace(SyntaxNode syntax) {
+            return syntax is LiteralExpressionSyntax literal && literal.Kind() == SyntaxKind.StringLiteralExpression;
+        }
+        private static bool HasGroup(SyntaxNode syntax) {
+            var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
+            return comment.ToString().StartsWith( "/// " );
+        }
+        private static bool IsType(SyntaxNode syntax) {
+            return syntax is TypeOfExpressionSyntax;
+        }
 
-        // Helpers/Syntax/Attribute
-        private static bool IsModule(AttributeSyntax attribute) {
-            return attribute.Name.ToString() is "Module";
+        // Helpers/Syntax
+        private static Module GetModule(SyntaxNode syntax) {
+            var module = ((TypeOfExpressionSyntax) syntax).Type.ToString();
+            return new Module( module );
         }
-        private static bool IsNamespace(AttributeSyntax attribute) {
-            return attribute.Name.ToString() is "Namespace";
+        private static Namespace GetNamespace(SyntaxNode syntax) {
+            var @namespace = ((LiteralExpressionSyntax) syntax).Token.ValueText;
+            return new Namespace( @namespace, null! );
         }
-        private static bool HasGroupName(AttributeSyntax attribute) {
-            var comment = attribute.Parent!.GetLeadingTrivia().Where( i => i.Kind() == SyntaxKind.SingleLineCommentTrivia ).LastOrDefault();
-            return comment.ToString().StartsWith( "// " );
-        }
-        private static bool IsType(AttributeSyntax attribute) {
-            return attribute.Name.ToString() is "Type";
-        }
-
-
-        // Helpers/Syntax/Attribute
-        private static string GetModule(AttributeSyntax attribute) {
-            var arg = attribute.ArgumentList!.Arguments.First();
-            var module = ((TypeOfExpressionSyntax) arg.Expression).Type.ToString();
-            return module;
-        }
-        private static string GetNamespace(AttributeSyntax attribute) {
-            var arg = attribute.ArgumentList!.Arguments.First();
-            var @namespace = ((LiteralExpressionSyntax) arg.Expression).Token.ValueText;
-            return @namespace;
-        }
-        private static string GetGroup(AttributeSyntax attribute) {
-            var comment = attribute.Parent!.GetLeadingTrivia().Where( i => i.Kind() == SyntaxKind.SingleLineCommentTrivia ).LastOrDefault();
+        private static Group GetGroup(SyntaxNode syntax) {
+            var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
             var group = GetCommentContent( comment.ToString() );
-            return group;
+            return new Group( group, null! );
         }
-        private static string GetType(AttributeSyntax attribute) {
-            var arg = attribute.ArgumentList!.Arguments.First();
-            var type = ((TypeOfExpressionSyntax) arg.Expression).Type.ToString();
-            return type;
+        private static Type GetType(SyntaxNode syntax) {
+            var type = ((TypeOfExpressionSyntax) syntax).Type.ToString();
+            return new Type( type );
         }
 
 

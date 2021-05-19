@@ -6,23 +6,33 @@ namespace ProjectArchitecture.Model {
     using System.Collections.Generic;
     using System.Text;
 
-    [Module( typeof( FakeModule_Domain ) )]
-    [Module( typeof( FakeModule_Infrastructure ) )]
+    // FakeProject
     public partial class FakeProject : ProjectNode {
+        public FakeProject() => SetModules(
+            typeof( FakeModule_Domain ),
+            typeof( FakeModule_Infrastructure )
+        );
     }
 
-    [Namespace( "FakeProject" )]
-    [Type( typeof( object ) )]
+    // Modules/Domain
     public partial class FakeModule_Domain : ModuleNode {
+        public FakeModule_Domain() => SetNamespacesAndGroupsAndTypes(
+            "FakeProject",
+            typeof( object )
+        );
     }
 
-    [Namespace( "Global" )]
-    [Type( typeof( object ) )]
-    [Namespace( "System" )]
-    [Type( typeof( object ) )]
-    // String
-    [Type( typeof( string ) )]
+    // Modules/Infrastructure
     public partial class FakeModule_Infrastructure : ModuleNode {
+        public FakeModule_Infrastructure() => SetNamespacesAndGroupsAndTypes(
+            "Global",
+            typeof( object ),
+            "System",
+            /// Group 0
+            typeof( object ),
+            /// Group 1
+            typeof( string )
+        );
     }
 
 }

@@ -1,6 +1,14 @@
 ﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+using System.ComponentModel;
+
+namespace System.Runtime.CompilerServices {
+    [EditorBrowsable( EditorBrowsableState.Never )]
+    internal class IsExternalInit {
+    }
+}
+
 namespace System {
     using System;
     using System.Collections;
@@ -33,17 +41,19 @@ namespace System {
 
         public static IEnumerable<(T? Key, T[] Children)> Unflatten<T>(this IEnumerable<T> source, Func<T, bool> predicate) {
             var key = default( T );
+            var hasKey = false;
             var children = new List<T>();
             foreach (var item in source) {
                 if (!predicate( item )) {
                     children.Add( item );
                 } else {
-                    if (children.Any()) yield return (key, children.ToArray());
+                    if (hasKey || children.Any()) yield return (key, children.ToArray());
                     key = item;
+                    hasKey = true;
                     children.Clear();
                 }
             }
-            if (children.Any()) yield return (key, children.ToArray());
+            if (hasKey || children.Any()) yield return (key, children.ToArray());
         }
 
         public static IEnumerable<T[]> Split<T>(this IEnumerable<T> source, Func<T, bool> predicate) {
@@ -70,6 +80,12 @@ namespace System {
                 if (predicate( queue.Peek() )) return queue.Dequeue();
             }
             return default;
+        }
+
+
+        // String
+        public static string Join(this IEnumerable<string> values, string separator = ", ") {
+            return string.Join( separator, values );
         }
 
 

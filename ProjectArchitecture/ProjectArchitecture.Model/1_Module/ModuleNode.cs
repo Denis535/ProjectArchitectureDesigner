@@ -13,6 +13,12 @@ namespace ProjectArchitecture.Model {
         public virtual NamespaceNode[] Namespaces => GetChildren<NamespaceNode>( this ).ToArray();
 
 
+        // SetNamespacesAndGroupsAndTypes
+        protected void SetNamespacesAndGroupsAndTypes(params object[] objects) {
+            // used by source generator
+        }
+
+
         // Utils
         public override string ToString() {
             return "Module: " + Name;
