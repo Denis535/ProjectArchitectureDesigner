@@ -24,16 +24,10 @@ namespace ProjectArchitecture {
 
         [Test]
         public void Test_00() {
-            TestContext.WriteLine( Project.Domain );
-            TestContext.WriteLine( Project.Domain.FakeProject );
-            TestContext.WriteLine( Project.Domain.FakeProject.Default );
-
-            TestContext.WriteLine( Project.Infrastructure );
-            TestContext.WriteLine( Project.Infrastructure.Global );
-            TestContext.WriteLine( Project.Infrastructure.Global.Default );
-            TestContext.WriteLine( Project.Infrastructure.System );
-            TestContext.WriteLine( Project.Infrastructure.System.Group_0 );
-            TestContext.WriteLine( Project.Infrastructure.System.Group_1 );
+            Assert.AreEqual( Project.Domain.FakeProject.Default.@object.Type, typeof( object ) );
+            Assert.AreEqual( Project.Infrastructure.Global.Default.@object.Type, typeof( object ) );
+            Assert.AreEqual( Project.Infrastructure.System.Group_0.@object.Type, typeof( object ) );
+            Assert.AreEqual( Project.Infrastructure.System.Group_1.@string.Type, typeof( string ) );
         }
 
         [Test]

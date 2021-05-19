@@ -69,7 +69,6 @@ namespace ProjectArchitecture.Analyzer {
 
         // Helpers
         private static string GetGeneratedSourceName(CompilationUnitSyntax unit) {
-            //return Path.GetFileNameWithoutExtension( unit.SyntaxTree.FilePath ) + $".Generated.{Guid.NewGuid()}.cs";
             return Path.GetFileNameWithoutExtension( unit.SyntaxTree.FilePath ) + ".Generated.cs";
         }
         private static string? GetGeneratedSource(CompilationUnitSyntax unit) {
@@ -83,18 +82,19 @@ namespace ProjectArchitecture.Analyzer {
         }
         // Helpers/Generation/Member
         private static MemberDeclarationSyntax? CreateMemberDeclaration(MemberDeclarationSyntax member) {
-            if (member is NamespaceDeclarationSyntax @namespace) {
-                return CreateNamespaceDeclaration( @namespace );
+            if (member is NamespaceDeclarationSyntax @namespace) return CreateNamespaceDeclaration( @namespace );
+            if (member is ClassDeclarationSyntax @class) return CreateClassDeclaration( @class );
+            return null;
+        }
+        // Helpers/Generation/Member/Class
+        private static ClassDeclarationSyntax? CreateClassDeclaration(ClassDeclarationSyntax @class) {
+            if (@class.IsPartial() && @class.IsChildOf( "ProjectNode" )) {
+                var modules = SyntaxAnalyzer.GetProjectData( @class ).ToArray(); // Get project class data
+                return SyntaxGenerator.CreateClassDeclaration_Project( @class, modules ); // Generate partial project class
             }
-            if (member is ClassDeclarationSyntax @class) {
-                if (@class.IsPartial() && @class.IsChildOf( "ProjectNode" )) {
-                    var modules = SyntaxAnalyzer.GetProjectData( @class ).ToArray();
-                    return SyntaxGenerator.CreateClassDeclaration_Project( @class, modules );
-                }
-                if (@class.IsPartial() && @class.IsChildOf( "ModuleNode" )) {
-                    var namespaces = SyntaxAnalyzer.GetModuleData( @class ).ToArray();
-                    return SyntaxGenerator.CreateClassDeclaration_Module( @class, namespaces );
-                }
+            if (@class.IsPartial() && @class.IsChildOf( "ModuleNode" )) {
+                var namespaces = SyntaxAnalyzer.GetModuleData( @class ).ToArray(); // Get module class data
+                return SyntaxGenerator.CreateClassDeclaration_Module( @class, namespaces ); // Generate partial module class
             }
             return null;
         }
