@@ -24,16 +24,16 @@ namespace ProjectArchitecture {
 
         [Test]
         public void Test_00() {
-            //TestContext.WriteLine( Project.Domain );
-            //TestContext.WriteLine( Project.Domain.FakeProject );
-            //TestContext.WriteLine( Project.Domain.FakeProject.Default );
+            TestContext.WriteLine( Project.Domain );
+            TestContext.WriteLine( Project.Domain.FakeProject );
+            TestContext.WriteLine( Project.Domain.FakeProject.Default );
 
-            //TestContext.WriteLine( Project.Infrastructure );
-            //TestContext.WriteLine( Project.Infrastructure.Global );
-            //TestContext.WriteLine( Project.Infrastructure.Global.Default );
-            //TestContext.WriteLine( Project.Infrastructure.System );
-            //TestContext.WriteLine( Project.Infrastructure.System.Group_0 );
-            //TestContext.WriteLine( Project.Infrastructure.System.Group_1 );
+            TestContext.WriteLine( Project.Infrastructure );
+            TestContext.WriteLine( Project.Infrastructure.Global );
+            TestContext.WriteLine( Project.Infrastructure.Global.Default );
+            TestContext.WriteLine( Project.Infrastructure.System );
+            TestContext.WriteLine( Project.Infrastructure.System.Group_0 );
+            TestContext.WriteLine( Project.Infrastructure.System.Group_1 );
         }
 
         [Test]

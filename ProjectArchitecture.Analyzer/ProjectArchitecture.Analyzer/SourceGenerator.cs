@@ -15,6 +15,12 @@ namespace ProjectArchitecture.Analyzer {
 
     [Generator]
     public class SourceGenerator : ISourceGenerator {
+        private class SyntaxReceiver : ISyntaxReceiver {
+            public IList<CompilationUnitSyntax> Units { get; } = new List<CompilationUnitSyntax>();
+            public void OnVisitSyntaxNode(SyntaxNode syntax) {
+                if (syntax is CompilationUnitSyntax unit) Units.Add( unit );
+            }
+        }
 
         private static readonly DiagnosticDescriptor ErrorDiagnosticDescriptor = new DiagnosticDescriptor(
             "SourceGenerator",
@@ -26,31 +32,33 @@ namespace ProjectArchitecture.Analyzer {
 
 
         public void Initialize(GeneratorInitializationContext context) {
+            context.RegisterForSyntaxNotifications( () => new SyntaxReceiver() );
         }
 
 
         public void Execute(GeneratorExecutionContext context) {
 #if DEBUG
-            Debugger.Launch();
+            //Debugger.Launch();
 #endif
+            var receiver = (SyntaxReceiver) context.SyntaxReceiver!;
             var compilation = context.Compilation;
             var cancellationToken = context.CancellationToken;
 
-            foreach (var tree in compilation.SyntaxTrees) {
-                if (tree.FilePath.Contains( ".nuget" )) continue;
-                if (tree.FilePath.Contains( "\\obj\\Debug\\" )) continue;
-                if (tree.FilePath.Contains( "\\obj\\Release\\" )) continue;
+            foreach (var unit in receiver.Units) {
+                if (unit.SyntaxTree.FilePath.Contains( ".nuget" )) continue;
+                if (unit.SyntaxTree.FilePath.Contains( "\\obj\\Debug\\" )) continue;
+                if (unit.SyntaxTree.FilePath.Contains( "\\obj\\Release\\" )) continue;
 
                 try {
-                    Execute( context, tree );
+                    Execute( context, unit );
                 } catch (Exception ex) {
                     context.ReportDiagnostic( Diagnostic.Create( ErrorDiagnosticDescriptor, null, ex.Message ) );
                 }
             }
         }
-        private static void Execute(GeneratorExecutionContext context, SyntaxTree tree) {
-            var name = GetGeneratedSourceName( tree );
-            var source = GetGeneratedSource( tree );
+        private static void Execute(GeneratorExecutionContext context, CompilationUnitSyntax unit) {
+            var name = GetGeneratedSourceName( unit );
+            var source = GetGeneratedSource( unit );
             if (source != null) {
                 Debug.WriteLine( "Generated source: " + name );
                 Debug.WriteLine( source );
@@ -60,11 +68,12 @@ namespace ProjectArchitecture.Analyzer {
 
 
         // Helpers
-        private static string GetGeneratedSourceName(SyntaxTree tree) {
-            return Path.GetFileNameWithoutExtension( tree.FilePath ) + $".Generated.{Guid.NewGuid()}.cs";
+        private static string GetGeneratedSourceName(CompilationUnitSyntax unit) {
+            //return Path.GetFileNameWithoutExtension( unit.SyntaxTree.FilePath ) + $".Generated.{Guid.NewGuid()}.cs";
+            return Path.GetFileNameWithoutExtension( unit.SyntaxTree.FilePath ) + ".Generated.cs";
         }
-        private static string? GetGeneratedSource(SyntaxTree tree) {
-            return CreateCompilationUnit( (CompilationUnitSyntax) tree.GetRoot( default ) )?.NormalizeWhitespace().ToString();
+        private static string? GetGeneratedSource(CompilationUnitSyntax unit) {
+            return CreateCompilationUnit( unit )?.NormalizeWhitespace().ToString();
         }
         // Helpers/Generation/CompilationUnit
         private static CompilationUnitSyntax? CreateCompilationUnit(CompilationUnitSyntax unit) {

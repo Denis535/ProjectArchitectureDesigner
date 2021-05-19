@@ -90,8 +90,8 @@ namespace ProjectArchitecture.Analyzer {
             return syntax is LiteralExpressionSyntax literal && literal.Kind() == SyntaxKind.StringLiteralExpression;
         }
         private static bool HasGroup(SyntaxNode syntax) {
-            var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
-            return comment.ToString().StartsWith( "/// " );
+            var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault().ToFullString();
+            return comment.StartsWith( "// " ) || comment.StartsWith( "/// " );
         }
         private static bool IsType(SyntaxNode syntax) {
             return syntax is TypeOfExpressionSyntax;
