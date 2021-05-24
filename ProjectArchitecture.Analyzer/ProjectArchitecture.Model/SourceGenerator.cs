@@ -12,7 +12,6 @@ namespace ProjectArchitecture.Model {
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using Microsoft.CodeAnalysis.Formatting;
 
     [Generator]
     public class SourceGenerator : ISourceGenerator {
@@ -90,12 +89,12 @@ namespace ProjectArchitecture.Model {
         // Helpers/Generation/Member/Class
         private static ClassDeclarationSyntax? CreateClassDeclaration(ClassDeclarationSyntax @class) {
             if (@class.IsPartial() && @class.IsChildOf( "ProjectNode" )) {
-                var modules = SyntaxAnalyzer.GetProjectData( @class ).ToArray(); // Get project class data
-                return SyntaxGenerator.CreateClassDeclaration_Project( @class, modules ); // Generate partial project class
+                var project = SyntaxAnalyzer.GetProjectData( @class ); // Get project data
+                return SyntaxGenerator.CreateClassDeclaration_Project( @class, project ); // Generate partial project class
             }
             if (@class.IsPartial() && @class.IsChildOf( "ModuleNode" )) {
-                var namespaces = SyntaxAnalyzer.GetModuleData( @class ).ToArray(); // Get module class data
-                return SyntaxGenerator.CreateClassDeclaration_Module( @class, namespaces ); // Generate partial module class
+                var module = SyntaxAnalyzer.GetModuleData( @class ); // Get module data
+                return SyntaxGenerator.CreateClassDeclaration_Module( @class, module ); // Generate partial module class
             }
             return null;
         }

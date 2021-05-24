@@ -9,7 +9,7 @@ namespace ProjectArchitecture.Model {
 
     // Project/ProjectArchitecture
     public sealed partial class Project_ProjectArchitecture : ProjectNode {
-        public Project_ProjectArchitecture() => SetModules(
+        protected override void DefineChildren() => SetChildren(
             typeof( Module_ProjectArchitecture ),
             typeof( Module_ProjectArchitecture_Analyzer )
         );
@@ -24,10 +24,10 @@ namespace ProjectArchitecture.Model {
 
     // Modules/ProjectArchitecture
     public sealed partial class Module_ProjectArchitecture : ModuleNode {
-        public Module_ProjectArchitecture() => SetNamespacesAndGroupsAndTypes(
+        protected override void DefineChildren() => SetChildren(
             "ProjectArchitecture.Model",
             typeof( Node ),
-            // Children
+            // Node/Children
             typeof( ProjectNode ),
             typeof( ModuleNode ),
             typeof( NamespaceNode ),
@@ -41,7 +41,7 @@ namespace ProjectArchitecture.Model {
 
     // Modules/ProjectArchitecture.Analyzer
     public sealed partial class Module_ProjectArchitecture_Analyzer : ModuleNode {
-        public Module_ProjectArchitecture_Analyzer() => SetNamespacesAndGroupsAndTypes(
+        protected override void DefineChildren() => SetChildren(
             "ProjectArchitecture.Model",
             typeof( SourceGenerator )
         );

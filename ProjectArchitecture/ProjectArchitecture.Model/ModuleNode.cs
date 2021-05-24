@@ -13,9 +13,9 @@ namespace ProjectArchitecture.Model {
         public virtual NamespaceNode[] Namespaces => GetChildren<NamespaceNode>( this ).ToArray();
 
 
-        // SetNamespacesAndGroupsAndTypes
-        protected void SetNamespacesAndGroupsAndTypes(params object[] objects) {
-            // used by source generator
+        // Initialization
+        protected abstract void DefineChildren(); // Used by source generator
+        protected void SetChildren(params object[] children) { // Used by source generator
         }
 
 

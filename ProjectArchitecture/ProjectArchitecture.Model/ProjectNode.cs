@@ -14,9 +14,9 @@ namespace ProjectArchitecture.Model {
         public virtual ModuleNode[] Modules => GetChildren<ModuleNode>( this ).ToArray();
 
 
-        // SetModules
-        protected void SetModules(params Type[] modules) {
-            // used by source generator
+        // Initialization
+        protected abstract void DefineChildren(); // Used by source generator
+        protected void SetChildren(params Type[] children) { // Used by source generator
         }
 
 

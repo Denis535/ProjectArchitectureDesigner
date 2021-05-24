@@ -30,8 +30,8 @@ namespace ProjectArchitecture.Model {
                 typeof( SourceGenerator ).Assembly
             };
             Project.Compare( assemblies, out var intersected, out var missing, out var extra );
-            if (missing.Any()) Assert.Fail( "Missing types: {0}", missing.Select( i => i.ToString() ).Join() );
-            if (extra.Any()) Assert.Fail( "Extra types: {0}", extra.Select( i => i.ToString() ).Join() );
+            if (missing.Any()) Assert.Warn( "Missing types: {0}", missing.Select( i => i.ToString() ).Join() );
+            if (extra.Any()) Assert.Warn( "Extra types: {0}", extra.Select( i => i.ToString() ).Join() );
         }
 
 

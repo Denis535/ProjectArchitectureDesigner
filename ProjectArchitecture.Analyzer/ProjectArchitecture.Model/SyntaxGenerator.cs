@@ -14,32 +14,32 @@ namespace ProjectArchitecture.Model {
 
 
         // Classes/Project
-        public static ClassDeclarationSyntax CreateClassDeclaration_Project(ClassDeclarationSyntax @class, SyntaxAnalyzer.Module[] modules) {
-            var comment = SyntaxFactoryUtils.Comment( GetComment( @class.Identifier.ValueText, modules ) );
-            //var name = SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( @class.Identifier.ValueText ) );
-            var properties = modules.Select( CreatePropertyDeclaration_Module ).ToArray();
+        public static ClassDeclarationSyntax CreateClassDeclaration_Project(ClassDeclarationSyntax @class, SyntaxAnalyzer.ProjectData project) {
+            var comment = SyntaxFactoryUtils.Comment( "// Project: {0}", project.GetName() );
+            var name = SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( project.GetName() ) );
+            var properties = project.Modules.Select( CreatePropertyDeclaration_Module ).ToArray();
             return
                 SyntaxFactoryUtils.ClassDeclaration( @class )
                 .WithLeadingTrivia( comment )
-                //.AddMembers( name )
+                .AddMembers( name )
                 .AddMembers( properties );
         }
         // Classes/Module
-        public static ClassDeclarationSyntax CreateClassDeclaration_Module(ClassDeclarationSyntax @class, SyntaxAnalyzer.Namespace[] namespaces) {
-            var comment = SyntaxFactoryUtils.Comment( GetComment( @class.Identifier.ValueText, namespaces ) );
-            //var name = SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( @class.Identifier.ValueText ) );
-            var properties = namespaces.Select( CreatePropertyDeclaration_Namespace ).ToArray();
-            var classes = namespaces.Select( CreateClassDeclaration_Namespace ).ToArray();
+        public static ClassDeclarationSyntax CreateClassDeclaration_Module(ClassDeclarationSyntax @class, SyntaxAnalyzer.ModuleData module) {
+            var comment = SyntaxFactoryUtils.Comment( "// Module: {0}", module.GetName() );
+            var name = SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( module.GetName() ) );
+            var properties = module.Namespaces.Select( CreatePropertyDeclaration_Namespace ).ToArray();
+            var classes = module.Namespaces.Select( CreateClassDeclaration_Namespace ).ToArray();
             return
                 SyntaxFactoryUtils.ClassDeclaration( @class )
                 .WithLeadingTrivia( comment )
-                //.AddMembers( name )
+                .AddMembers( name )
                 .AddMembers( properties )
                 .AddMembers( classes );
         }
         private static ClassDeclarationSyntax CreateClassDeclaration_Namespace(SyntaxAnalyzer.Namespace @namespace) {
-            var comment = SyntaxFactoryUtils.Comment( GetComment( @namespace ) );
-            var name = SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( @namespace ) );
+            var comment = SyntaxFactoryUtils.Comment( "// Namespace: {0}", @namespace.Value );
+            var name = SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( @namespace.Value ) );
             var properties = @namespace.Groups.Select( CreatePropertyDeclaration_Group ).ToArray();
             var classes = @namespace.Groups.Select( CreateClassDeclaration_Group ).ToArray();
             return
@@ -50,8 +50,8 @@ namespace ProjectArchitecture.Model {
                 .AddMembers( classes );
         }
         private static ClassDeclarationSyntax CreateClassDeclaration_Group(SyntaxAnalyzer.Group group) {
-            var comment = SyntaxFactoryUtils.Comment( GetComment( group ) );
-            var name = SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( group ) );
+            var comment = SyntaxFactoryUtils.Comment( "// Group: {0}", group.Value );
+            var name = SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( group.Value ) );
             var properties = group.Types.Select( CreatePropertyDeclaration_Type ).ToArray();
             return
                 SyntaxFactoryUtils.ClassDeclaration( group.GetTypeName(), "GroupNode" )
@@ -80,10 +80,17 @@ namespace ProjectArchitecture.Model {
         }
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Type(SyntaxAnalyzer.Type type) {
             var identifier = type.GetIdentifier();
-            return SyntaxFactoryUtils.PropertyDeclaration( "TypeNode", identifier, SyntaxFactoryUtils.TypeOfExpression( type ) );
+            return SyntaxFactoryUtils.PropertyDeclaration( "TypeNode", identifier, SyntaxFactoryUtils.TypeOfExpression( type.Value ) );
         }
 
 
+        // Helpers/Name
+        private static string GetName(this SyntaxAnalyzer.ProjectData project) {
+            return WithoutPrefix( project.Value, "Project_" ).Replace( '_', '.' );
+        }
+        private static string GetName(this SyntaxAnalyzer.ModuleData module) {
+            return WithoutPrefix( module.Value, "Module_" ).Replace( '_', '.' );
+        }
         // Helpers/Type
         private static string GetTypeName(this SyntaxAnalyzer.Module module) => module.Value;
         private static string GetTypeName(this SyntaxAnalyzer.Namespace @namespace) => "Namespace_" + GetTypeName( @namespace.Value );
@@ -93,12 +100,6 @@ namespace ProjectArchitecture.Model {
         }
         // Helpers/Identifier
         private static string GetIdentifier(this SyntaxAnalyzer.Module module) => module.Value;
-        //private static string GetIdentifier(this SyntaxAnalyzer.Module module) {
-        //    var value = module.Value;
-        //    var i = value.IndexOf( "Module_" );
-        //    if (i != -1) value = value.Substring( i + 7 );
-        //    return value;
-        //}
         private static string GetIdentifier(this SyntaxAnalyzer.Namespace @namespace) => GetIdentifier( @namespace.Value );
         private static string GetIdentifier(this SyntaxAnalyzer.Group group) => GetIdentifier( group.Value );
         private static string GetIdentifier(this SyntaxAnalyzer.Type type) => GetIdentifier( type.Value );
@@ -111,17 +112,10 @@ namespace ProjectArchitecture.Model {
             return char.IsLetterOrDigit( @char ) ? @char : '_';
         }
         // Helpers/String
-        private static string GetComment(string project, SyntaxAnalyzer.Module[] modules) {
-            return string.Format( "// Project: {0}, Modules: {1}", project, modules.Join( i => i.Value ) );
-        }
-        private static string GetComment(string module, SyntaxAnalyzer.Namespace[] namespaces) {
-            return string.Format( "// Module: {0}, Namespaces: {1}", module, namespaces.Join( i => i.Value ) );
-        }
-        private static string GetComment(SyntaxAnalyzer.Namespace @namespace) {
-            return string.Format( "// Namespace: {0}, Groups: {1}", @namespace.Value, @namespace.Groups.Join( i => i.Value ) );
-        }
-        private static string GetComment(SyntaxAnalyzer.Group group) {
-            return string.Format( "// Group: {0}, Types: {1}", group.Value, group.Types.Join( i => i.Value ) );
+        private static string WithoutPrefix(string value, string prefix) {
+            var i = value.IndexOf( prefix );
+            if (i != -1) value = value.Substring( i + prefix.Length );
+            return value;
         }
 
 

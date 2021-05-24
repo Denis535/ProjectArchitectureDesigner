@@ -11,47 +11,47 @@ namespace ProjectArchitecture.Model {
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     internal static class SyntaxAnalyzer {
+        // Project
+        public record ProjectData(string Value, Module[] Modules) {
+            public override string ToString() => string.Format( "ProjectData: {0}", Value );
+        }
         public record Module(string Value) {
             public override string ToString() => string.Format( "Module: {0}", Value );
-            public static implicit operator string(Module @object) => @object.Value;
+        }
+        // Module
+        public record ModuleData(string Value, Namespace[] Namespaces) {
+            public override string ToString() => string.Format( "ModuleData: {0}", Value );
         }
         public record Namespace(string Value, Group[] Groups) {
             public override string ToString() => string.Format( "Namespace: {0}", Value );
-            public static implicit operator string(Namespace @object) => @object.Value;
         }
         public record Group(string Value, Type[] Types) {
             public override string ToString() => string.Format( "Group: {0}", Value );
-            public static implicit operator string(Group @object) => @object.Value;
         }
         public record Type(string Value) {
             public override string ToString() => string.Format( "Type: {0}", Value );
-            public static implicit operator string(Type @object) => @object.Value;
         }
 
 
         // Project
-        public static Module[] GetProjectData(ClassDeclarationSyntax @class) {
-            var constructor = @class.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault();
-            var body = (SyntaxNode?) constructor?.Body ?? constructor?.ExpressionBody;
-            if (body != null) {
-                return body.DescendantNodes().Where( IsModule ).Select( GetModule ).ToArray();
-            }
-            return Array.Empty<Module>();
+        public static ProjectData GetProjectData(ClassDeclarationSyntax @class) {
+            var method = @class.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault( i => i.Identifier.ValueText == "DefineChildren" );
+            var body = (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
+            var modules = body?.DescendantNodes().Where( IsModule ).Select( GetModule ).ToArray() ?? Array.Empty<Module>();
+            return new ProjectData( @class.Identifier.ValueText, modules );
         }
 
         // Module
-        public static Namespace[] GetModuleData(ClassDeclarationSyntax @class) {
-            var constructor = @class.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault();
-            var body = (SyntaxNode?) constructor?.Body ?? constructor?.ExpressionBody;
-            if (body != null) {
-                return GetNamespacesAndGroupsAndTypes( body ).Map( GetNamespaces ).ToArray();
-            }
-            return Array.Empty<Namespace>();
+        public static ModuleData GetModuleData(ClassDeclarationSyntax @class) {
+            var method = @class.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault( i => i.Identifier.ValueText == "DefineChildren" );
+            var body = (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
+            var @namespaces = body?.Map( GetModuleData ).Map( GetNamespaceHierarchy ).ToArray() ?? Array.Empty<Namespace>();
+            return new ModuleData( @class.Identifier.ValueText, namespaces );
         }
 
 
         // Helpers/Module
-        private static IEnumerable<object> GetNamespacesAndGroupsAndTypes(SyntaxNode syntax) {
+        private static IEnumerable<object> GetModuleData(SyntaxNode syntax) {
             var nodes = syntax.DescendantNodes().Where( i => IsNamespace( i ) || IsType( i ) );
             foreach (var node in nodes) {
                 if (IsNamespace( node )) {
@@ -65,21 +65,21 @@ namespace ProjectArchitecture.Model {
                 }
             }
         }
-        private static IEnumerable<Namespace> GetNamespaces(IEnumerable<object> namespaces) {
+        private static IEnumerable<Namespace> GetNamespaceHierarchy(IEnumerable<object> namespaces) {
             return namespaces.Unflatten( i => i is Namespace ).Select( i => GetNamespace( i.Key, i.Children ) );
         }
         private static Namespace GetNamespace(object? @namespace, object[] groups) {
             var namespace_ = (Namespace?) @namespace ?? new Namespace( "Global", null! );
-            var groups_ = groups.Map( GetGroups ).ToArray();
-            return new Namespace( namespace_, groups_ );
+            var groups_ = groups.Map( GetGroupHierarchy ).ToArray();
+            return new Namespace( namespace_.Value, groups_ );
         }
-        private static IEnumerable<Group> GetGroups(object[] groups) {
+        private static IEnumerable<Group> GetGroupHierarchy(object[] groups) {
             return groups.Unflatten( i => i is Group ).Select( i => GetGroup( i.Key, i.Children ) );
         }
         private static Group GetGroup(object? group, object[] types) {
             var group_ = (Group?) group ?? new Group( "Default", null! );
             var types_ = types.Cast<Type>().ToArray();
-            return new Group( group_, types_ );
+            return new Group( group_.Value, types_ );
         }
 
         // Helpers/Syntax
