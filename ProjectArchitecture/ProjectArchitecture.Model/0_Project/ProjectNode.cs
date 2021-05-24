@@ -22,18 +22,18 @@ namespace ProjectArchitecture.Model {
 
         // Compare/Assembly
         public void Compare(Assembly assembly, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = Flatten<TypeNode>().Select( i => i.Type );
+            var actual = Flatten<TypeNode>().Select( i => i.Value );
             var expected = assembly.DefinedTypes.Where( IsSupported );
             Utils.Compare( actual, expected, out intersected, out missing, out extra );
         }
         public void Compare(Assembly[] assemblies, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = Flatten<TypeNode>().Select( i => i.Type );
+            var actual = Flatten<TypeNode>().Select( i => i.Value );
             var expected = assemblies.SelectMany( i => i.DefinedTypes ).Where( IsSupported );
             Utils.Compare( actual, expected, out intersected, out missing, out extra );
         }
         // Compare/Type
         public void Compare(IEnumerable<Type> types, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = Flatten<TypeNode>().Select( i => i.Type );
+            var actual = Flatten<TypeNode>().Select( i => i.Value );
             var expected = types.Where( IsSupported );
             Utils.Compare( actual, expected, out intersected, out missing, out extra );
         }

@@ -9,8 +9,7 @@ namespace ProjectArchitecture.Model {
 
     public abstract class NamespaceNode : Node {
 
-        public override string Name => GetName( this );
-        public GroupNode[] Groups => GetChildren<GroupNode>( this ).ToArray();
+        public virtual GroupNode[] Groups => GetChildren<GroupNode>( this ).ToArray();
 
 
         // Utils

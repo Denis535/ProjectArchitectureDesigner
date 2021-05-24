@@ -8,12 +8,12 @@ namespace ProjectArchitecture.Model {
 
     public class TypeNode : Node {
 
-        public override string Name => Type.Name;
-        public Type Type { get; }
+        public override string Name => Value.Name;
+        public Type Value { get; }
 
 
-        public TypeNode(Type type) {
-            Type = type;
+        public TypeNode(Type value) {
+            Value = value;
         }
 
 
@@ -25,6 +25,7 @@ namespace ProjectArchitecture.Model {
 
         // Conversions
         public static implicit operator TypeNode(Type type) => new TypeNode( type );
+        public static implicit operator Type(TypeNode type) => type.Value;
 
 
     }

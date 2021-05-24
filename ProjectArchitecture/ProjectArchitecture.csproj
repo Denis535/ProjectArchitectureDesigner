@@ -2,7 +2,8 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
-        <IsPackable>true</IsPackable>
     </PropertyGroup>
+
+    <Import Project="..\Shared\Shared.projitems" Label="Shared" />
 
 </Project>

@@ -1,9 +1,8 @@
 ﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-using System.ComponentModel;
-
 namespace System.Runtime.CompilerServices {
+    using System.ComponentModel;
     [EditorBrowsable( EditorBrowsableState.Never )]
     internal class IsExternalInit {
     }
@@ -13,11 +12,13 @@ namespace System {
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Text;
 
+    [EditorBrowsable( EditorBrowsableState.Never )]
     internal static class Utils {
 
 
@@ -86,6 +87,9 @@ namespace System {
         // String
         public static string Join(this IEnumerable<string> values, string separator = ", ") {
             return string.Join( separator, values );
+        }
+        public static string Join<T>(this IEnumerable<T> values, Func<T, string> selector, string separator = ", ") {
+            return string.Join( separator, values.Select( selector ) );
         }
 
 

@@ -5,11 +5,15 @@
         <RootNamespace></RootNamespace>
         <LangVersion>latest</LangVersion>
         <Nullable>enable</Nullable>
-        <IsPackable>true</IsPackable>
+        <IsPackable>false</IsPackable>
         <EnableNETAnalyzers>true</EnableNETAnalyzers>
         <AnalysisLevel>latest</AnalysisLevel>
     </PropertyGroup>
 
-    <Import Project="Shared\Shared.projitems" Label="Shared" />
+    <!--<ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>ProjectArchitecture.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>-->
 
 </Project>

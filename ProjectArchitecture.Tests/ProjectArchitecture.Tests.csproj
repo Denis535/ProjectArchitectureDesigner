@@ -2,7 +2,6 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
-        <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,9 +13,11 @@
     <ItemGroup>
         <ProjectReference Include="..\ProjectArchitecture\ProjectArchitecture.csproj" />
         <ProjectReference Include="..\ProjectArchitecture.Analyzer\ProjectArchitecture.Analyzer.csproj">
-            <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
             <OutputItemType>Analyzer</OutputItemType>
         </ProjectReference>
     </ItemGroup>
+
+    <Import Project="..\Shared\Shared.projitems" Label="Shared" />
 
 </Project>

@@ -20,17 +20,31 @@ namespace ProjectArchitecture.Model {
 
 
         // Helpers
-        protected static string GetName(Node node) {
-            return node.GetType().Name.Replace( '_', '.' );
+        protected static string GetName(ProjectNode node) {
+            return WithoutPrefix( node.GetType().Name, "Project_" ).Replace( '_', '.' );
+        }
+        protected static string GetName(ModuleNode node) {
+            return WithoutPrefix( node.GetType().Name, "Module_" ).Replace( '_', '.' );
         }
         protected static IEnumerable<T> GetChildren<T>(Node node) {
             return
                 node
                 .GetType()
                 .GetProperties( BindingFlags.Public | BindingFlags.Instance )
-                .Where( i => i.PropertyType.IsSubclassOf( typeof( T ) ) )
+                .Where( IsOfType<T> )
                 .Select( i => i.GetValue( node ) )
                 .Cast<T>();
+        }
+        private static bool IsOfType<T>(PropertyInfo property) {
+            return
+                property.PropertyType.Equals( typeof( T ) ) ||
+                property.PropertyType.IsSubclassOf( typeof( T ) );
+        }
+        // Helpers/String
+        private static string WithoutPrefix(string value, string prefix) {
+            var i = value.IndexOf( prefix );
+            if (i != -1) value = value[ (i + prefix.Length).. ];
+            return value;
         }
 
 

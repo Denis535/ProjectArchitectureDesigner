@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #pragma warning disable RS2008 // Enable analyzer release tracking
-namespace ProjectArchitecture.Analyzer {
+namespace ProjectArchitecture.Model {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
@@ -12,6 +12,7 @@ namespace ProjectArchitecture.Analyzer {
     using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using Microsoft.CodeAnalysis.Formatting;
 
     [Generator]
     public class SourceGenerator : ISourceGenerator {

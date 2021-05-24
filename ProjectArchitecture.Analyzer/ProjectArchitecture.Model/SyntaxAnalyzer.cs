@@ -1,7 +1,7 @@
 ﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-namespace ProjectArchitecture.Analyzer {
+namespace ProjectArchitecture.Model {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -12,19 +12,19 @@ namespace ProjectArchitecture.Analyzer {
 
     internal static class SyntaxAnalyzer {
         public record Module(string Value) {
-            public override string ToString() => Value;
+            public override string ToString() => string.Format( "Module: {0}", Value );
             public static implicit operator string(Module @object) => @object.Value;
         }
         public record Namespace(string Value, Group[] Groups) {
-            public override string ToString() => string.Format( "{0}: ({1})", Value, string.Join<Group>( ", ", Groups ) );
+            public override string ToString() => string.Format( "Namespace: {0}", Value );
             public static implicit operator string(Namespace @object) => @object.Value;
         }
         public record Group(string Value, Type[] Types) {
-            public override string ToString() => string.Format( "{0}: {1}", Value, string.Join<Type>( ", ", Types ) );
+            public override string ToString() => string.Format( "Group: {0}", Value );
             public static implicit operator string(Group @object) => @object.Value;
         }
         public record Type(string Value) {
-            public override string ToString() => Value;
+            public override string ToString() => string.Format( "Type: {0}", Value );
             public static implicit operator string(Type @object) => @object.Value;
         }
 
@@ -90,6 +90,8 @@ namespace ProjectArchitecture.Analyzer {
             return syntax is LiteralExpressionSyntax literal && literal.Kind() == SyntaxKind.StringLiteralExpression;
         }
         private static bool HasGroup(SyntaxNode syntax) {
+            // Note: SyntaxTrivia.ToString() doesn't return documentation comment!
+            // Note: So, one should use SyntaxTrivia.ToFullString()!
             var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault().ToFullString();
             return comment.StartsWith( "// " ) || comment.StartsWith( "/// " );
         }
@@ -119,7 +121,7 @@ namespace ProjectArchitecture.Analyzer {
 
         // Helpers/Syntax/Misc
         private static string GetCommentContent(string comment) {
-            var content = comment.SkipWhile( i => i == '/' ).TakeWhile( i => i != '/' );
+            var content = comment.SkipWhile( i => i == '/' );
             return string.Concat( content ).Trim();
         }
 
