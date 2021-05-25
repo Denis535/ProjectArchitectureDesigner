@@ -26,7 +26,7 @@ namespace ProjectArchitecture.Model {
         [Test]
         public void Test_00_Project() {
             var assemblies = new[] {
-                typeof( Node ).Assembly,
+                typeof( ArchitectureNode ).Assembly,
                 typeof( SourceGenerator ).Assembly
             };
             Project.Compare( assemblies, out var intersected, out var missing, out var extra );

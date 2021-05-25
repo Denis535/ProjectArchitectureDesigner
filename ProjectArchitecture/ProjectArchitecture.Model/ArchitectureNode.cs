@@ -8,7 +8,7 @@ namespace ProjectArchitecture.Model {
     using System.Reflection;
     using System.Text;
 
-    public abstract class Node {
+    public abstract class ArchitectureNode {
 
         public abstract string Name { get; }
 
@@ -32,7 +32,7 @@ namespace ProjectArchitecture.Model {
         private protected static string GetName(GroupNode node) {
             return WithoutPrefix( node.GetType().Name, "Group_" ).Replace( '_', ' ' );
         }
-        private protected static IEnumerable<T> GetChildren<T>(Node node) {
+        private protected static IEnumerable<T> GetChildren<T>(ArchitectureNode node) {
             return
                 node
                 .GetType()

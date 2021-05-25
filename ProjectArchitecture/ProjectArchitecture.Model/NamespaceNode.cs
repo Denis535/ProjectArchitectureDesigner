@@ -7,7 +7,7 @@ namespace ProjectArchitecture.Model {
     using System.Linq;
     using System.Text;
 
-    public abstract class NamespaceNode : Node {
+    public abstract class NamespaceNode : ArchitectureNode {
 
         public override string Name => GetName( this );
         public virtual GroupNode[] Groups => GetChildren<GroupNode>( this ).ToArray();

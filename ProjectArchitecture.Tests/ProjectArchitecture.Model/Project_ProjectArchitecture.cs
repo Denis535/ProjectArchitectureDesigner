@@ -26,7 +26,7 @@ namespace ProjectArchitecture.Model {
     public sealed partial class Module_ProjectArchitecture : ModuleNode {
         protected override void DefineChildren() => SetChildren(
             "ProjectArchitecture.Model",
-            typeof( Node ),
+            typeof( ArchitectureNode ),
             // Node/Children
             typeof( ProjectNode ),
             typeof( ModuleNode ),

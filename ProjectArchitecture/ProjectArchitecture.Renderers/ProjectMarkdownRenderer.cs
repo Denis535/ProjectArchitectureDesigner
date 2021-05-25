@@ -33,7 +33,7 @@ namespace ProjectArchitecture.Renderers {
             }
         }
         // Helpers/Node
-        private static string GetLinkString(this Node node, string link, string uri) {
+        private static string GetLinkString(this ArchitectureNode node, string link, string uri) {
             return node switch {
                 ProjectNode
                 => string.Format( "  - [{0}](#{1})", link, uri ),
@@ -49,7 +49,7 @@ namespace ProjectArchitecture.Renderers {
                 => throw new ArgumentNullException( nameof( node ) ),
             };
         }
-        private static string GetItemString(this Node node) {
+        private static string GetItemString(this ArchitectureNode node) {
             return node switch {
                 ProjectNode proj
                 => "# " + proj,
@@ -68,11 +68,11 @@ namespace ProjectArchitecture.Renderers {
             };
         }
         // Helpers/Node/Links
-        private static IEnumerable<(Node, string Link, string Uri)> GetLinks(this IEnumerable<Node> nodes) {
+        private static IEnumerable<(ArchitectureNode, string Link, string Uri)> GetLinks(this IEnumerable<ArchitectureNode> nodes) {
             var prevs = new List<string>();
             return nodes.Select( i => i.GetLink( prevs ) );
         }
-        private static (Node Item, string Link, string Uri) GetLink(this Node node, List<string> prevs) {
+        private static (ArchitectureNode Item, string Link, string Uri) GetLink(this ArchitectureNode node, List<string> prevs) {
             var link = node.ToString();
             var uri = node.ToString().ToLowerInvariant()
                 .Replace( "  ", " " )

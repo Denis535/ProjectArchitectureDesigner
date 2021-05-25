@@ -8,7 +8,7 @@ namespace ProjectArchitecture.Model {
     using System.Reflection;
     using System.Text;
 
-    public abstract class ProjectNode : Node {
+    public abstract class ProjectNode : ArchitectureNode {
 
         public override string Name => GetName( this );
         public virtual ModuleNode[] Modules => GetChildren<ModuleNode>( this ).ToArray();
@@ -40,7 +40,7 @@ namespace ProjectArchitecture.Model {
 
 
         // Flatten
-        public IEnumerable<Node> Flatten() {
+        public IEnumerable<ArchitectureNode> Flatten() {
             yield return this;
 
             foreach (var module in Modules) {
@@ -59,7 +59,7 @@ namespace ProjectArchitecture.Model {
                 }
             }
         }
-        public IEnumerable<T> Flatten<T>() where T : Node {
+        public IEnumerable<T> Flatten<T>() where T : ArchitectureNode {
             return Flatten().OfType<T>();
         }
 

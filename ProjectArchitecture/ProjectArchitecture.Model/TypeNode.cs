@@ -6,7 +6,7 @@ namespace ProjectArchitecture.Model {
     using System.Collections.Generic;
     using System.Text;
 
-    public class TypeNode : Node {
+    public class TypeNode : ArchitectureNode {
 
         public override string Name => Value.Name;
         public Type Value { get; }

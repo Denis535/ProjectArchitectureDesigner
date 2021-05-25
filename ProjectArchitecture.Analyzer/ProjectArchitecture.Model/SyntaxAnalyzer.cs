@@ -11,49 +11,44 @@ namespace ProjectArchitecture.Model {
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     internal static class SyntaxAnalyzer {
-        // Project
-        public record ProjectData(string Value, Module[] Modules) {
-            public override string ToString() => string.Format( "ProjectData: {0}", Value );
+        // Node
+        public abstract record Node(string Value) {
+            public override string ToString() => string.Format( "{0}: {1}", GetType().Name, Value );
         }
-        public record Module(string Value) {
-            public override string ToString() => string.Format( "Module: {0}", Value );
-        }
-        // Module
-        public record ModuleData(string Value, Namespace[] Namespaces) {
-            public override string ToString() => string.Format( "ModuleData: {0}", Value );
-        }
-        public record Namespace(string Value, Group[] Groups) {
-            public override string ToString() => string.Format( "Namespace: {0}", Value );
-        }
-        public record Group(string Value, Type[] Types) {
-            public override string ToString() => string.Format( "Group: {0}", Value );
-        }
-        public record Type(string Value) {
-            public override string ToString() => string.Format( "Type: {0}", Value );
-        }
+        // Node/Project
+        public record ProjectData(string Value, Module[] Modules) : Node( Value );
+        public record Module(string Value) : Node( Value );
+        // Node/Module
+        public record ModuleData(string Value, Namespace[] Namespaces) : Node( Value );
+        public record Namespace(string Value, Group[] Groups) : Node( Value );
+        public record Group(string Value, Type[] Types) : Node( Value );
+        public record Type(string Value) : Node( Value );
 
 
         // Project
         public static ProjectData GetProjectData(ClassDeclarationSyntax @class) {
             var method = @class.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault( i => i.Identifier.ValueText == "DefineChildren" );
             var body = (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
-            var modules = body?.DescendantNodes().Where( IsModule ).Select( GetModule ).ToArray() ?? Array.Empty<Module>();
+            var modules = body?.GetProjectData().ToArray() ?? Array.Empty<Module>();
             return new ProjectData( @class.Identifier.ValueText, modules );
+        }
+        private static IEnumerable<Module> GetProjectData(this SyntaxNode syntax) {
+            foreach (var node in syntax.DescendantNodes()) {
+                if (IsModule( node )) {
+                    yield return GetModule( node );
+                }
+            }
         }
 
         // Module
         public static ModuleData GetModuleData(ClassDeclarationSyntax @class) {
             var method = @class.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault( i => i.Identifier.ValueText == "DefineChildren" );
             var body = (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
-            var @namespaces = body?.Map( GetModuleData ).Map( GetNamespaceHierarchy ).ToArray() ?? Array.Empty<Namespace>();
+            var @namespaces = body?.GetModuleData().GetNamespaceHierarchy().ToArray() ?? Array.Empty<Namespace>();
             return new ModuleData( @class.Identifier.ValueText, namespaces );
         }
-
-
-        // Helpers/Module
-        private static IEnumerable<object> GetModuleData(SyntaxNode syntax) {
-            var nodes = syntax.DescendantNodes().Where( i => IsNamespace( i ) || IsType( i ) );
-            foreach (var node in nodes) {
+        private static IEnumerable<Node> GetModuleData(this SyntaxNode syntax) {
+            foreach (var node in syntax.DescendantNodes()) {
                 if (IsNamespace( node )) {
                     yield return GetNamespace( node );
                 } else
@@ -65,22 +60,23 @@ namespace ProjectArchitecture.Model {
                 }
             }
         }
-        private static IEnumerable<Namespace> GetNamespaceHierarchy(IEnumerable<object> namespaces) {
-            return namespaces.Unflatten( i => i is Namespace ).Select( i => GetNamespace( i.Key, i.Children ) );
+        private static IEnumerable<Namespace> GetNamespaceHierarchy(this IEnumerable<Node> namespaces) {
+            return namespaces.Unflatten( i => i is Namespace ).Select( i => GetNamespace( (Namespace?) i.Key, i.Children ) );
         }
-        private static Namespace GetNamespace(object? @namespace, object[] groups) {
-            var namespace_ = (Namespace?) @namespace ?? new Namespace( "Global", null! );
+        private static Namespace GetNamespace(Namespace? @namespace, Node[] groups) {
+            var namespace_ = @namespace ?? new Namespace( "Global", null! );
             var groups_ = groups.Map( GetGroupHierarchy ).ToArray();
             return new Namespace( namespace_.Value, groups_ );
         }
-        private static IEnumerable<Group> GetGroupHierarchy(object[] groups) {
-            return groups.Unflatten( i => i is Group ).Select( i => GetGroup( i.Key, i.Children ) );
+        private static IEnumerable<Group> GetGroupHierarchy(Node[] groups) {
+            return groups.Unflatten( i => i is Group ).Select( i => GetGroup( (Group?) i.Key, i.Children ) );
         }
-        private static Group GetGroup(object? group, object[] types) {
-            var group_ = (Group?) group ?? new Group( "Default", null! );
+        private static Group GetGroup(Group? group, Node[] types) {
+            var group_ = group ?? new Group( "Default", null! );
             var types_ = types.Cast<Type>().ToArray();
             return new Group( group_.Value, types_ );
         }
+
 
         // Helpers/Syntax
         private static bool IsModule(SyntaxNode syntax) {
@@ -118,8 +114,7 @@ namespace ProjectArchitecture.Model {
             return new Type( type );
         }
 
-
-        // Helpers/Syntax/Misc
+        // Helpers/Syntax
         private static string GetCommentContent(string comment) {
             var content = comment.SkipWhile( i => i == '/' );
             return string.Concat( content ).Trim();
