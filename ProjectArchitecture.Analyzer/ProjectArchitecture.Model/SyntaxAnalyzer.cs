@@ -40,6 +40,7 @@ namespace ProjectArchitecture.Model {
             }
         }
 
+
         // Module
         public static ModuleData GetModuleData(ClassDeclarationSyntax @class) {
             var method = @class.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault( i => i.Identifier.ValueText == "DefineChildren" );

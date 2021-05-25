@@ -45,7 +45,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         public static ClassDeclarationSyntax ClassDeclaration(string identifier, string @base) {
             return SyntaxFactory.ClassDeclaration(
                 List<AttributeListSyntax>(),
-                TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.SealedKeyword ) ),
+                TokenList( Token( SyntaxKind.PublicKeyword ) ),
                 Identifier( identifier ),
                 null,
                 BaseList( SeparatedList<BaseTypeSyntax>( NodeOrTokenList( SimpleBaseType( ParseTypeName( @base ) ) ) ) ),

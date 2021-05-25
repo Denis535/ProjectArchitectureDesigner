@@ -31,6 +31,7 @@ namespace ProjectArchitecture.Model {
             return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, SyntaxFactoryUtils.ObjectCreationExpression( type ) );
         }
 
+
         // Module
         public static ClassDeclarationSyntax CreateClassDeclaration_Module(ClassDeclarationSyntax @class, SyntaxAnalyzer.ModuleData module) {
             var comment = SyntaxFactoryUtils.Comment( "// Module: {0}", module.GetName() );
