@@ -10,7 +10,8 @@ namespace ProjectArchitecture.Model {
     public abstract class NamespaceNode : ArchitectureNode {
 
         public override string Name => GetName( this );
-        public virtual GroupNode[] Groups => GetChildren<GroupNode>( this ).ToArray();
+        public bool IsGlobal => Name is null or "" or "Global";
+        public GroupNode[] Groups => GetChildren<GroupNode>( this ).ToArray();
 
 
         // Utils

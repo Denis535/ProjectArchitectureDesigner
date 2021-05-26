@@ -10,7 +10,8 @@ namespace ProjectArchitecture.Model {
     public abstract class GroupNode : ArchitectureNode {
 
         public override string Name => GetName( this );
-        public virtual TypeNode[] Types => GetChildren<TypeNode>( this ).ToArray();
+        public bool IsDefault => Name is null or "" or "Default";
+        public TypeNode[] Types => GetChildren<TypeNode>( this ).ToArray();
 
 
         // Utils

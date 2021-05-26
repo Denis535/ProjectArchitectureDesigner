@@ -37,6 +37,7 @@ And the roslyn source generator will generate the complex hierarchical structure
     public partial class Module_ProjectArchitecture : ModuleNode {
         protected override void DefineChildren() => SetChildren(
             "ProjectArchitecture.Model",
+            // Node
             typeof( ArchitectureNode ),
             // Node/Children
             typeof( ProjectNode ),
@@ -133,7 +134,7 @@ And the roslyn source generator will generate the complex hierarchical structure
     Project: ProjectArchitecture
     | - Module: ProjectArchitecture
     |   | - Namespace: ProjectArchitecture.Model
-    |   |   | - Default
+    |   |   | - Node
     |   |   |   | * ArchitectureNode
     |   |   | - Node/Children
     |   |       | * ProjectNode
@@ -149,7 +150,6 @@ And the roslyn source generator will generate the complex hierarchical structure
         | - Namespace: ProjectArchitecture.Model
             | - Default
                 | * SourceGenerator
-
 
 # The links
 

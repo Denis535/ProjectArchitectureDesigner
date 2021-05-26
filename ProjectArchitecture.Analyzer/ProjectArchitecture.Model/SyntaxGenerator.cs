@@ -15,8 +15,8 @@ namespace ProjectArchitecture.Model {
 
         // Project
         public static ClassDeclarationSyntax CreateClassDeclaration_Project(ClassDeclarationSyntax @class, SyntaxAnalyzer.ProjectData project) {
-            var comment = SyntaxFactoryUtils.Comment( "// Project: {0}", project.GetName() );
-            var name = SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( project.GetName() ) );
+            var comment = SyntaxFactoryUtils.Comment( "// Project: {0}", project.Name );
+            var name = CreatePropertyDeclaration_Name( project.Name );
             var properties = project.Modules.Select( CreatePropertyDeclaration_Module ).ToArray();
             return
                 SyntaxFactoryUtils.ClassDeclaration( @class )
@@ -24,18 +24,10 @@ namespace ProjectArchitecture.Model {
                 .AddMembers( name )
                 .AddMembers( properties );
         }
-        // Project/Properties
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Module(SyntaxAnalyzer.Module module) {
-            var type = module.GetTypeName();
-            var identifier = module.GetIdentifier();
-            return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, SyntaxFactoryUtils.ObjectCreationExpression( type ) );
-        }
-
-
         // Module
         public static ClassDeclarationSyntax CreateClassDeclaration_Module(ClassDeclarationSyntax @class, SyntaxAnalyzer.ModuleData module) {
-            var comment = SyntaxFactoryUtils.Comment( "// Module: {0}", module.GetName() );
-            var name = SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( module.GetName() ) );
+            var comment = SyntaxFactoryUtils.Comment( "// Module: {0}", module.Name );
+            var name = CreatePropertyDeclaration_Name( module.Name );
             var properties = module.Namespaces.Select( CreatePropertyDeclaration_Namespace ).ToArray();
             var classes = module.Namespaces.Select( CreateClassDeclaration_Namespace ).ToArray();
             return
@@ -46,8 +38,8 @@ namespace ProjectArchitecture.Model {
                 .AddMembers( classes );
         }
         private static ClassDeclarationSyntax CreateClassDeclaration_Namespace(SyntaxAnalyzer.Namespace @namespace) {
-            var comment = SyntaxFactoryUtils.Comment( "// Namespace: {0}", @namespace.GetName() );
-            var name = SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( @namespace.GetName() ) );
+            var comment = SyntaxFactoryUtils.Comment( "// Namespace: {0}", @namespace.Name );
+            var name = CreatePropertyDeclaration_Name( @namespace.Name );
             var properties = @namespace.Groups.Select( CreatePropertyDeclaration_Group ).ToArray();
             var classes = @namespace.Groups.Select( CreateClassDeclaration_Group ).ToArray();
             return
@@ -58,8 +50,8 @@ namespace ProjectArchitecture.Model {
                 .AddMembers( classes );
         }
         private static ClassDeclarationSyntax CreateClassDeclaration_Group(SyntaxAnalyzer.Group group) {
-            var comment = SyntaxFactoryUtils.Comment( "// Group: {0}", group.GetName() );
-            var name = SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( group.GetName() ) );
+            var comment = SyntaxFactoryUtils.Comment( "// Group: {0}", group.Name );
+            var name = CreatePropertyDeclaration_Name( group.Name );
             var properties = group.Types.Select( CreatePropertyDeclaration_Type ).ToArray();
             return
                 SyntaxFactoryUtils.ClassDeclaration( group.GetTypeName(), "GroupNode" )
@@ -67,7 +59,17 @@ namespace ProjectArchitecture.Model {
                 .AddMembers( name )
                 .AddMembers( properties );
         }
-        // Module/Properties
+
+
+        // Helpers/Syntax
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Name(string name) {
+            return SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( name ) );
+        }
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Module(SyntaxAnalyzer.Module module) {
+            var type = module.GetTypeName();
+            var identifier = module.GetIdentifier();
+            return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, SyntaxFactoryUtils.ObjectCreationExpression( type ) );
+        }
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Namespace(SyntaxAnalyzer.Namespace @namespace) {
             var type = @namespace.GetTypeName();
             var identifier = @namespace.GetIdentifier();
@@ -80,49 +82,29 @@ namespace ProjectArchitecture.Model {
         }
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Type(SyntaxAnalyzer.Type type) {
             var identifier = type.GetIdentifier();
-            return SyntaxFactoryUtils.PropertyDeclaration( "TypeNode", identifier, SyntaxFactoryUtils.TypeOfExpression( type.Value ) );
+            return SyntaxFactoryUtils.PropertyDeclaration( "TypeNode", identifier, SyntaxFactoryUtils.TypeOfExpression( type.Name ) );
         }
 
 
-        // Helpers/Node/Name
-        private static string GetName(this SyntaxAnalyzer.ProjectData project) {
-            return WithoutPrefix( project.Value, "Project_" ).Replace( '_', '.' );
+        // Helpers/String/Type
+        private static string GetTypeName(this SyntaxAnalyzer.Module module) => module.Name;
+        private static string GetTypeName(this SyntaxAnalyzer.Namespace @namespace) => "Namespace_" + @namespace.Name.Escape();
+        private static string GetTypeName(this SyntaxAnalyzer.Group group) => "Group_" + group.Name.Escape();
+        // Helpers/String/Identifier
+        private static string GetIdentifier(this SyntaxAnalyzer.Module module) => module.Name;
+        private static string GetIdentifier(this SyntaxAnalyzer.Namespace @namespace) => @namespace.Name.Escape().Escape2();
+        private static string GetIdentifier(this SyntaxAnalyzer.Group group) => group.Name.Escape().Escape2();
+        private static string GetIdentifier(this SyntaxAnalyzer.Type type) => type.Name.Escape().Escape2();
+        // Helpers/String
+        private static string Escape(this string value) {
+            return string.Concat( value.Select( Escape ) );
         }
-        private static string GetName(this SyntaxAnalyzer.ModuleData module) {
-            return WithoutPrefix( module.Value, "Module_" ).Replace( '_', '.' );
-        }
-        private static string GetName(this SyntaxAnalyzer.Namespace @namespace) {
-            return @namespace.Value;
-        }
-        private static string GetName(this SyntaxAnalyzer.Group group) {
-            return group.Value;
-        }
-        // Helpers/Node/Type
-        private static string GetTypeName(this SyntaxAnalyzer.Module module) => module.Value;
-        private static string GetTypeName(this SyntaxAnalyzer.Namespace @namespace) => "Namespace_" + GetTypeName( @namespace.Value );
-        private static string GetTypeName(this SyntaxAnalyzer.Group group) => "Group_" + GetTypeName( group.Value );
-        private static string GetTypeName(string value) {
-            return value.Select( Escape ).Map( string.Concat );
-        }
-        // Helpers/Node/Identifier
-        private static string GetIdentifier(this SyntaxAnalyzer.Module module) => module.Value;
-        private static string GetIdentifier(this SyntaxAnalyzer.Namespace @namespace) => GetIdentifier( @namespace.Value );
-        private static string GetIdentifier(this SyntaxAnalyzer.Group group) => GetIdentifier( group.Value );
-        private static string GetIdentifier(this SyntaxAnalyzer.Type type) => GetIdentifier( type.Value );
-        private static string GetIdentifier(string value) {
-            value = value.Select( Escape ).Map( string.Concat );
-            if (SyntaxFacts.GetKeywordKind( value ) != SyntaxKind.None) value = "@" + value;
+        private static string Escape2(this string value) {
+            if (SyntaxFacts.GetKeywordKind( value ) != SyntaxKind.None) return "@" + value;
             return value;
         }
         private static char Escape(char @char) {
             return char.IsLetterOrDigit( @char ) ? @char : '_';
-        }
-
-        // Helpers/String
-        private static string WithoutPrefix(string value, string prefix) {
-            var i = value.IndexOf( prefix );
-            if (i != -1) value = value.Substring( i + prefix.Length );
-            return value;
         }
 
 
