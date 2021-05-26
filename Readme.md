@@ -11,7 +11,7 @@ It will give you:
 # The getting started
 
 In order to describe the architecture you need to declare the architecture model consisting of: project, modules, namespaces, groups and types.
-To achieve it you need to write the `ProjectNode` and the 'ModuleNode' classes with the list of modules, namespaces, groups and types.
+To achieve it you need to write the `ProjectNode` and the `ModuleNode` classes with the list of modules, namespaces, groups and types.
 And the roslyn source generator will generate the complex hierarchical structure based on it.
 
 # The examples
