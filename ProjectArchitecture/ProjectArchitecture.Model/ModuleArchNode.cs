@@ -7,10 +7,10 @@ namespace ProjectArchitecture.Model {
     using System.Linq;
     using System.Text;
 
-    public abstract class ModuleNode : ArchitectureNode {
+    public abstract class ModuleArchNode : ArchNode {
 
         public override string Name => GetName( this );
-        public NamespaceNode[] Namespaces => GetChildren<NamespaceNode>( this ).ToArray();
+        public NamespaceArchNode[] Namespaces => GetChildren<NamespaceArchNode>( this ).ToArray();
 
 
         // Initialization

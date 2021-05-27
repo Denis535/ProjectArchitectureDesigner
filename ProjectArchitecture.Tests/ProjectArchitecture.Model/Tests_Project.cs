@@ -22,11 +22,11 @@ namespace ProjectArchitecture.Model {
         }
 
 
-        // Project
+        // Ñompleteness
         [Test]
-        public void Test_00_Project() {
+        public void Test_00_Ñompleteness() {
             var assemblies = new[] {
-                typeof( ArchitectureNode ).Assembly,
+                typeof( ArchNode ).Assembly,
                 typeof( SourceGenerator ).Assembly
             };
             Project.Compare( assemblies, out var intersected, out var missing, out var extra );
@@ -37,12 +37,16 @@ namespace ProjectArchitecture.Model {
 
         // Rendering
         [Test]
-        public void Test_01_Rendering() {
-            TestContext.WriteLine( Project.Render() );
+        public void Test_01_Rendering_Text() {
+            TestContext.WriteLine( Project.RenderToText() );
+        }
+        [Test]
+        public void Test_01_Rendering_HierarchicalText() {
+            TestContext.WriteLine( Project.RenderToHierarchicalText() );
         }
         [Test]
         public void Test_01_Rendering_Markdown() {
-            TestContext.WriteLine( Project.RenderMarkdown() );
+            TestContext.WriteLine( Project.RenderToMarkdown() );
         }
 
 

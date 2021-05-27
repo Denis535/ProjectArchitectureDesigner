@@ -5,14 +5,14 @@ namespace ProjectArchitecture.Model {
     using System;
     using System.Collections.Generic;
     using System.Text;
-
-    public class TypeNode : ArchitectureNode {
+    
+    public class TypeArchNode : ArchNode {
 
         public override string Name => Value.Name;
         public Type Value { get; }
 
 
-        public TypeNode(Type value) {
+        public TypeArchNode(Type value) {
             Value = value;
         }
 
@@ -24,8 +24,8 @@ namespace ProjectArchitecture.Model {
 
 
         // Conversions
-        public static implicit operator TypeNode(Type type) => new TypeNode( type );
-        public static implicit operator Type(TypeNode type) => type.Value;
+        public static implicit operator TypeArchNode(Type value) => new TypeArchNode( value );
+        public static implicit operator Type(TypeArchNode type) => type.Value;
 
 
     }

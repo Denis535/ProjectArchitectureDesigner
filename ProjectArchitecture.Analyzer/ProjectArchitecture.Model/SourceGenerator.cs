@@ -74,35 +74,32 @@ namespace ProjectArchitecture.Model {
         private static string? GetGeneratedSource(CompilationUnitSyntax unit) {
             return CreateCompilationUnit( unit )?.NormalizeWhitespace().ToString();
         }
-        // Helpers/Generation/CompilationUnit
+        // Helpers/Syntax/Create
         private static CompilationUnitSyntax? CreateCompilationUnit(CompilationUnitSyntax unit) {
             var members = unit.Members.Select( CreateMemberDeclaration ).OfType<MemberDeclarationSyntax>().ToArray();
             if (!members.Any()) return null;
             return SyntaxFactoryUtils.CompilationUnit( unit ).AddMembers( members );
         }
-        // Helpers/Generation/Member
         private static MemberDeclarationSyntax? CreateMemberDeclaration(MemberDeclarationSyntax member) {
             if (member is NamespaceDeclarationSyntax @namespace) return CreateNamespaceDeclaration( @namespace );
             if (member is ClassDeclarationSyntax @class) return CreateClassDeclaration( @class );
             return null;
         }
-        // Helpers/Generation/Member/Class
-        private static ClassDeclarationSyntax? CreateClassDeclaration(ClassDeclarationSyntax @class) {
-            if (@class.IsPartial() && @class.IsChildOf( "ProjectNode" )) {
-                var project = SyntaxAnalyzer.GetProjectData( @class ); // Get project data
-                return SyntaxGenerator.CreateClassDeclaration_Project( @class, project ); // Generate partial project class
-            }
-            if (@class.IsPartial() && @class.IsChildOf( "ModuleNode" )) {
-                var module = SyntaxAnalyzer.GetModuleData( @class ); // Get module data
-                return SyntaxGenerator.CreateClassDeclaration_Module( @class, module ); // Generate partial module class
-            }
-            return null;
-        }
-        // Helpers/Generation/Member/Namespace
         private static NamespaceDeclarationSyntax? CreateNamespaceDeclaration(NamespaceDeclarationSyntax @namespace) {
             var members = @namespace.Members.Select( CreateMemberDeclaration ).OfType<MemberDeclarationSyntax>().ToArray();
             if (!members.Any()) return null;
             return SyntaxFactoryUtils.NamespaceDeclaration( @namespace ).AddMembers( members );
+        }
+        private static ClassDeclarationSyntax? CreateClassDeclaration(ClassDeclarationSyntax @class) {
+            if (SyntaxAnalyzer.IsProject( @class )) {
+                var project = SyntaxAnalyzer.GetProjectInfo( @class ); // Get project data
+                return SyntaxGenerator.CreateClassDeclaration_Project( @class, project ); // Generate partial project class
+            }
+            if (SyntaxAnalyzer.IsModule( @class )) {
+                var module = SyntaxAnalyzer.GetModuleInfo( @class ); // Get module data
+                return SyntaxGenerator.CreateClassDeclaration_Module( @class, module ); // Generate partial module class
+            }
+            return null;
         }
 
 

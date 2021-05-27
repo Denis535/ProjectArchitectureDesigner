@@ -7,11 +7,11 @@ namespace ProjectArchitecture.Model {
     using System.Linq;
     using System.Text;
 
-    public abstract class NamespaceNode : ArchitectureNode {
+    public abstract class NamespaceArchNode : ArchNode {
 
         public override string Name => GetName( this );
-        public bool IsGlobal => Name is null or "" or "Global";
-        public GroupNode[] Groups => GetChildren<GroupNode>( this ).ToArray();
+        public bool IsGlobal => Name is (null or "" or "Global");
+        public GroupArchNode[] Groups => GetChildren<GroupArchNode>( this ).ToArray();
 
 
         // Utils

@@ -8,7 +8,7 @@ namespace ProjectArchitecture.Model {
     using ProjectArchitecture.Renderers;
 
     // Project/ProjectArchitecture
-    public sealed partial class Project_ProjectArchitecture : ProjectNode {
+    public sealed partial class Project_ProjectArchitecture : ProjectArchNode {
         protected override void DefineChildren() => SetChildren(
             typeof( Module_ProjectArchitecture ),
             typeof( Module_ProjectArchitecture_Analyzer )
@@ -23,25 +23,25 @@ namespace ProjectArchitecture.Model {
     }
 
     // Modules/ProjectArchitecture
-    public sealed partial class Module_ProjectArchitecture : ModuleNode {
+    public sealed partial class Module_ProjectArchitecture : ModuleArchNode {
         protected override void DefineChildren() => SetChildren(
             "ProjectArchitecture.Model",
-            // Node
-            typeof( ArchitectureNode ),
-            // Node/Children
-            typeof( ProjectNode ),
-            typeof( ModuleNode ),
-            typeof( NamespaceNode ),
-            typeof( GroupNode ),
-            typeof( TypeNode ),
+            // ArchNode
+            typeof( ArchNode ),
+            // ArchNode/Children
+            typeof( ProjectArchNode ),
+            typeof( ModuleArchNode ),
+            typeof( NamespaceArchNode ),
+            typeof( GroupArchNode ),
+            typeof( TypeArchNode ),
             "ProjectArchitecture.Renderers",
-            typeof( ProjectRenderer ),
+            typeof( ProjectTextRenderer ),
             typeof( ProjectMarkdownRenderer )
         );
     }
 
     // Modules/ProjectArchitecture.Analyzer
-    public sealed partial class Module_ProjectArchitecture_Analyzer : ModuleNode {
+    public sealed partial class Module_ProjectArchitecture_Analyzer : ModuleArchNode {
         protected override void DefineChildren() => SetChildren(
             "ProjectArchitecture.Model",
             typeof( SourceGenerator )

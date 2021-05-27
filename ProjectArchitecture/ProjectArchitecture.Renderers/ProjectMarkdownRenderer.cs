@@ -11,7 +11,8 @@ namespace ProjectArchitecture.Renderers {
     public static class ProjectMarkdownRenderer {
 
 
-        public static string RenderMarkdown(this ProjectNode project) {
+        // Render/Markdown
+        public static string RenderToMarkdown(this ProjectArchNode project) {
             var builder = new StringBuilder();
             builder.AppendTableOfContents( project );
             builder.AppendLine();
@@ -21,58 +22,23 @@ namespace ProjectArchitecture.Renderers {
 
 
         // Helpers/Project
-        private static void AppendTableOfContents(this StringBuilder builder, ProjectNode project) {
+        private static void AppendTableOfContents(this StringBuilder builder, ProjectArchNode project) {
             builder.AppendLine( "# Table of Contents" );
-            foreach (var (node, link, uri) in project.Flatten().Where( i => i is ProjectNode or ModuleNode or NamespaceNode ).GetLinks()) {
+            foreach (var (node, link, uri) in project.Flatten().Where( i => i is ProjectArchNode or ModuleArchNode or NamespaceArchNode ).GetLinks()) {
                 builder.AppendLine( node.GetLinkString( link, uri ) );
             }
         }
-        private static void AppendBody(this StringBuilder builder, ProjectNode project) {
+        private static void AppendBody(this StringBuilder builder, ProjectArchNode project) {
             foreach (var node in project.Flatten()) {
                 builder.AppendLine( node.GetItemString() );
             }
         }
-        // Helpers/Node
-        private static string GetLinkString(this ArchitectureNode node, string link, string uri) {
-            return node switch {
-                ProjectNode
-                => string.Format( "  - [{0}](#{1})", link, uri ),
-                ModuleNode
-                => string.Format( "    - [{0}](#{1})", link, uri ),
-                NamespaceNode
-                => string.Format( "      - [{0}](#{1})", link, uri ),
-                GroupNode
-                => string.Format( "        - [{0}](#{1})", link, uri ),
-                { }
-                => throw new NotSupportedException( "Node is not supported: " + node.GetType().ToString() ),
-                null
-                => throw new ArgumentNullException( nameof( node ) ),
-            };
-        }
-        private static string GetItemString(this ArchitectureNode node) {
-            return node switch {
-                ProjectNode proj
-                => "# " + proj,
-                ModuleNode module
-                => "## " + module,
-                NamespaceNode @namespace
-                => "### " + @namespace,
-                GroupNode group
-                => "#### " + group,
-                TypeNode type
-                => "* " + type.Name,
-                { }
-                => throw new NotSupportedException( "Node is not supported: " + node.GetType().ToString() ),
-                null
-                => throw new ArgumentNullException( nameof( node ) ),
-            };
-        }
-        // Helpers/Node/Links
-        private static IEnumerable<(ArchitectureNode, string Link, string Uri)> GetLinks(this IEnumerable<ArchitectureNode> nodes) {
+        // Helpers/Links
+        private static IEnumerable<(ArchNode, string Link, string Uri)> GetLinks(this IEnumerable<ArchNode> nodes) {
             var prevs = new List<string>();
             return nodes.Select( i => i.GetLink( prevs ) );
         }
-        private static (ArchitectureNode Item, string Link, string Uri) GetLink(this ArchitectureNode node, List<string> prevs) {
+        private static (ArchNode Item, string Link, string Uri) GetLink(this ArchNode node, List<string> prevs) {
             var link = node.ToString();
             var uri = node.ToString().ToLowerInvariant()
                 .Replace( "  ", " " )
@@ -85,6 +51,41 @@ namespace ProjectArchitecture.Renderers {
             var id = prevs.Count( i => i == uri ) - 1;
             if (id != 0) uri += "-" + id;
             return (node, link, uri);
+        }
+        // Helpers/String
+        private static string GetLinkString(this ArchNode node, string link, string uri) {
+            return node switch {
+                ProjectArchNode
+                => string.Format( "  - [{0}](#{1})", link, uri ),
+                ModuleArchNode
+                => string.Format( "    - [{0}](#{1})", link, uri ),
+                NamespaceArchNode
+                => string.Format( "      - [{0}](#{1})", link, uri ),
+                GroupArchNode
+                => string.Format( "        - [{0}](#{1})", link, uri ),
+                { }
+                => throw new NotSupportedException( "Node is not supported: " + node.GetType().ToString() ),
+                null
+                => throw new ArgumentNullException( nameof( node ) ),
+            };
+        }
+        private static string GetItemString(this ArchNode node) {
+            return node switch {
+                ProjectArchNode proj
+                => "# " + proj,
+                ModuleArchNode module
+                => "## " + module,
+                NamespaceArchNode @namespace
+                => "### " + @namespace,
+                GroupArchNode group
+                => "#### " + group,
+                TypeArchNode type
+                => "* " + type.Name,
+                { }
+                => throw new NotSupportedException( "Node is not supported: " + node.GetType().ToString() ),
+                null
+                => throw new ArgumentNullException( nameof( node ) ),
+            };
         }
 
 

@@ -8,10 +8,10 @@ namespace ProjectArchitecture.Model {
     using System.Reflection;
     using System.Text;
 
-    public abstract class ProjectNode : ArchitectureNode {
+    public abstract class ProjectArchNode : ArchNode {
 
         public override string Name => GetName( this );
-        public ModuleNode[] Modules => GetChildren<ModuleNode>( this ).ToArray();
+        public ModuleArchNode[] Modules => GetChildren<ModuleArchNode>( this ).ToArray();
 
 
         // Initialization
@@ -22,25 +22,25 @@ namespace ProjectArchitecture.Model {
 
         // Compare/Assembly
         public void Compare(Assembly assembly, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = Flatten<TypeNode>().Select( i => i.Value );
+            var actual = Flatten<TypeArchNode>().Select( i => i.Value );
             var expected = assembly.DefinedTypes.Where( IsSupported );
             Utils.Compare( actual, expected, out intersected, out missing, out extra );
         }
         public void Compare(Assembly[] assemblies, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = Flatten<TypeNode>().Select( i => i.Value );
+            var actual = Flatten<TypeArchNode>().Select( i => i.Value );
             var expected = assemblies.SelectMany( i => i.DefinedTypes ).Where( IsSupported );
             Utils.Compare( actual, expected, out intersected, out missing, out extra );
         }
         // Compare/Type
         public void Compare(IEnumerable<Type> types, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = Flatten<TypeNode>().Select( i => i.Value );
+            var actual = Flatten<TypeArchNode>().Select( i => i.Value );
             var expected = types.Where( IsSupported );
             Utils.Compare( actual, expected, out intersected, out missing, out extra );
         }
 
 
         // Flatten
-        public IEnumerable<ArchitectureNode> Flatten() {
+        public IEnumerable<ArchNode> Flatten() {
             yield return this;
 
             foreach (var module in Modules) {
@@ -59,7 +59,7 @@ namespace ProjectArchitecture.Model {
                 }
             }
         }
-        public IEnumerable<T> Flatten<T>() where T : ArchitectureNode {
+        public IEnumerable<T> Flatten<T>() where T : ArchNode {
             return Flatten().OfType<T>();
         }
 

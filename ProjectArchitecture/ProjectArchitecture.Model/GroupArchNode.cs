@@ -7,11 +7,11 @@ namespace ProjectArchitecture.Model {
     using System.Linq;
     using System.Text;
 
-    public abstract class GroupNode : ArchitectureNode {
+    public abstract class GroupArchNode : ArchNode {
 
         public override string Name => GetName( this );
-        public bool IsDefault => Name is null or "" or "Default";
-        public TypeNode[] Types => GetChildren<TypeNode>( this ).ToArray();
+        public bool IsDefault => Name is (null or "" or "Default");
+        public TypeArchNode[] Types => GetChildren<TypeArchNode>( this ).ToArray();
 
 
         // Utils
