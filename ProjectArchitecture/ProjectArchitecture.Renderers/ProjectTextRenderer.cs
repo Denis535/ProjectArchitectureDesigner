@@ -13,21 +13,10 @@ namespace ProjectArchitecture.Renderers {
         // Render/Text
         public static string RenderToText(this ProjectArchNode project) {
             var builder = new StringBuilder();
-            foreach (var node in project.Flatten()) {
+            foreach (var node in project.DescendantNodesAndSelf) {
                 builder.AppendLine( (node.GetTitle() + ": ").PadRight( 11 ) + node.Name );
             }
             return builder.ToString();
-        }
-        private static string GetTitle(this ArchNode node) {
-            return node switch {
-                ProjectArchNode => "Project",
-                ModuleArchNode => "Module",
-                NamespaceArchNode => "Namespace",
-                GroupArchNode => "Group",
-                TypeArchNode => "Type",
-                { } => throw new ArgumentException( "Node is invalid: " + node.GetType() ),
-                null => throw new ArgumentNullException( nameof( node ), "Node is null" ),
-            };
         }
 
 
@@ -50,6 +39,25 @@ namespace ProjectArchitecture.Renderers {
         private static void Render(this HierarchicalStringBuilder builder, GroupArchNode group) {
             using var scope = builder.AppendSection( group.Name );
             foreach (var type in group.Types) builder.AppendLineWithPrefix( "| * ", type.Name );
+        }
+
+
+        // Helpers/String
+        private static string GetTitle(this ArchNode node) {
+            return node switch {
+                ProjectArchNode
+                => "Project",
+                ModuleArchNode
+                => "Module",
+                NamespaceArchNode
+                => "Namespace",
+                GroupArchNode
+                => "Group",
+                TypeArchNode
+                => "Type",
+                { } => throw new ArgumentException( "ArchNode is invalid: " + node.GetType() ),
+                null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
+            };
         }
 
 

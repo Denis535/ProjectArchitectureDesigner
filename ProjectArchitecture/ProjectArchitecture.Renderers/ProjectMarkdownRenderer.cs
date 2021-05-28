@@ -21,39 +21,39 @@ namespace ProjectArchitecture.Renderers {
         }
 
 
-        // Helpers/Project
+        // Helpers/StringBuilder
         private static void AppendTableOfContents(this StringBuilder builder, ProjectArchNode project) {
             builder.AppendLine( "# Table of Contents" );
-            foreach (var (node, link, uri) in project.Flatten().Where( i => i is ProjectArchNode or ModuleArchNode or NamespaceArchNode ).GetLinks()) {
-                builder.AppendLine( node.GetLinkString( link, uri ) );
+            foreach (var (node, link, uri) in project.DescendantNodesAndSelf.Where( i => i is ProjectArchNode or ModuleArchNode or NamespaceArchNode ).GetLinks()) {
+                builder.AppendLine( node.GetDisplayString( link, uri ) );
             }
         }
         private static void AppendBody(this StringBuilder builder, ProjectArchNode project) {
-            foreach (var node in project.Flatten()) {
-                builder.AppendLine( node.GetItemString() );
+            foreach (var node in project.DescendantNodesAndSelf) {
+                builder.AppendLine( node.GetDisplayString() );
             }
         }
-        // Helpers/Links
+        // Helpers/GetLinks
         private static IEnumerable<(ArchNode, string Link, string Uri)> GetLinks(this IEnumerable<ArchNode> nodes) {
             var prevs = new List<string>();
             return nodes.Select( i => i.GetLink( prevs ) );
         }
         private static (ArchNode Item, string Link, string Uri) GetLink(this ArchNode node, List<string> prevs) {
             var link = node.ToString();
-            var uri = node.ToString().ToLowerInvariant()
-                .Replace( "  ", " " )
-                .Replace( " ", "-" )
-                .Replace( ".", "" )
-                .Replace( ":", "" )
-                .Replace( "/", "" );
-            prevs.Add( uri );
-
-            var id = prevs.Count( i => i == uri ) - 1;
-            if (id != 0) uri += "-" + id;
+            var uri = node.ToString().GetUri( prevs );
             return (node, link, uri);
         }
-        // Helpers/String
-        private static string GetLinkString(this ArchNode node, string link, string uri) {
+        private static string GetUri(this string value, List<string> prevs) {
+            var uri = string.Concat( value.Trim().ToLowerInvariant().Select( Escape ) );
+            prevs.Add( uri );
+            var id = prevs.Count( i => i == uri ) - 1;
+            return id == 0 ? uri : $"{uri}-{id}";
+        }
+        private static char Escape(char @char) {
+            return char.IsLetterOrDigit( @char ) ? @char : '-';
+        }
+        // Helpers/GetDisplayString
+        private static string GetDisplayString(this ArchNode node, string link, string uri) {
             return node switch {
                 ProjectArchNode
                 => string.Format( "  - [{0}](#{1})", link, uri ),
@@ -63,13 +63,11 @@ namespace ProjectArchitecture.Renderers {
                 => string.Format( "      - [{0}](#{1})", link, uri ),
                 GroupArchNode
                 => string.Format( "        - [{0}](#{1})", link, uri ),
-                { }
-                => throw new NotSupportedException( "Node is not supported: " + node.GetType().ToString() ),
-                null
-                => throw new ArgumentNullException( nameof( node ) ),
+                { } => throw new ArgumentException( "ArchNode is invalid: " + node.GetType() ),
+                null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
             };
         }
-        private static string GetItemString(this ArchNode node) {
+        private static string GetDisplayString(this ArchNode node) {
             return node switch {
                 ProjectArchNode proj
                 => "# " + proj,
@@ -81,10 +79,8 @@ namespace ProjectArchitecture.Renderers {
                 => "#### " + group,
                 TypeArchNode type
                 => "* " + type.Name,
-                { }
-                => throw new NotSupportedException( "Node is not supported: " + node.GetType().ToString() ),
-                null
-                => throw new ArgumentNullException( nameof( node ) ),
+                { } => throw new ArgumentException( "ArchNode is invalid: " + node.GetType() ),
+                null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
             };
         }
 
