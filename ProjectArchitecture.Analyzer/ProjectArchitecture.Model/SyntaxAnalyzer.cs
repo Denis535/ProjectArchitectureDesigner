@@ -41,7 +41,7 @@ namespace ProjectArchitecture.Model {
         }
 
 
-        // Helpers/Syntax/GetModules
+        // Helpers/GetModules
         private static IEnumerable<ModuleNode> GetModules(this ClassDeclarationSyntax @class) {
             var method = @class.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault( i => i.Identifier.ValueText == "DefineChildren" );
             var body = (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
@@ -52,7 +52,7 @@ namespace ProjectArchitecture.Model {
                 }
             }
         }
-        // Helpers/Syntax/GetNamespacesGroupsTypes
+        // Helpers/GetNamespacesGroupsTypes
         private static IEnumerable<Node> GetNamespacesGroupsTypes(this ClassDeclarationSyntax @class) {
             var method = @class.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault( i => i.Identifier.ValueText == "DefineChildren" );
             var body = (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
@@ -85,7 +85,7 @@ namespace ProjectArchitecture.Model {
             var types_ = types.Cast<TypeNode>().ToArray();
             return new GroupNode( group_.Name, types_ );
         }
-        // Helpers/Syntax/IsNode
+        // Helpers/IsNode
         private static bool IsModule(SyntaxNode syntax) {
             return syntax is TypeOfExpressionSyntax;
         }
@@ -101,7 +101,7 @@ namespace ProjectArchitecture.Model {
         private static bool IsType(SyntaxNode syntax) {
             return syntax is TypeOfExpressionSyntax;
         }
-        // Helpers/Syntax/GetNode
+        // Helpers/GetNode
         private static ModuleNode GetModule(SyntaxNode syntax) {
             var module = ((TypeOfExpressionSyntax) syntax).Type.ToString();
             return new ModuleNode( module );

@@ -10,7 +10,9 @@ namespace ProjectArchitecture.Model {
     public abstract class ModuleArchNode : ArchNode {
 
         public override string Name => GetName( this );
-        public NamespaceArchNode[] Namespaces => GetChildren<NamespaceArchNode>( this ).ToArray();
+        public virtual NamespaceArchNode[] Namespaces => GetChildren<NamespaceArchNode>( this ).ToArray();
+        public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
+        public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
 
 
         // Initialization

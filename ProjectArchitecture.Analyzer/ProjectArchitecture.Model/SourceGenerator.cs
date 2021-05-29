@@ -74,7 +74,7 @@ namespace ProjectArchitecture.Model {
         private static string? GetGeneratedSource(CompilationUnitSyntax unit) {
             return CreateCompilationUnit( unit )?.NormalizeWhitespace().ToString();
         }
-        // Helpers/Syntax/Create
+        // Helpers/CreateSyntax
         private static CompilationUnitSyntax? CreateCompilationUnit(CompilationUnitSyntax unit) {
             var members = unit.Members.Select( CreateMemberDeclaration ).OfType<MemberDeclarationSyntax>().ToArray();
             if (!members.Any()) return null;

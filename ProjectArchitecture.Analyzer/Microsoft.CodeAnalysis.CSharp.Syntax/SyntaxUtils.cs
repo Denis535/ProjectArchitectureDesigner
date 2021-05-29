@@ -10,20 +10,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
     internal static class SyntaxUtils {
 
 
-        // Syntax
-        public static bool IsPartial(this TypeDeclarationSyntax @class) {
-            return @class.Modifiers.Select( i => i.Kind() ).Contains( SyntaxKind.PartialKeyword );
-        }
-        public static bool IsChildOf(this TypeDeclarationSyntax @class, string name) {
-            var @base = @class.BaseList?.Types.FirstOrDefault();
-            return @base?.ToString() == name;
-        }
-        public static IEnumerable<AttributeSyntax> GetAttributes(this TypeDeclarationSyntax @class) {
-            return @class.AttributeLists.SelectMany( i => i.Attributes );
-        }
-
-
-        // Syntax/Checks
+        // Ensure
         public static string EnsureIdentifierIsValid(string identifier) {
             if (string.IsNullOrEmpty( identifier )) {
                 throw new Exception( "Identifier must not be empty" );
@@ -44,6 +31,19 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         }
         private static bool IsCharValid(char @char) {
             return char.IsLetterOrDigit( @char ) || @char == '_';
+        }
+
+
+        // Type
+        public static bool IsPartial(this TypeDeclarationSyntax @class) {
+            return @class.Modifiers.Select( i => i.Kind() ).Contains( SyntaxKind.PartialKeyword );
+        }
+        public static bool IsChildOf(this TypeDeclarationSyntax @class, string name) {
+            var @base = @class.BaseList?.Types.FirstOrDefault();
+            return @base?.ToString() == name;
+        }
+        public static IEnumerable<AttributeSyntax> GetAttributes(this TypeDeclarationSyntax @class) {
+            return @class.AttributeLists.SelectMany( i => i.Attributes );
         }
 
 

@@ -11,7 +11,9 @@ namespace ProjectArchitecture.Model {
 
         public override string Name => GetName( this );
         public bool IsDefault => Name is (null or "" or "Default");
-        public TypeArchNode[] Types => GetChildren<TypeArchNode>( this ).ToArray();
+        public virtual TypeArchNode[] Types => GetChildren<TypeArchNode>( this ).ToArray();
+        public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
+        public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
 
 
         // Utils

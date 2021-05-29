@@ -19,9 +19,6 @@ namespace ProjectArchitecture.Renderers {
             builder.AppendBody( project );
             return builder.ToString();
         }
-
-
-        // Helpers/StringBuilder
         private static void AppendTableOfContents(this StringBuilder builder, ProjectArchNode project) {
             builder.AppendLine( "# Table of Contents" );
             foreach (var (node, link, uri) in project.DescendantNodesAndSelf.Where( i => i is ProjectArchNode or ModuleArchNode or NamespaceArchNode ).GetLinks()) {
@@ -33,52 +30,54 @@ namespace ProjectArchitecture.Renderers {
                 builder.AppendLine( node.GetDisplayString() );
             }
         }
+
+
         // Helpers/GetLinks
-        private static IEnumerable<(ArchNode, string Link, string Uri)> GetLinks(this IEnumerable<ArchNode> nodes) {
+        private static IEnumerable<(ArchNode Node, string Link, string Uri)> GetLinks(this IEnumerable<ArchNode> nodes) {
             var prevs = new List<string>();
             return nodes.Select( i => i.GetLink( prevs ) );
         }
-        private static (ArchNode Item, string Link, string Uri) GetLink(this ArchNode node, List<string> prevs) {
+        private static (ArchNode Node, string Link, string Uri) GetLink(this ArchNode node, List<string> prevs) {
             var link = node.ToString();
-            var uri = node.ToString().GetUri( prevs );
+            var uri = node.GetUri( prevs );
             return (node, link, uri);
         }
-        private static string GetUri(this string value, List<string> prevs) {
-            var uri = string.Concat( value.Trim().ToLowerInvariant().Select( Escape ) );
+        private static string GetUri(this ArchNode node, List<string> prevs) {
+            var uri = node.ToString().ToLowerInvariant().Trim().Replace( "  ", " " ).Replace( " ", "-" ).Where( IsValid ).Map( string.Concat );
             prevs.Add( uri );
             var id = prevs.Count( i => i == uri ) - 1;
             return id == 0 ? uri : $"{uri}-{id}";
         }
-        private static char Escape(char @char) {
-            return char.IsLetterOrDigit( @char ) ? @char : '-';
+        private static bool IsValid(char @char) {
+            return char.IsLetterOrDigit( @char ) || @char is '-';
         }
         // Helpers/GetDisplayString
         private static string GetDisplayString(this ArchNode node, string link, string uri) {
             return node switch {
                 ProjectArchNode
-                => string.Format( "  - [{0}](#{1})", link, uri ),
+                => "  - [{0}](#{1})".Format( link, uri ),
                 ModuleArchNode
-                => string.Format( "    - [{0}](#{1})", link, uri ),
+                => "    - [{0}](#{1})".Format( link, uri ),
                 NamespaceArchNode
-                => string.Format( "      - [{0}](#{1})", link, uri ),
+                => "      - [{0}](#{1})".Format( link, uri ),
                 GroupArchNode
-                => string.Format( "        - [{0}](#{1})", link, uri ),
+                => "        - [{0}](#{1})".Format( link, uri ),
                 { } => throw new ArgumentException( "ArchNode is invalid: " + node.GetType() ),
                 null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
             };
         }
         private static string GetDisplayString(this ArchNode node) {
             return node switch {
-                ProjectArchNode proj
-                => "# " + proj,
-                ModuleArchNode module
-                => "## " + module,
-                NamespaceArchNode @namespace
-                => "### " + @namespace,
-                GroupArchNode group
-                => "#### " + group,
-                TypeArchNode type
-                => "* " + type.Name,
+                ProjectArchNode
+                => "# Project: {0}".Format( node.Name ),
+                ModuleArchNode
+                => "## Module: {0}".Format( node.Name ),
+                NamespaceArchNode
+                => "### Namespace: {0}".Format( node.Name ),
+                GroupArchNode
+                => "#### Group: {0}".Format( node.Name ),
+                TypeArchNode
+                => "* {0}".Format( node.Name ),
                 { } => throw new ArgumentException( "ArchNode is invalid: " + node.GetType() ),
                 null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
             };

@@ -11,7 +11,9 @@ namespace ProjectArchitecture.Model {
 
         public override string Name => GetName( this );
         public bool IsGlobal => Name is (null or "" or "Global");
-        public GroupArchNode[] Groups => GetChildren<GroupArchNode>( this ).ToArray();
+        public virtual GroupArchNode[] Groups => GetChildren<GroupArchNode>( this ).ToArray();
+        public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
+        public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
 
 
         // Utils

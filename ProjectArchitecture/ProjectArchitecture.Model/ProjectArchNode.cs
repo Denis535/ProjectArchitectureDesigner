@@ -11,7 +11,7 @@ namespace ProjectArchitecture.Model {
     public abstract class ProjectArchNode : ArchNode {
 
         public override string Name => GetName( this );
-        public ModuleArchNode[] Modules => GetChildren<ModuleArchNode>( this ).ToArray();
+        public virtual ModuleArchNode[] Modules => GetChildren<ModuleArchNode>( this ).ToArray();
         public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
         public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
 
@@ -24,28 +24,28 @@ namespace ProjectArchitecture.Model {
 
         // Compare
         public void Compare(Assembly assembly, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = GetDescendantNodes<TypeArchNode>( this ).Select( i => i.Value );
+            var actual = GetDescendantNodes( this ).OfType<TypeArchNode>().Select( i => i.Value );
             var expected = assembly.DefinedTypes.Where( IsSupported );
             Utils.Compare( actual, expected, out intersected, out missing, out extra );
         }
         public void Compare(Assembly[] assemblies, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = GetDescendantNodes<TypeArchNode>( this ).Select( i => i.Value );
+            var actual = GetDescendantNodes( this ).OfType<TypeArchNode>().Select( i => i.Value );
             var expected = assemblies.SelectMany( i => i.DefinedTypes ).Where( IsSupported );
             Utils.Compare( actual, expected, out intersected, out missing, out extra );
         }
         public void Compare(IEnumerable<Type> types, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = GetDescendantNodes<TypeArchNode>( this ).Select( i => i.Value );
+            var actual = GetDescendantNodes( this ).OfType<TypeArchNode>().Select( i => i.Value );
             var expected = types.Where( IsSupported );
             Utils.Compare( actual, expected, out intersected, out missing, out extra );
         }
 
 
         // GetSupportedTypes
-        public IEnumerable<Type> GetSupportedTypes(Assembly assembly) {
-            return assembly.DefinedTypes.Where( IsSupported );
+        public Type[] GetSupportedTypes(Assembly assembly) {
+            return assembly.DefinedTypes.Where( IsSupported ).ToArray();
         }
-        public IEnumerable<Type> GetSupportedTypes(params Assembly[] assemblies) {
-            return assemblies.SelectMany( i => i.DefinedTypes ).Where( IsSupported );
+        public Type[] GetSupportedTypes(params Assembly[] assemblies) {
+            return assemblies.SelectMany( i => i.DefinedTypes ).Where( IsSupported ).ToArray();
         }
 
 
@@ -58,29 +58,6 @@ namespace ProjectArchitecture.Model {
         // Infrastructure
         protected virtual bool IsSupported(Type type) {
             return !type.IsObsolete() && !type.IsCompilerGenerated();
-        }
-
-
-        // Helpers
-        private static IEnumerable<T> GetDescendantNodes<T>(ProjectArchNode project) where T : ArchNode {
-            return GetDescendantNodes( project ).OfType<T>();
-        }
-        private static IEnumerable<ArchNode> GetDescendantNodes(ProjectArchNode project) {
-            foreach (var module in project.Modules) {
-                yield return module;
-
-                foreach (var @namespace in module.Namespaces) {
-                    yield return @namespace;
-
-                    foreach (var group in @namespace.Groups) {
-                        yield return group;
-
-                        foreach (var type in group.Types) {
-                            yield return type;
-                        }
-                    }
-                }
-            }
         }
 
 

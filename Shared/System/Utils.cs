@@ -39,7 +39,6 @@ namespace System {
                 missing.Add( item );
             }
         }
-
         public static IEnumerable<(T? Key, T[] Children)> Unflatten<T>(this IEnumerable<T> source, Func<T, bool> predicate) {
             var key = default( T );
             var hasKey = false;
@@ -56,7 +55,6 @@ namespace System {
             }
             if (hasKey || children.Any()) yield return (key, children.ToArray());
         }
-
         public static IEnumerable<T[]> Split<T>(this IEnumerable<T> source, Func<T, bool> predicate) {
             var slice = new List<T>();
             foreach (var item in source) {
@@ -84,7 +82,21 @@ namespace System {
         }
 
 
+        // StringBuilder
+        public static void AppendLineFormat(this StringBuilder builder, string format, params object?[] args) {
+            builder.AppendLine( string.Format( format, args ) );
+        }
+
+
         // String
+        public static string WithoutPrefix(this string value, string prefix) {
+            var i = value.IndexOf( prefix );
+            if (i != -1) value = value.Substring( i + prefix.Length );
+            return value;
+        }
+        public static string Format(this string format, params string?[] args) {
+            return string.Format( format, args );
+        }
         public static string Join(this IEnumerable<string> values, string separator = ", ") {
             return string.Join( separator, values );
         }

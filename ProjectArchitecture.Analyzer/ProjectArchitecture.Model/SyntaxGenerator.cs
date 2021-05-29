@@ -61,7 +61,7 @@ namespace ProjectArchitecture.Model {
         }
 
 
-        // Helpers/Syntax/Create/Property
+        // Helpers/CreateSyntax
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Name(string name) {
             return SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( name ) );
         }
@@ -84,11 +84,11 @@ namespace ProjectArchitecture.Model {
             var identifier = type.GetIdentifier();
             return SyntaxFactoryUtils.PropertyDeclaration( "TypeArchNode", identifier, SyntaxFactoryUtils.TypeOfExpression( type.Name ) );
         }
-        // Helpers/Node/GetTypeName
+        // Helpers/GetTypeName
         private static string GetTypeName(this ModuleNode module) => module.Name;
         private static string GetTypeName(this NamespaceNode @namespace) => "Namespace_" + @namespace.Name.Escape();
         private static string GetTypeName(this GroupNode group) => "Group_" + group.Name.Escape();
-        // Helpers/Node/GetIdentifier
+        // Helpers/GetIdentifier
         private static string GetIdentifier(this ModuleNode module) => module.Name;
         private static string GetIdentifier(this NamespaceNode @namespace) => @namespace.Name.Escape().Escape2();
         private static string GetIdentifier(this GroupNode group) => group.Name.Escape().Escape2();
