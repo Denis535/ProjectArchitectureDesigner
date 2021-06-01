@@ -27,22 +27,9 @@ namespace ProjectArchitecture.Model {
         }
 
 
-        // ProjectMustBeComplete
+        // Project
         [Test]
-        public void Test_00_ProjectMustBeComplete() {
-            Project.Compare( Assemblies, out var intersected, out var missing, out var extra );
-
-            if (missing.Any()) {
-                TestContext.WriteLine( GetDisplayString( Project.GetSupportedTypes( Assemblies ) ) );
-                Assert.Warn( "Missing types: {0}", missing.Select( i => i.ToString() ).Join() );
-            }
-            if (extra.Any()) {
-                TestContext.WriteLine( GetDisplayString( Project.GetSupportedTypes( Assemblies ) ) );
-                Assert.Warn( "Extra types: {0}", extra.Select( i => i.ToString() ).Join() );
-            }
-        }
-        [Test]
-        public void Test_00_ModulesMustBeValid() {
+        public void Test_00_Project_Modules() {
             foreach (var module in Project.Modules) {
                 foreach (var type in module.DescendantNodes.OfType<TypeArchNode>().Select( i => i.Value )) {
                     Assert.That( type.Assembly.GetName().Name, Is.EqualTo( module.Name ) );
@@ -50,11 +37,23 @@ namespace ProjectArchitecture.Model {
             }
         }
         [Test]
-        public void Test_00_NamespacesMustBeValid() {
+        public void Test_00_Project_Namespaces() {
             foreach (var @namespace in Project.DescendantNodes.OfType<NamespaceArchNode>()) {
                 foreach (var type in @namespace.DescendantNodes.OfType<TypeArchNode>().Select( i => i.Value )) {
                     Assert.That( type.Namespace, Is.EqualTo( @namespace.Name ) );
                 }
+            }
+        }
+        [Test]
+        public void Test_00_Project_Types() {
+            Project.Compare( Assemblies, out var intersected, out var missing, out var extra );
+            if (missing.Any()) {
+                TestContext.WriteLine( GetDisplayString( Project.GetSupportedTypes( Assemblies ) ) );
+                Assert.Warn( "Missing types: {0}", missing.Select( i => i.ToString() ).Join() );
+            }
+            if (extra.Any()) {
+                TestContext.WriteLine( GetDisplayString( Project.GetSupportedTypes( Assemblies ) ) );
+                Assert.Warn( "Extra types: {0}", extra.Select( i => i.ToString() ).Join() );
             }
         }
 

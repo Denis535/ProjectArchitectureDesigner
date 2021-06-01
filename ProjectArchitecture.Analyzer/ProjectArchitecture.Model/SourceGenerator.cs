@@ -23,9 +23,9 @@ namespace ProjectArchitecture.Model {
         }
 
         private static readonly DiagnosticDescriptor ErrorDiagnosticDescriptor = new DiagnosticDescriptor(
-            "SourceGenerator",
-            "SourceGenerator",
-            "Error: {0}",
+            "ProjectArchitecture",
+            "Error",
+            "Message: {0}",
             "Error",
             DiagnosticSeverity.Error,
             true );
@@ -41,9 +41,6 @@ namespace ProjectArchitecture.Model {
             //Debugger.Launch();
 #endif
             var receiver = (SyntaxReceiver) context.SyntaxReceiver!;
-            var compilation = context.Compilation;
-            var cancellationToken = context.CancellationToken;
-
             foreach (var unit in receiver.Units) {
                 if (unit.SyntaxTree.FilePath.Contains( ".nuget" )) continue;
                 if (unit.SyntaxTree.FilePath.Contains( "\\obj\\Debug\\" )) continue;
@@ -72,7 +69,7 @@ namespace ProjectArchitecture.Model {
             return Path.GetFileNameWithoutExtension( unit.SyntaxTree.FilePath ) + ".Generated.cs";
         }
         private static string? GetGeneratedSource(CompilationUnitSyntax unit) {
-            return CreateCompilationUnit( unit )?.NormalizeWhitespace().ToString();
+            return CreateCompilationUnit( unit )?.NormalizeWhitespace().Format().ToString();
         }
         // Helpers/CreateSyntax
         private static CompilationUnitSyntax? CreateCompilationUnit(CompilationUnitSyntax unit) {
@@ -92,12 +89,12 @@ namespace ProjectArchitecture.Model {
         }
         private static ClassDeclarationSyntax? CreateClassDeclaration(ClassDeclarationSyntax @class) {
             if (SyntaxAnalyzer.IsProject( @class )) {
-                var project = SyntaxAnalyzer.GetProjectInfo( @class ); // Get project data
-                return SyntaxGenerator.CreateClassDeclaration_Project( @class, project ); // Generate partial project class
+                var project = SyntaxAnalyzer.GetProjectInfo( @class ); // Get project info
+                return SyntaxGenerator.CreateClassDeclaration_Project( @class, project ); // CreateC partial project class
             }
             if (SyntaxAnalyzer.IsModule( @class )) {
-                var module = SyntaxAnalyzer.GetModuleInfo( @class ); // Get module data
-                return SyntaxGenerator.CreateClassDeclaration_Module( @class, module ); // Generate partial module class
+                var module = SyntaxAnalyzer.GetModuleInfo( @class ); // Get module info
+                return SyntaxGenerator.CreateClassDeclaration_Module( @class, module ); // CreateC partial module class
             }
             return null;
         }

@@ -10,14 +10,6 @@ namespace ProjectArchitecture.Model {
     using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-    internal record ProjectInfo(string Name, ModuleNode[] Modules);
-    internal record ModuleInfo(string Name, NamespaceNode[] Namespaces);
-    internal abstract record Node();
-    internal record ModuleNode(string Name) : Node();
-    internal record NamespaceNode(string Name, GroupNode[] Groups) : Node();
-    internal record GroupNode(string Name, TypeNode[] Types) : Node();
-    internal record TypeNode(string Name) : Node();
-
     internal static class SyntaxAnalyzer {
 
 
@@ -26,23 +18,23 @@ namespace ProjectArchitecture.Model {
             return @class.IsPartial() && @class.IsChildOf( "ProjectArchNode" );
         }
         public static ProjectInfo GetProjectInfo(ClassDeclarationSyntax @class) {
-            var name = @class.Identifier.ValueText.WithoutPrefix( "Project_" ).Replace( '_', '.' );
-            var modules = @class?.GetModules().ToArray() ?? Array.Empty<ModuleNode>();
-            return new ProjectInfo( name, modules );
+            var type = @class.Identifier.ValueText;
+            var modules = @class.GetModules().ToArray();
+            return new ProjectInfo( type, modules );
         }
         // Module
         public static bool IsModule(ClassDeclarationSyntax @class) {
             return @class.IsPartial() && @class.IsChildOf( "ModuleArchNode" );
         }
         public static ModuleInfo GetModuleInfo(ClassDeclarationSyntax @class) {
-            var name = @class.Identifier.ValueText.WithoutPrefix( "Module_" ).Replace( '_', '.' );
-            var @namespaces = @class?.GetNamespacesGroupsTypes().GetNamespaceHierarchy().ToArray() ?? Array.Empty<NamespaceNode>();
-            return new ModuleInfo( name, namespaces );
+            var type = @class.Identifier.ValueText;
+            var @namespaces = @class.GetNamespacesGroupsTypes().GetNamespaceHierarchy().ToArray();
+            return new ModuleInfo( type, namespaces );
         }
 
 
         // Helpers/GetModules
-        private static IEnumerable<ModuleNode> GetModules(this ClassDeclarationSyntax @class) {
+        private static IEnumerable<ProjectInfo.Module_> GetModules(this ClassDeclarationSyntax @class) {
             var method = @class.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault( i => i.Identifier.ValueText == "DefineChildren" );
             var body = (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
             if (body == null) yield break;
@@ -53,7 +45,7 @@ namespace ProjectArchitecture.Model {
             }
         }
         // Helpers/GetNamespacesGroupsTypes
-        private static IEnumerable<Node> GetNamespacesGroupsTypes(this ClassDeclarationSyntax @class) {
+        private static IEnumerable<object> GetNamespacesGroupsTypes(this ClassDeclarationSyntax @class) {
             var method = @class.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault( i => i.Identifier.ValueText == "DefineChildren" );
             var body = (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
             if (body == null) yield break;
@@ -69,21 +61,21 @@ namespace ProjectArchitecture.Model {
                 }
             }
         }
-        private static IEnumerable<NamespaceNode> GetNamespaceHierarchy(this IEnumerable<Node> namespaces) {
-            return namespaces.Unflatten( i => i is NamespaceNode ).Select( i => GetNamespace( (NamespaceNode?) i.Key, i.Children ) );
+        private static IEnumerable<ModuleInfo.Namespace_> GetNamespaceHierarchy(this IEnumerable<object> namespaces) {
+            return namespaces.Unflatten( i => i is ModuleInfo.Namespace_ ).Select( i => GetNamespace( (ModuleInfo.Namespace_?) i.Key, i.Children ) );
         }
-        private static NamespaceNode GetNamespace(NamespaceNode? @namespace, Node[] groups) {
-            var namespace_ = @namespace ?? new NamespaceNode( "Global", null! );
+        private static ModuleInfo.Namespace_ GetNamespace(ModuleInfo.Namespace_? @namespace, object[] groups) {
+            var namespace_ = @namespace ?? new ModuleInfo.Namespace_( "Global", null! );
             var groups_ = groups.GetGroupHierarchy().ToArray();
-            return new NamespaceNode( namespace_.Name, groups_ );
+            return new ModuleInfo.Namespace_( namespace_.Name, groups_ );
         }
-        private static IEnumerable<GroupNode> GetGroupHierarchy(this Node[] groups) {
-            return groups.Unflatten( i => i is GroupNode ).Select( i => GetGroup( (GroupNode?) i.Key, i.Children ) );
+        private static IEnumerable<ModuleInfo.Group_> GetGroupHierarchy(this object[] groups) {
+            return groups.Unflatten( i => i is ModuleInfo.Group_ ).Select( i => GetGroup( (ModuleInfo.Group_?) i.Key, i.Children ) );
         }
-        private static GroupNode GetGroup(GroupNode? group, Node[] types) {
-            var group_ = group ?? new GroupNode( "Default", null! );
-            var types_ = types.Cast<TypeNode>().ToArray();
-            return new GroupNode( group_.Name, types_ );
+        private static ModuleInfo.Group_ GetGroup(ModuleInfo.Group_? group, object[] types) {
+            var group_ = group ?? new ModuleInfo.Group_( "Default", null! );
+            var types_ = types.Cast<ModuleInfo.Type_>().ToArray();
+            return new ModuleInfo.Group_( group_.Name, types_ );
         }
         // Helpers/IsNode
         private static bool IsModule(SyntaxNode syntax) {
@@ -102,32 +94,27 @@ namespace ProjectArchitecture.Model {
             return syntax is TypeOfExpressionSyntax;
         }
         // Helpers/GetNode
-        private static ModuleNode GetModule(SyntaxNode syntax) {
+        private static ProjectInfo.Module_ GetModule(SyntaxNode syntax) {
             var module = ((TypeOfExpressionSyntax) syntax).Type.ToString();
-            return new ModuleNode( module );
+            return new ProjectInfo.Module_( module );
         }
-        private static NamespaceNode GetNamespace(SyntaxNode syntax) {
+        private static ModuleInfo.Namespace_ GetNamespace(SyntaxNode syntax) {
             var @namespace = ((LiteralExpressionSyntax) syntax).Token.ValueText;
-            return new NamespaceNode( @namespace, null! );
+            return new ModuleInfo.Namespace_( @namespace, null! );
         }
-        private static GroupNode GetGroup(SyntaxNode syntax) {
+        private static ModuleInfo.Group_ GetGroup(SyntaxNode syntax) {
             var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
             var group = comment.ToString().GetCommentContent();
-            return new GroupNode( group, null! );
+            return new ModuleInfo.Group_( group, null! );
         }
-        private static TypeNode GetType(SyntaxNode syntax) {
+        private static ModuleInfo.Type_ GetType(SyntaxNode syntax) {
             var type = ((TypeOfExpressionSyntax) syntax).Type.ToString();
-            return new TypeNode( type );
+            return new ModuleInfo.Type_( type );
         }
         // Helpers/String
         private static string GetCommentContent(this string comment) {
             var content = comment.SkipWhile( i => i == '/' );
             return string.Concat( content ).Trim();
-        }
-        private static string WithoutPrefix(this string value, string prefix) {
-            var i = value.IndexOf( prefix );
-            if (i != -1) value = value.Substring( i + prefix.Length );
-            return value;
         }
 
 
