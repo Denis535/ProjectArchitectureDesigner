@@ -32,7 +32,7 @@ namespace System.Text {
         private const string IndentEmptyPrefix = "    ";
         private const string TitlePrefix = "";
         private const string SectionPrefix = "| - ";
-        private const string LinePrefix = "|   ";
+        private const string LinePrefix = "| - ";
 
         private List<Node> Nodes { get; }
         private int Level { get; set; }

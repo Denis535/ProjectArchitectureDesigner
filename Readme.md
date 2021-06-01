@@ -1,6 +1,6 @@
 # The overview
 
-The **ProjectArchitecture** allows you to describe the project architecture with a very simple syntax.
+The **ProjectArchitecture** package allows you to describe the project architecture with a very simple syntax.
 And the roslyn source generator will generate the complex hierarchical structure based on it.
 
 It will give you:
@@ -126,21 +126,21 @@ To achieve it you need to write the `ProjectNode` and the `ModuleNode` classes w
     | - Module: ProjectArchitecture
     |   | - Namespace: ProjectArchitecture.Model
     |   |   | - ArchNode
-    |   |   |   | * ArchNode
+    |   |   | * ArchNode
     |   |   | - ArchNode/Children
-    |   |       | * ProjectArchNode
-    |   |       | * ModuleArchNode
-    |   |       | * NamespaceArchNode
-    |   |       | * GroupArchNode
-    |   |       | * TypeArchNode
+    |   |   | * ProjectArchNode
+    |   |   | * ModuleArchNode
+    |   |   | * NamespaceArchNode
+    |   |   | * GroupArchNode
+    |   |   | * TypeArchNode
     |   | - Namespace: ProjectArchitecture.Renderers
     |       | - Default
-    |           | * ProjectTextRenderer
-    |           | * ProjectMarkdownRenderer
+    |       | * ProjectTextRenderer
+    |       | * ProjectMarkdownRenderer
     | - Module: ProjectArchitecture.Analyzer
         | - Namespace: ProjectArchitecture.Model
             | - Default
-                | * SourceGenerator
+            | * SourceGenerator
 
 # The links
 

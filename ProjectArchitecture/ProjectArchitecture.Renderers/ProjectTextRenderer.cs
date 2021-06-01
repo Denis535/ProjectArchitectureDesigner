@@ -40,7 +40,7 @@ namespace ProjectArchitecture.Renderers {
             foreach (var group in @namespace.Groups) builder.AppendObject( group );
         }
         private static void AppendObject(this HierarchicalStringBuilder builder, GroupArchNode group) {
-            using var scope = builder.AppendSection( group.Name );
+            builder.AppendLine( group.Name );
             foreach (var type in group.Types) builder.AppendLineWithPrefix( "| * ", type.Name );
         }
 
