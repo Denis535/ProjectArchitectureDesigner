@@ -16,10 +16,10 @@ And the roslyn source generator will generate the complex hierarchical structure
 
 # The examples
 
-## The original source example
+## The original source
 
     // Project/ProjectArchitecture
-    public partial class Project_ProjectArchitecture : ProjectNode {
+    public sealed partial class Project_ProjectArchitecture : ProjectArchNode {
         protected override void DefineChildren() => SetChildren(
             typeof( Module_ProjectArchitecture ),
             typeof( Module_ProjectArchitecture_Analyzer )
@@ -34,117 +34,108 @@ And the roslyn source generator will generate the complex hierarchical structure
     }
 
     // Modules/ProjectArchitecture
-    public partial class Module_ProjectArchitecture : ModuleNode {
+    public sealed partial class Module_ProjectArchitecture : ModuleArchNode {
         protected override void DefineChildren() => SetChildren(
             "ProjectArchitecture.Model",
-            // Node
-            typeof( ArchitectureNode ),
-            // Node/Children
-            typeof( ProjectNode ),
-            typeof( ModuleNode ),
-            typeof( NamespaceNode ),
-            typeof( GroupNode ),
-            typeof( TypeNode ),
+            // ArchNode
+            typeof( ArchNode ),
+            // ArchNode/Children
+            typeof( ProjectArchNode ),
+            typeof( ModuleArchNode ),
+            typeof( NamespaceArchNode ),
+            typeof( GroupArchNode ),
+            typeof( TypeArchNode ),
             "ProjectArchitecture.Renderers",
-            typeof( ProjectRenderer ),
+            typeof( ProjectTextRenderer ),
             typeof( ProjectMarkdownRenderer )
         );
     }
 
     // Modules/ProjectArchitecture.Analyzer
-    public partial class Module_ProjectArchitecture_Analyzer : ModuleNode {
+    public sealed partial class Module_ProjectArchitecture_Analyzer : ModuleArchNode {
         protected override void DefineChildren() => SetChildren(
             "ProjectArchitecture.Model",
             typeof( SourceGenerator )
         );
     }
 
-## The generated source example
+## The generated source
 
     // Project: ProjectArchitecture
-    public partial class Project_ProjectArchitecture : ProjectNode {
+    public sealed partial class Project_ProjectArchitecture : ProjectArchNode {
         public override string Name { get; } = "ProjectArchitecture";
-        public Module_ProjectArchitecture Module_ProjectArchitecture { get; } = new Module_ProjectArchitecture();
-        public Module_ProjectArchitecture_Analyzer Module_ProjectArchitecture_Analyzer { get; } = new Module_ProjectArchitecture_Analyzer();
+        public Module_ProjectArchitecture ProjectArchitecture { get; } = new Module_ProjectArchitecture();
+        public Module_ProjectArchitecture_Analyzer ProjectArchitecture_Analyzer { get; } = new Module_ProjectArchitecture_Analyzer();
     }
-
     // Module: ProjectArchitecture
-    public partial class Module_ProjectArchitecture : ModuleNode {
+    public sealed partial class Module_ProjectArchitecture : ModuleArchNode {
         public override string Name { get; } = "ProjectArchitecture";
         public Namespace_ProjectArchitecture_Model ProjectArchitecture_Model { get; } = new Namespace_ProjectArchitecture_Model();
         public Namespace_ProjectArchitecture_Renderers ProjectArchitecture_Renderers { get; } = new Namespace_ProjectArchitecture_Renderers();
-        
         // Namespace: ProjectArchitecture.Model
-        public class Namespace_ProjectArchitecture_Model : NamespaceNode {
+        public class Namespace_ProjectArchitecture_Model : NamespaceArchNode {
             public override string Name { get; } = "ProjectArchitecture.Model";
-            public Group_Default Default { get; } = new Group_Default();
-            public Group_Node_Children Node_Children { get; } = new Group_Node_Children();
-            
-            // Group: Default
-            public class Group_Default : GroupNode {
-                public override string Name { get; } = "Default";
-                public TypeNode ArchitectureNode { get; } = typeof(ArchitectureNode);
+            public Group_ArchNode ArchNode { get; } = new Group_ArchNode();
+            public Group_ArchNode_Children ArchNode_Children { get; } = new Group_ArchNode_Children();
+            // Group: ArchNode
+            public class Group_ArchNode : GroupArchNode {
+                public override string Name { get; } = "ArchNode";
+                public TypeArchNode ArchNode { get; } = typeof(ArchNode);
             }
-
-            // Group: Node/Children
-            public class Group_Node_Children : GroupNode {
-                public override string Name { get; } = "Node/Children";
-                public TypeNode ProjectNode { get; } = typeof(ProjectNode);
-                public TypeNode ModuleNode { get; } = typeof(ModuleNode);
-                public TypeNode NamespaceNode { get; } = typeof(NamespaceNode);
-                public TypeNode GroupNode { get; } = typeof(GroupNode);
-                public TypeNode TypeNode { get; } = typeof(TypeNode);
+            // Group: ArchNode/Children
+            public class Group_ArchNode_Children : GroupArchNode {
+                public override string Name { get; } = "ArchNode/Children";
+                public TypeArchNode ProjectArchNode { get; } = typeof(ProjectArchNode);
+                public TypeArchNode ModuleArchNode { get; } = typeof(ModuleArchNode);
+                public TypeArchNode NamespaceArchNode { get; } = typeof(NamespaceArchNode);
+                public TypeArchNode GroupArchNode { get; } = typeof(GroupArchNode);
+                public TypeArchNode TypeArchNode { get; } = typeof(TypeArchNode);
             }
         }
-
         // Namespace: ProjectArchitecture.Renderers
-        public class Namespace_ProjectArchitecture_Renderers : NamespaceNode {
+        public class Namespace_ProjectArchitecture_Renderers : NamespaceArchNode {
             public override string Name { get; } = "ProjectArchitecture.Renderers";
             public Group_Default Default { get; } = new Group_Default();
-            
             // Group: Default
-            public class Group_Default : GroupNode {
+            public class Group_Default : GroupArchNode {
                 public override string Name { get; } = "Default";
-                public TypeNode ProjectRenderer { get; } = typeof(ProjectRenderer);
-                public TypeNode ProjectMarkdownRenderer { get; } = typeof(ProjectMarkdownRenderer);
+                public TypeArchNode ProjectTextRenderer { get; } = typeof(ProjectTextRenderer);
+                public TypeArchNode ProjectMarkdownRenderer { get; } = typeof(ProjectMarkdownRenderer);
             }
         }
     }
-
     // Module: ProjectArchitecture.Analyzer
-    public partial class Module_ProjectArchitecture_Analyzer : ModuleNode {
+    public sealed partial class Module_ProjectArchitecture_Analyzer : ModuleArchNode {
         public override string Name { get; } = "ProjectArchitecture.Analyzer";
         public Namespace_ProjectArchitecture_Model ProjectArchitecture_Model { get; } = new Namespace_ProjectArchitecture_Model();
-        
         // Namespace: ProjectArchitecture.Model
-        public class Namespace_ProjectArchitecture_Model : NamespaceNode {
+        public class Namespace_ProjectArchitecture_Model : NamespaceArchNode {
             public override string Name { get; } = "ProjectArchitecture.Model";
             public Group_Default Default { get; } = new Group_Default();
-            
             // Group: Default
-            public class Group_Default : GroupNode {
+            public class Group_Default : GroupArchNode {
                 public override string Name { get; } = "Default";
-                public TypeNode SourceGenerator { get; } = typeof(SourceGenerator);
+                public TypeArchNode SourceGenerator { get; } = typeof(SourceGenerator);
             }
         }
     }
 
-## The rendered architecture model example
+## The rendered architecture model
 
     Project: ProjectArchitecture
     | - Module: ProjectArchitecture
     |   | - Namespace: ProjectArchitecture.Model
-    |   |   | - Node
-    |   |   |   | * ArchitectureNode
-    |   |   | - Node/Children
-    |   |       | * ProjectNode
-    |   |       | * ModuleNode
-    |   |       | * NamespaceNode
-    |   |       | * GroupNode
-    |   |       | * TypeNode
+    |   |   | - ArchNode
+    |   |   |   | * ArchNode
+    |   |   | - ArchNode/Children
+    |   |       | * ProjectArchNode
+    |   |       | * ModuleArchNode
+    |   |       | * NamespaceArchNode
+    |   |       | * GroupArchNode
+    |   |       | * TypeArchNode
     |   | - Namespace: ProjectArchitecture.Renderers
     |       | - Default
-    |           | * ProjectRenderer
+    |           | * ProjectTextRenderer
     |           | * ProjectMarkdownRenderer
     | - Module: ProjectArchitecture.Analyzer
         | - Namespace: ProjectArchitecture.Model
