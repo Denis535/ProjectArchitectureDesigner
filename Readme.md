@@ -1,6 +1,7 @@
 # The overview
 
-The package **ProjectArchitecture** allows you to describe the project architecture with a very simple syntax.
+The **ProjectArchitecture** allows you to describe the project architecture with a very simple syntax.
+And the roslyn source generator will generate the complex hierarchical structure based on it.
 
 It will give you:
  - The readable list of all types.
@@ -10,9 +11,8 @@ It will give you:
 
 # The getting started
 
-In order to describe the architecture you need to declare the architecture model consisting of: project, modules, namespaces, groups and types.
+In order to describe the architecture you need to declare the architecture model consisting of project, modules, namespaces, groups and types.
 To achieve it you need to write the `ProjectNode` and the `ModuleNode` classes with the list of modules, namespaces, groups and types.
-And the roslyn source generator will generate the complex hierarchical structure based on it.
 
 # The examples
 
