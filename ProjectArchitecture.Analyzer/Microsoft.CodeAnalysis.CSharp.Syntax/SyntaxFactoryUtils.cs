@@ -109,9 +109,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         }
 
 
-        // Comment
+        // Trivia
         public static SyntaxTrivia Comment(string format, params object[] args) {
             return SyntaxFactory.Comment( string.Format( format, args ) );
+        }
+        public static SyntaxTrivia EndOfLine() {
+            return SyntaxFactory.EndOfLine( "\r\n" );
         }
 
 
@@ -120,15 +123,15 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
             return SyntaxFactory.List<TNode>();
         }
         private static SyntaxList<TNode> List<TNode>(TNode node) where TNode : SyntaxNode {
-            return SyntaxFactory.List( new[] { node }.AsEnumerable() );
+            return SyntaxFactory.List( new[] { node } );
         }
         private static SyntaxList<TNode> List<TNode>(params TNode[] nodes) where TNode : SyntaxNode {
             return SyntaxFactory.List( nodes );
         }
-        public static SyntaxList<TNode> WithoutTrivia<TNode>(this SyntaxList<TNode> nodes) where TNode : SyntaxNode {
+        private static SyntaxList<TNode> WithoutTrivia<TNode>(this SyntaxList<TNode> nodes) where TNode : SyntaxNode {
             return SyntaxFactory.List( nodes.Select( i => i.WithoutTrivia() ) );
         }
-        public static SyntaxTokenList WithoutTrivia(this SyntaxTokenList tokens) {
+        private static SyntaxTokenList WithoutTrivia(this SyntaxTokenList tokens) {
             return SyntaxFactory.TokenList( tokens.Select( i => i.WithoutTrivia() ) );
         }
 

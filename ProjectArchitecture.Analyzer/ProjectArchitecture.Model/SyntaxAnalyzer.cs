@@ -34,7 +34,7 @@ namespace ProjectArchitecture.Model {
 
 
         // Helpers/GetModules
-        private static IEnumerable<ProjectInfo.Module_> GetModules(this ClassDeclarationSyntax @class) {
+        private static IEnumerable<ModuleEntry> GetModules(this ClassDeclarationSyntax @class) {
             var method = @class.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault( i => i.Identifier.ValueText == "DefineChildren" );
             var body = (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
             if (body == null) yield break;
@@ -61,21 +61,21 @@ namespace ProjectArchitecture.Model {
                 }
             }
         }
-        private static IEnumerable<ModuleInfo.Namespace_> GetNamespaceHierarchy(this IEnumerable<object> namespaces) {
-            return namespaces.Unflatten( i => i is ModuleInfo.Namespace_ ).Select( i => GetNamespace( (ModuleInfo.Namespace_?) i.Key, i.Children ) );
+        private static IEnumerable<NamespaceEntry> GetNamespaceHierarchy(this IEnumerable<object> namespaces) {
+            return namespaces.Unflatten( i => i is NamespaceEntry ).Select( i => GetNamespace( (NamespaceEntry?) i.Key, i.Children.ToArray() ) );
         }
-        private static ModuleInfo.Namespace_ GetNamespace(ModuleInfo.Namespace_? @namespace, object[] groups) {
-            var namespace_ = @namespace ?? new ModuleInfo.Namespace_( "Global", null! );
+        private static NamespaceEntry GetNamespace(NamespaceEntry? @namespace, object[] groups) {
+            var namespace_ = @namespace ?? new NamespaceEntry( "Global", null! );
             var groups_ = groups.GetGroupHierarchy().ToArray();
-            return new ModuleInfo.Namespace_( namespace_.Name, groups_ );
+            return new NamespaceEntry( namespace_.Name, groups_ );
         }
-        private static IEnumerable<ModuleInfo.Group_> GetGroupHierarchy(this object[] groups) {
-            return groups.Unflatten( i => i is ModuleInfo.Group_ ).Select( i => GetGroup( (ModuleInfo.Group_?) i.Key, i.Children ) );
+        private static IEnumerable<GroupEntry> GetGroupHierarchy(this object[] groups) {
+            return groups.Unflatten( i => i is GroupEntry ).Select( i => GetGroup( (GroupEntry?) i.Key, i.Children.ToArray() ) );
         }
-        private static ModuleInfo.Group_ GetGroup(ModuleInfo.Group_? group, object[] types) {
-            var group_ = group ?? new ModuleInfo.Group_( "Default", null! );
-            var types_ = types.Cast<ModuleInfo.Type_>().ToArray();
-            return new ModuleInfo.Group_( group_.Name, types_ );
+        private static GroupEntry GetGroup(GroupEntry? group, object[] types) {
+            var group_ = group ?? new GroupEntry( "Default", null! );
+            var types_ = types.Cast<TypeEntry>().ToArray();
+            return new GroupEntry( group_.Name, types_ );
         }
         // Helpers/IsNode
         private static bool IsModule(SyntaxNode syntax) {
@@ -94,22 +94,22 @@ namespace ProjectArchitecture.Model {
             return syntax is TypeOfExpressionSyntax;
         }
         // Helpers/GetNode
-        private static ProjectInfo.Module_ GetModule(SyntaxNode syntax) {
+        private static ModuleEntry GetModule(SyntaxNode syntax) {
             var module = ((TypeOfExpressionSyntax) syntax).Type.ToString();
-            return new ProjectInfo.Module_( module );
+            return new ModuleEntry( module );
         }
-        private static ModuleInfo.Namespace_ GetNamespace(SyntaxNode syntax) {
+        private static NamespaceEntry GetNamespace(SyntaxNode syntax) {
             var @namespace = ((LiteralExpressionSyntax) syntax).Token.ValueText;
-            return new ModuleInfo.Namespace_( @namespace, null! );
+            return new NamespaceEntry( @namespace, null! );
         }
-        private static ModuleInfo.Group_ GetGroup(SyntaxNode syntax) {
+        private static GroupEntry GetGroup(SyntaxNode syntax) {
             var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
             var group = comment.ToString().GetCommentContent();
-            return new ModuleInfo.Group_( group, null! );
+            return new GroupEntry( group, null! );
         }
-        private static ModuleInfo.Type_ GetType(SyntaxNode syntax) {
+        private static TypeEntry GetType(SyntaxNode syntax) {
             var type = ((TypeOfExpressionSyntax) syntax).Type.ToString();
-            return new ModuleInfo.Type_( type );
+            return new TypeEntry( type );
         }
         // Helpers/String
         private static string GetCommentContent(this string comment) {

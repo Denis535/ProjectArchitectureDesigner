@@ -19,7 +19,7 @@ namespace ProjectArchitecture.Model {
             var properties = project.Modules.Select( CreatePropertyDeclaration_Module ).ToArray();
             return
                 SyntaxFactoryUtils.ClassDeclaration( @class )
-                .WithLeadingTrivia( comment )
+                .WithLeadingTrivia( SyntaxFactoryUtils.EndOfLine(), comment )
                 .AddMembers( name )
                 .AddMembers( properties );
         }
@@ -31,12 +31,12 @@ namespace ProjectArchitecture.Model {
             var classes = module.Namespaces.Select( CreateClassDeclaration_Namespace ).ToArray();
             return
                 SyntaxFactoryUtils.ClassDeclaration( @class )
-                .WithLeadingTrivia( comment )
+                .WithLeadingTrivia( SyntaxFactoryUtils.EndOfLine(), comment )
                 .AddMembers( name )
                 .AddMembers( properties )
                 .AddMembers( classes );
         }
-        private static ClassDeclarationSyntax CreateClassDeclaration_Namespace(ModuleInfo.Namespace_ @namespace) {
+        private static ClassDeclarationSyntax CreateClassDeclaration_Namespace(NamespaceEntry @namespace) {
             var comment = SyntaxFactoryUtils.Comment( "// Namespace: {0}", @namespace.Name );
             var name = CreatePropertyDeclaration_Name( @namespace.Name );
             var properties = @namespace.Groups.Select( CreatePropertyDeclaration_Group ).ToArray();
@@ -48,13 +48,13 @@ namespace ProjectArchitecture.Model {
                 .AddMembers( properties )
                 .AddMembers( classes );
         }
-        private static ClassDeclarationSyntax CreateClassDeclaration_Group(ModuleInfo.Group_ group) {
+        private static ClassDeclarationSyntax CreateClassDeclaration_Group(GroupEntry group) {
             var comment = SyntaxFactoryUtils.Comment( "// Group: {0}", group.Name );
             var name = CreatePropertyDeclaration_Name( group.Name );
             var properties = group.Types.Select( CreatePropertyDeclaration_Type ).ToArray();
             return
                 SyntaxFactoryUtils.ClassDeclaration( group.Type, "GroupArchNode" )
-                .WithLeadingTrivia( comment )
+                .WithLeadingTrivia( comment, comment )
                 .AddMembers( name )
                 .AddMembers( properties );
         }
@@ -64,25 +64,29 @@ namespace ProjectArchitecture.Model {
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Name(string name) {
             return SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", SyntaxFactoryUtils.StringLiteral( name ) );
         }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Module(ProjectInfo.Module_ module) {
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Module(ModuleEntry module) {
+            var comment = SyntaxFactoryUtils.Comment( "// Module: {0}", module.Name );
             var type = module.Type;
             var identifier = module.Identifier;
-            return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, SyntaxFactoryUtils.ObjectCreationExpression( type ) );
+            return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, SyntaxFactoryUtils.ObjectCreationExpression( type ) ).WithTrailingTrivia( comment );
         }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Namespace(ModuleInfo.Namespace_ @namespace) {
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Namespace(NamespaceEntry @namespace) {
+            var comment = SyntaxFactoryUtils.Comment( "// Namespace: {0}", @namespace.Name );
             var type = @namespace.Type;
             var identifier = @namespace.Identifier;
-            return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, SyntaxFactoryUtils.ObjectCreationExpression( type ) );
+            return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, SyntaxFactoryUtils.ObjectCreationExpression( type ) ).WithTrailingTrivia( comment );
         }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Group(ModuleInfo.Group_ group) {
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Group(GroupEntry group) {
+            var comment = SyntaxFactoryUtils.Comment( "// Group: {0}", group.Name );
             var type = group.Type;
             var identifier = group.Identifier;
-            return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, SyntaxFactoryUtils.ObjectCreationExpression( type ) );
+            return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, SyntaxFactoryUtils.ObjectCreationExpression( type ) ).WithTrailingTrivia( comment );
         }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Type(ModuleInfo.Type_ type) {
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Type(TypeEntry type) {
+            var comment = SyntaxFactoryUtils.Comment( "// Type: {0}", type.Name );
             var type_ = type.Type;
             var identifier = type.Identifier;
-            return SyntaxFactoryUtils.PropertyDeclaration( "TypeArchNode", identifier, SyntaxFactoryUtils.TypeOfExpression( type_ ) );
+            return SyntaxFactoryUtils.PropertyDeclaration( "TypeArchNode", identifier, SyntaxFactoryUtils.TypeOfExpression( type_ ) ).WithTrailingTrivia( comment, SyntaxFactoryUtils.Comment( "// Tmp" ) );
         }
 
 

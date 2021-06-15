@@ -8,37 +8,41 @@ namespace ProjectArchitecture.Model {
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     // ProjectInfo
-    internal record ProjectInfo(string Type, ProjectInfo.Module_[] Modules) {
+    internal record ProjectInfo(string Type, ModuleEntry[] Modules) {
         public string Name => Type.WithoutPrefix( "Project_" ).Replace( '_', '.' );
         public string Type { get; } = Type;
-        public Module_[] Modules { get; } = Modules;
-
-        public record Module_(string Type) {
-            public string Type { get; } = Type;
-            public string Identifier => Type.WithoutPrefix( "Module_" ).EscapeIdentifier();
-        }
+        public ModuleEntry[] Modules { get; } = Modules;
     }
     // ModuleInfo
-    internal record ModuleInfo(string Type, ModuleInfo.Namespace_[] Namespaces) {
+    internal record ModuleInfo(string Type, NamespaceEntry[] Namespaces) {
         public string Name => Type.WithoutPrefix( "Module_" ).Replace( '_', '.' );
         public string Type { get; } = Type;
-        public Namespace_[] Namespaces { get; } = Namespaces;
-
-        public record Namespace_(string Name, Group_[] Groups) {
-            public string Name { get; } = Name;
-            public string Type => "Namespace_" + Name.EscapeTypeName();
-            public string Identifier => Name.EscapeIdentifier();
-            public Group_[] Groups { get; } = Groups;
-        }
-        public record Group_(string Name, Type_[] Types) {
-            public string Name { get; } = Name;
-            public string Type => "Group_" + Name.EscapeTypeName();
-            public string Identifier => Name.EscapeIdentifier();
-            public Type_[] Types { get; } = Types;
-        }
-        public record Type_(string Type) {
-            public string Type { get; } = Type;
-            public string Identifier => Type.EscapeIdentifier();
-        }
+        public NamespaceEntry[] Namespaces { get; } = Namespaces;
+    }
+    // Entries/ModuleEntry
+    public record ModuleEntry(string Type) {
+        public string Name { get; } = Type;
+        public string Type { get; } = Type;
+        public string Identifier => Type.WithoutPrefix( "Module_" ).EscapeIdentifier(); // todo
+    }
+    // Entries/NamespaceEntry
+    public record NamespaceEntry(string Name, GroupEntry[] Groups) {
+        public string Name { get; } = Name;
+        public string Type => "Namespace_" + Name.EscapeTypeName();
+        public string Identifier => Name.EscapeIdentifier();
+        public GroupEntry[] Groups { get; } = Groups;
+    }
+    // Entries/GroupEntry
+    public record GroupEntry(string Name, TypeEntry[] Types) {
+        public string Name { get; } = Name;
+        public string Type => "Group_" + Name.EscapeTypeName();
+        public string Identifier => Name.EscapeIdentifier();
+        public TypeEntry[] Types { get; } = Types;
+    }
+    // Entries/TypeEntry
+    public record TypeEntry(string Type) {
+        public string Name { get; } = Type;
+        public string Type { get; } = Type;
+        public string Identifier => Type.EscapeIdentifier(); // todo
     }
 }

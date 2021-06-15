@@ -10,7 +10,6 @@ namespace ProjectArchitecture.Model {
     using System.Linq;
     using System.Text;
     using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     [Generator]
@@ -69,7 +68,7 @@ namespace ProjectArchitecture.Model {
             return Path.GetFileNameWithoutExtension( unit.SyntaxTree.FilePath ) + ".Generated.cs";
         }
         private static string? GetGeneratedSource(CompilationUnitSyntax unit) {
-            return CreateCompilationUnit( unit )?.NormalizeWhitespace().Format().ToString();
+            return CreateCompilationUnit( unit )?.Format().ToFullString();
         }
         // Helpers/CreateSyntax
         private static CompilationUnitSyntax? CreateCompilationUnit(CompilationUnitSyntax unit) {
@@ -90,11 +89,11 @@ namespace ProjectArchitecture.Model {
         private static ClassDeclarationSyntax? CreateClassDeclaration(ClassDeclarationSyntax @class) {
             if (SyntaxAnalyzer.IsProject( @class )) {
                 var project = SyntaxAnalyzer.GetProjectInfo( @class ); // Get project info
-                return SyntaxGenerator.CreateClassDeclaration_Project( @class, project ); // CreateC partial project class
+                return SyntaxGenerator.CreateClassDeclaration_Project( @class, project ); // Create partial project class
             }
             if (SyntaxAnalyzer.IsModule( @class )) {
                 var module = SyntaxAnalyzer.GetModuleInfo( @class ); // Get module info
-                return SyntaxGenerator.CreateClassDeclaration_Module( @class, module ); // CreateC partial module class
+                return SyntaxGenerator.CreateClassDeclaration_Module( @class, module ); // Create partial module class
             }
             return null;
         }
