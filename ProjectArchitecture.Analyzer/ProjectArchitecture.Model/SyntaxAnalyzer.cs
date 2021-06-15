@@ -15,7 +15,7 @@ namespace ProjectArchitecture.Model {
 
         // Project
         public static bool IsProject(ClassDeclarationSyntax @class) {
-            return @class.IsPartial() && @class.IsChildOf( "ProjectArchNode" );
+            return @class.IsChildOf( "ProjectArchNode" );
         }
         public static ProjectInfo GetProjectInfo(ClassDeclarationSyntax @class) {
             var type = @class.Identifier.ValueText;
@@ -24,7 +24,7 @@ namespace ProjectArchitecture.Model {
         }
         // Module
         public static bool IsModule(ClassDeclarationSyntax @class) {
-            return @class.IsPartial() && @class.IsChildOf( "ModuleArchNode" );
+            return @class.IsChildOf( "ModuleArchNode" );
         }
         public static ModuleInfo GetModuleInfo(ClassDeclarationSyntax @class) {
             var type = @class.Identifier.ValueText;

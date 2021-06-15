@@ -22,8 +22,7 @@ namespace System {
 
         // String
         public static string WithoutPrefix(this string value, string prefix) {
-            var i = value.IndexOf( prefix );
-            if (i != -1) value = value.Substring( i + prefix.Length );
+            if (value.StartsWith( prefix )) return value.Substring( prefix.Length );
             return value;
         }
         public static string Format(this string format, params string?[] args) {

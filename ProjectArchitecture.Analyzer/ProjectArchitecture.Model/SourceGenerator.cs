@@ -87,11 +87,11 @@ namespace ProjectArchitecture.Model {
             return SyntaxFactoryUtils.NamespaceDeclaration( @namespace ).AddMembers( members );
         }
         private static ClassDeclarationSyntax? CreateClassDeclaration(ClassDeclarationSyntax @class) {
-            if (SyntaxAnalyzer.IsProject( @class )) {
+            if (@class.IsPartial() && SyntaxAnalyzer.IsProject( @class )) {
                 var project = SyntaxAnalyzer.GetProjectInfo( @class ); // Get project info
                 return SyntaxGenerator.CreateClassDeclaration_Project( @class, project ); // Create partial project class
             }
-            if (SyntaxAnalyzer.IsModule( @class )) {
+            if (@class.IsPartial() && SyntaxAnalyzer.IsModule( @class )) {
                 var module = SyntaxAnalyzer.GetModuleInfo( @class ); // Get module info
                 return SyntaxGenerator.CreateClassDeclaration_Module( @class, module ); // Create partial module class
             }

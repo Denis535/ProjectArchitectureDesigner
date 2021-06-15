@@ -20,27 +20,27 @@ namespace ProjectArchitecture.Model {
         public NamespaceEntry[] Namespaces { get; } = Namespaces;
     }
     // Entries/ModuleEntry
-    public record ModuleEntry(string Type) {
+    internal record ModuleEntry(string Type) {
         public string Name { get; } = Type;
         public string Type { get; } = Type;
         public string Identifier => Type.WithoutPrefix( "Module_" ).EscapeIdentifier(); // todo
     }
     // Entries/NamespaceEntry
-    public record NamespaceEntry(string Name, GroupEntry[] Groups) {
+    internal record NamespaceEntry(string Name, GroupEntry[] Groups) {
         public string Name { get; } = Name;
         public string Type => "Namespace_" + Name.EscapeTypeName();
         public string Identifier => Name.EscapeIdentifier();
         public GroupEntry[] Groups { get; } = Groups;
     }
     // Entries/GroupEntry
-    public record GroupEntry(string Name, TypeEntry[] Types) {
+    internal record GroupEntry(string Name, TypeEntry[] Types) {
         public string Name { get; } = Name;
         public string Type => "Group_" + Name.EscapeTypeName();
         public string Identifier => Name.EscapeIdentifier();
         public TypeEntry[] Types { get; } = Types;
     }
     // Entries/TypeEntry
-    public record TypeEntry(string Type) {
+    internal record TypeEntry(string Type) {
         public string Name { get; } = Type;
         public string Type { get; } = Type;
         public string Identifier => Type.EscapeIdentifier(); // todo

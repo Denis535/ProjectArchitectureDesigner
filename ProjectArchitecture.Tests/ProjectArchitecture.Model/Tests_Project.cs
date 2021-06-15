@@ -30,18 +30,14 @@ namespace ProjectArchitecture.Model {
         // Project
         [Test]
         public void Test_00_Project_Modules() {
-            foreach (var module in Project.Modules) {
-                foreach (var type in module.DescendantNodes.OfType<TypeArchNode>().Select( i => i.Value )) {
-                    Assert.That( type.Assembly.GetName().Name, Is.EqualTo( module.Name ) );
-                }
+            foreach (var type in Project.DescendantNodes.OfType<TypeArchNode>()) {
+                Assert.That( type.Value.Assembly.GetName().Name, Is.EqualTo( type.Module.Name ) );
             }
         }
         [Test]
         public void Test_00_Project_Namespaces() {
-            foreach (var @namespace in Project.DescendantNodes.OfType<NamespaceArchNode>()) {
-                foreach (var type in @namespace.DescendantNodes.OfType<TypeArchNode>().Select( i => i.Value )) {
-                    Assert.That( type.Namespace, Is.EqualTo( @namespace.Name ) );
-                }
+            foreach (var type in Project.DescendantNodes.OfType<TypeArchNode>()) {
+                Assert.That( type.Value.Namespace, Is.EqualTo( type.Namespace.Name ) );
             }
         }
         [Test]
