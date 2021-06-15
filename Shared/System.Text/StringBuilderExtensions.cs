@@ -34,7 +34,7 @@ namespace System.Text {
         }
 
         private const string IndentPrefix = "|   ";
-        private const string IndentEmptyPrefix = "    ";
+        private const string IndentPrefix_Empty = "    ";
         private const string TitlePrefix = "";
         private const string SectionPrefix = "| - ";
         private const string LinePrefix = "| - ";
@@ -96,7 +96,7 @@ namespace System.Text {
         }
 
 
-        // Helpers
+        // Helpers/Ensure
         private static void EnsureLevelIsZero(int level) {
             if (level == 0) return;
             throw new InvalidOperationException( "Level must be zero: " + level );
@@ -105,7 +105,7 @@ namespace System.Text {
             if (level > 0) return;
             throw new InvalidOperationException( "Level must be not zero: " + level );
         }
-        // Helpers/Hierarchy
+        // Helpers/ToHierarchy
         private static IReadOnlyList<object> ToHierarchy(IReadOnlyList<Node> nodes) {
             var index = 0;
             return ToHierarchy( nodes, 0, ref index );
@@ -153,7 +153,7 @@ namespace System.Text {
                     if (!isLast) {
                         AppendHierarchy( builder, children, indent + IndentPrefix );
                     } else {
-                        AppendHierarchy( builder, children, indent + IndentEmptyPrefix );
+                        AppendHierarchy( builder, children, indent + IndentPrefix_Empty );
                     }
                     continue;
                 }

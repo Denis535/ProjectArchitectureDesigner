@@ -14,6 +14,7 @@ namespace ProjectArchitecture.Renderers {
         public static string RenderToText(this ProjectArchNode project) {
             var builder = new StringBuilder();
             foreach (var node in project.DescendantNodesAndSelf) {
+                if (node is GroupArchNode group && group.IsDefault) continue;
                 builder.AppendLine( node.GetDisplayString() );
             }
             return builder.ToString();
@@ -40,8 +41,8 @@ namespace ProjectArchitecture.Renderers {
             foreach (var group in @namespace.Groups) builder.AppendObject( group );
         }
         private static void AppendObject(this HierarchicalStringBuilder builder, GroupArchNode group) {
-            builder.AppendLine( group.Name );
-            foreach (var type in group.Types) builder.AppendLineWithPrefix( "| * ", type.Name );
+            if (!group.IsDefault) builder.AppendLineWithPrefix( "| - ", group.Name );
+            foreach (var type in group.Types) builder.AppendLineWithPrefix( "|   ", type.Name );
         }
 
 
@@ -49,15 +50,15 @@ namespace ProjectArchitecture.Renderers {
         private static string GetDisplayString(this ArchNode node) {
             return node switch {
                 ProjectArchNode
-                => "Project:   {0}".Format( node.Name ),
+                => "Project:      {0}".Format( node.Name ),
                 ModuleArchNode
-                => "Module:    {0}".Format( node.Name ),
+                => "- Module:     {0}".Format( node.Name ),
                 NamespaceArchNode
-                => "Namespace: {0}".Format( node.Name ),
+                => "-- Namespace: {0}".Format( node.Name ),
                 GroupArchNode
-                => "Group:     {0}".Format( node.Name ),
+                => "--- Group:    {0}".Format( node.Name ),
                 TypeArchNode
-                => "Type:      {0}".Format( node.Name ),
+                => "--- Type:     {0}".Format( node.Name ),
                 { } => throw new ArgumentException( "ArchNode is invalid: " + node.GetType() ),
                 null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
             };
