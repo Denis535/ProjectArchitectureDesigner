@@ -24,7 +24,7 @@ namespace ProjectArchitecture.Model {
         private static readonly DiagnosticDescriptor ErrorDiagnosticDescriptor = new DiagnosticDescriptor(
             "ProjectArchitecture",
             "Error",
-            "Message: {0}",
+            "{0}",
             "Error",
             DiagnosticSeverity.Error,
             true );

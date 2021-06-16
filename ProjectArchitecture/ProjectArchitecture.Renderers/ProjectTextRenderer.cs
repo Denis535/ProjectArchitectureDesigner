@@ -14,8 +14,9 @@ namespace ProjectArchitecture.Renderers {
         public static string RenderToText(this ProjectArchNode project) {
             var builder = new StringBuilder();
             foreach (var node in project.DescendantNodesAndSelf) {
-                if (node is GroupArchNode group && group.IsDefault) continue;
-                builder.AppendLine( node.GetDisplayString() );
+                if (!node.IsDefaultGroup()) {
+                    builder.AppendLine( node.GetDisplayString() );
+                }
             }
             return builder.ToString();
         }
@@ -47,6 +48,9 @@ namespace ProjectArchitecture.Renderers {
 
 
         // Helpers/GetDisplayString
+        private static bool IsDefaultGroup(this ArchNode node) {
+            return node is GroupArchNode group && group.IsDefault;
+        }
         private static string GetDisplayString(this ArchNode node) {
             return node switch {
                 ProjectArchNode
