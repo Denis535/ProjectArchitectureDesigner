@@ -26,30 +26,19 @@ namespace System.Collections.Generic {
             }
         }
         public static IEnumerable<(T? Key, IReadOnlyList<T> Children)> Unflatten<T>(this IEnumerable<T> source, Predicate<T> isKey) {
-            var (hasKey, key) = (false, default( T ));
+            var source_enumerator = source.GetPeekableEnumerator();
+            var key = default( Option<T> );
             var children = new List<T>();
-            foreach (var item in source) {
-                if (isKey( item )) {
-                    if (hasKey || children.Any()) yield return (key, children);
-                    (hasKey, key) = (true, item); // new key of new node
+            while (source_enumerator.PeekNext()) {
+                if (source_enumerator.TakeIf( isKey, out var curr )) {
+                    if (key.HasValue || children.Any()) yield return (key.ValueOrDefault, children);
+                    key = curr;
                     children.Clear();
                 } else {
-                    children.Add( item );
+                    children.AddRange( source_enumerator.TakeUntil( isKey ) );
                 }
             }
-            if (hasKey || children.Any()) yield return (key, children);
-        }
-        public static IEnumerable<IEnumerable<T>> SplitByLast<T>(this IEnumerable<T> source, Predicate<T> isLast) {
-            var source_enumerator = source.GetPeekableEnumerator();
-            while (source_enumerator.PeekNext()) {
-                yield return source_enumerator.TakeSliceByLast( isLast );
-            }
-        }
-        private static IEnumerable<T> TakeSliceByLast<T>(this IEnumerator<T> enumerator, Predicate<T> isLast) {
-            while (enumerator.MoveNext()) {
-                yield return enumerator.Current;
-                if (isLast( enumerator.Current )) yield break;
-            }
+            if (key.HasValue || children.Any()) yield return (key.ValueOrDefault, children);
         }
         public static IEnumerable<T> Append<T>(this T element, T element2) {
             return Enumerable.Empty<T>().Append( element ).Append( element2 );
@@ -62,6 +51,27 @@ namespace System.Collections.Generic {
         }
         public static PeekableEnumerator<T> GetPeekableEnumerator<T>(this IEnumerable<T> enumerable) {
             return new PeekableEnumerator<T>( enumerable.GetEnumerator() );
+        }
+    }
+    internal static class PeekableEnumeratorExtensions {
+        public static IEnumerable<T> TakeWhile<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate) {
+            while (enumerator.PeekNext( out var next ) && predicate( next )) {
+                enumerator.MoveNext( out var curr );
+                yield return curr!;
+            }
+        }
+        public static IEnumerable<T> TakeUntil<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate) {
+            while (enumerator.PeekNext( out var next ) && !predicate( next )) {
+                enumerator.MoveNext( out var curr );
+                yield return curr!;
+            }
+        }
+        public static bool TakeIf<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate, [MaybeNullWhen( false )] out T value) {
+            if (enumerator.PeekNext( out var next ) && predicate( next )) {
+                return enumerator.MoveNext( out value );
+            }
+            value = default;
+            return false;
         }
     }
     internal class PeekableEnumerator<T> : IEnumerator<T> {

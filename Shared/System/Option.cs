@@ -37,7 +37,8 @@ namespace System {
         private readonly bool hasValue;
         private readonly T value;
         public bool HasValue => hasValue;
-        public T Value => HasValue ? value : throw new InvalidOperationException( "Option object must have a value" );
+        public T Value => hasValue ? value : throw new InvalidOperationException( "Option object must have a value" );
+        public T? ValueOrDefault => hasValue ? value : default;
 
         public Option(T value) {
             this.hasValue = true;
@@ -45,10 +46,7 @@ namespace System {
         }
 
         // GetValueOrDefault
-        public T GetValueOrDefault() {
-            return value;
-        }
-        public T GetValueOrDefault(T @default) {
+        public T? GetValueOrDefault(T? @default) {
             return hasValue ? value : @default;
         }
 
@@ -70,7 +68,7 @@ namespace System {
             return new Option<T>( value );
         }
         public static explicit operator T(Option<T> value) {
-            return value.value;
+            return value.Value;
         }
 
     }

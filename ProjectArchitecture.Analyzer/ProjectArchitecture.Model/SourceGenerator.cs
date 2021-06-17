@@ -40,21 +40,23 @@ namespace ProjectArchitecture.Model {
             //Debugger.Launch();
 #endif
             var receiver = (SyntaxReceiver) context.SyntaxReceiver!;
+            var compilation = context.Compilation;
             foreach (var unit in receiver.Units) {
+                var model = new Lazy<SemanticModel>( () => compilation.GetSemanticModel( unit.SyntaxTree ) );
                 if (unit.SyntaxTree.FilePath.Contains( ".nuget" )) continue;
                 if (unit.SyntaxTree.FilePath.Contains( "\\obj\\Debug\\" )) continue;
                 if (unit.SyntaxTree.FilePath.Contains( "\\obj\\Release\\" )) continue;
 
                 try {
-                    Execute( context, unit );
+                    Execute( context, unit, model );
                 } catch (Exception ex) {
                     context.ReportDiagnostic( Diagnostic.Create( ErrorDiagnosticDescriptor, null, ex.Message ) );
                 }
             }
         }
-        private static void Execute(GeneratorExecutionContext context, CompilationUnitSyntax unit) {
+        private static void Execute(GeneratorExecutionContext context, CompilationUnitSyntax unit, Lazy<SemanticModel> model) {
             var name = GetGeneratedSourceName( unit );
-            var source = GetGeneratedSource( unit );
+            var source = GetGeneratedSource( unit, model );
             if (source != null) {
                 Debug.WriteLine( "Generated source: " + name );
                 Debug.WriteLine( source );
@@ -67,33 +69,33 @@ namespace ProjectArchitecture.Model {
         private static string GetGeneratedSourceName(CompilationUnitSyntax unit) {
             return Path.GetFileNameWithoutExtension( unit.SyntaxTree.FilePath ) + ".Generated.cs";
         }
-        private static string? GetGeneratedSource(CompilationUnitSyntax unit) {
-            return CreateCompilationUnit( unit )?.Format().ToFullString();
+        private static string? GetGeneratedSource(CompilationUnitSyntax unit, Lazy<SemanticModel> model) {
+            return CreateCompilationUnit( unit, model )?.Format().ToFullString();
         }
         // Helpers/CreateSyntax
-        private static CompilationUnitSyntax? CreateCompilationUnit(CompilationUnitSyntax unit) {
-            var members = unit.Members.Select( CreateMemberDeclaration ).OfType<MemberDeclarationSyntax>().ToArray();
+        private static CompilationUnitSyntax? CreateCompilationUnit(CompilationUnitSyntax unit, Lazy<SemanticModel> model) {
+            var members = unit.Members.Select( i => CreateMemberDeclaration( i, model ) ).OfType<MemberDeclarationSyntax>().ToArray();
             if (!members.Any()) return null;
             return SyntaxFactoryUtils.CompilationUnit( unit ).AddMembers( members );
         }
-        private static MemberDeclarationSyntax? CreateMemberDeclaration(MemberDeclarationSyntax member) {
-            if (member is NamespaceDeclarationSyntax @namespace) return CreateNamespaceDeclaration( @namespace );
-            if (member is ClassDeclarationSyntax @class) return CreateClassDeclaration( @class );
+        private static MemberDeclarationSyntax? CreateMemberDeclaration(MemberDeclarationSyntax member, Lazy<SemanticModel> model) {
+            if (member is NamespaceDeclarationSyntax @namespace) return CreateNamespaceDeclaration( @namespace, model );
+            if (member is ClassDeclarationSyntax @class) return CreateClassDeclaration( @class, model );
             return null;
         }
-        private static NamespaceDeclarationSyntax? CreateNamespaceDeclaration(NamespaceDeclarationSyntax @namespace) {
-            var members = @namespace.Members.Select( CreateMemberDeclaration ).OfType<MemberDeclarationSyntax>().ToArray();
+        private static NamespaceDeclarationSyntax? CreateNamespaceDeclaration(NamespaceDeclarationSyntax @namespace, Lazy<SemanticModel> model) {
+            var members = @namespace.Members.Select( i => CreateMemberDeclaration( i, model ) ).OfType<MemberDeclarationSyntax>().ToArray();
             if (!members.Any()) return null;
             return SyntaxFactoryUtils.NamespaceDeclaration( @namespace ).AddMembers( members );
         }
-        private static ClassDeclarationSyntax? CreateClassDeclaration(ClassDeclarationSyntax @class) {
+        private static ClassDeclarationSyntax? CreateClassDeclaration(ClassDeclarationSyntax @class, Lazy<SemanticModel> model) {
             if (@class.IsPartial() && SyntaxAnalyzer.IsProject( @class )) {
-                var project = SyntaxAnalyzer.GetProjectInfo( @class ); // Get project info
-                return SyntaxGenerator.CreateClassDeclaration_Project( @class, project ); // Create partial project class
+                var project = SyntaxAnalyzer.GetProjectInfo( @class, model.Value );
+                return SyntaxGenerator.CreateClassDeclaration_Project( @class, project );
             }
             if (@class.IsPartial() && SyntaxAnalyzer.IsModule( @class )) {
-                var module = SyntaxAnalyzer.GetModuleInfo( @class ); // Get module info
-                return SyntaxGenerator.CreateClassDeclaration_Module( @class, module ); // Create partial module class
+                var module = SyntaxAnalyzer.GetModuleInfo( @class, model.Value );
+                return SyntaxGenerator.CreateClassDeclaration_Module( @class, module );
             }
             return null;
         }

@@ -10,35 +10,62 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
     internal static class SyntaxUtils {
 
 
-        // Type
-        public static bool IsPartial(this TypeDeclarationSyntax @class) {
-            return @class.Modifiers.Select( i => i.Kind() ).Contains( SyntaxKind.PartialKeyword );
+        // IsEntry
+        public static bool IsModuleEntry(this SyntaxNode syntax) {
+            return syntax is TypeOfExpressionSyntax;
         }
-        public static bool IsChildOf(this TypeDeclarationSyntax @class, string name) {
-            var @base = @class.BaseList?.Types.FirstOrDefault();
-            return @base?.ToString() == name;
+        public static bool IsNamespaceEntry(this SyntaxNode syntax) {
+            return syntax is LiteralExpressionSyntax literal && literal.Kind() == SyntaxKind.StringLiteralExpression;
         }
-        public static IEnumerable<AttributeSyntax> GetAttributes(this TypeDeclarationSyntax @class) {
-            return @class.AttributeLists.SelectMany( i => i.Attributes );
+        public static bool HasGroupEntry(this SyntaxNode syntax) {
+            // Note: SyntaxTrivia.ToString() doesn't return documentation comment.
+            // Note: So, you should use SyntaxTrivia.ToFullString()!
+            var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
+            return comment.ToFullString().StartsWith( "// " ) || comment.ToFullString().StartsWith( "/// " );
+        }
+        public static bool IsTypeEntry(this SyntaxNode syntax) {
+            return syntax is TypeOfExpressionSyntax;
+        }
+        // GetEntry
+        public static string GetModuleEntry(this SyntaxNode syntax) {
+            return ((TypeOfExpressionSyntax) syntax).Type.ToString();
+        }
+        public static string GetNamespaceEntry(this SyntaxNode syntax) {
+            return ((LiteralExpressionSyntax) syntax).Token.ValueText;
+        }
+        public static string GetGroupEntry(this SyntaxNode syntax) {
+            var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
+            return comment.GetCommentContent();
+        }
+        public static string GetTypeEntry(this SyntaxNode syntax) {
+            return ((TypeOfExpressionSyntax) syntax).Type.ToString();
         }
 
 
-        // Escape
-        public static string EscapeTypeName(this string value) {
-            value = string.Concat( value.Select( Escape ) );
-            return value;
+        // GetName
+        public static string GetName_Project(this string type) {
+            return type.WithoutPrefix( "Project_" ).Replace( '_', '.' );
         }
-        public static string EscapeIdentifier(this string value) {
-            value = string.Concat( value.Select( Escape ) );
-            if (SyntaxFacts.GetKeywordKind( value ) != SyntaxKind.None) value = "@" + value;
-            return value;
+        public static string GetName_Module(this string type) {
+            return type.WithoutPrefix( "Module_" ).Replace( '_', '.' );
         }
-        private static char Escape(char @char) {
-            return char.IsLetterOrDigit( @char ) ? @char : '_';
+        // GetTypeName
+        public static string GetTypeName_Namespace(this string name) {
+            return "Namespace_" + name.EscapeTypeName();
+        }
+        public static string GetTypeName_Group(this string name) {
+            return "Group_" + name.EscapeTypeName();
+        }
+        // GetIdentifier
+        public static string GetIdentifier(this string name) {
+            return name.EscapeIdentifier();
+        }
+        public static string GetIdentifier_Module(this string name) {
+            return name.WithoutPrefix( "Module_" ).EscapeIdentifier();
         }
 
 
-        // Ensure
+        // EnsureIdentifierIsValid
         public static string EnsureIdentifierIsValid(string identifier) {
             if (string.IsNullOrEmpty( identifier )) {
                 throw new Exception( "Identifier must not be empty" );
@@ -59,6 +86,44 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         }
         private static bool IsCharValid(char @char) {
             return char.IsLetterOrDigit( @char ) || @char == '_';
+        }
+
+
+        // Syntax
+        public static bool IsPartial(this TypeDeclarationSyntax type) {
+            return type.Modifiers.Select( i => i.Kind() ).Contains( SyntaxKind.PartialKeyword );
+        }
+        public static bool IsChildOf(this TypeDeclarationSyntax type, string name) {
+            var @base = type.BaseList?.Types.FirstOrDefault();
+            return @base?.ToString() == name;
+        }
+        public static IEnumerable<MethodDeclarationSyntax> GetMethods(this TypeDeclarationSyntax type, string name) {
+            return type.Members.OfType<MethodDeclarationSyntax>().Where( i => i.Identifier.ValueText == name );
+        }
+        public static SyntaxNode? GetBody(this MethodDeclarationSyntax method) {
+            return (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
+        }
+
+
+        // Helpers/Trivia
+        private static string GetCommentContent(this SyntaxTrivia comment) {
+            // Note: SyntaxTrivia.ToString() doesn't return documentation comment.
+            // Note: So, you should use SyntaxTrivia.ToFullString()!
+            var content = comment.ToFullString().SkipWhile( i => i == '/' );
+            return string.Concat( content ).Trim();
+        }
+        // Helpers/String
+        private static string EscapeTypeName(this string value) {
+            value = string.Concat( value.Select( Escape ) );
+            return value;
+        }
+        private static string EscapeIdentifier(this string value) {
+            value = string.Concat( value.Select( Escape ) );
+            if (SyntaxFacts.GetKeywordKind( value ) != SyntaxKind.None) value = "@" + value;
+            return value;
+        }
+        private static char Escape(char @char) {
+            return char.IsLetterOrDigit( @char ) ? @char : '_';
         }
 
 

@@ -7,7 +7,6 @@ namespace ProjectArchitecture.Model {
     using System.Linq;
     using System.Text;
     using Microsoft.CodeAnalysis;
-    using Microsoft.CodeAnalysis.CSharp;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     internal static class SyntaxAnalyzer {
@@ -17,50 +16,55 @@ namespace ProjectArchitecture.Model {
         public static bool IsProject(ClassDeclarationSyntax @class) {
             return @class.IsChildOf( "ProjectArchNode" );
         }
-        public static ProjectInfo GetProjectInfo(ClassDeclarationSyntax @class) {
+        public static ProjectInfo GetProjectInfo(ClassDeclarationSyntax @class, SemanticModel model) {
             var type = @class.Identifier.ValueText;
-            var modules = @class.GetModules().ToArray();
-            return new ProjectInfo( type, modules );
+            var modules = @class
+                .GetMethods( "DefineChildren" )
+                .FirstOrDefault()?
+                .GetBody()?
+                .DescendantNodes()
+                .Select( GetModuleEntry )
+                .OfType<ModuleEntry>()
+                .ToArray();
+            return new ProjectInfo( type, modules ?? Array.Empty<ModuleEntry>() );
         }
+
+
         // Module
         public static bool IsModule(ClassDeclarationSyntax @class) {
             return @class.IsChildOf( "ModuleArchNode" );
         }
-        public static ModuleInfo GetModuleInfo(ClassDeclarationSyntax @class) {
+        public static ModuleInfo GetModuleInfo(ClassDeclarationSyntax @class, SemanticModel model) {
             var type = @class.Identifier.ValueText;
-            var @namespaces = @class.GetNamespacesGroupsTypes().GetNamespaceHierarchy().ToArray();
-            return new ModuleInfo( type, namespaces );
+            var @namespaces = @class
+                .GetMethods( "DefineChildren" )
+                .FirstOrDefault()?
+                .GetBody()?
+                .DescendantNodes()
+                .SelectMany( GetNamespaceOrGroupOrTypeEntry )
+                .GetNamespaceHierarchy()
+                .ToArray();
+            return new ModuleInfo( type, namespaces ?? Array.Empty<NamespaceEntry>() );
         }
 
 
-        // Helpers/GetModules
-        private static IEnumerable<ModuleEntry> GetModules(this ClassDeclarationSyntax @class) {
-            var method = @class.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault( i => i.Identifier.ValueText == "DefineChildren" );
-            var body = (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
-            if (body == null) yield break;
-            foreach (var node in body.DescendantNodes()) {
-                if (IsModule( node )) {
-                    yield return GetModule( node );
-                }
+        // Helpers/GetEntry
+        private static ModuleEntry? GetModuleEntry(SyntaxNode syntax) {
+            if (syntax.IsModuleEntry()) {
+                return new ModuleEntry( syntax.GetModuleEntry() );
+            }
+            return null;
+        }
+        private static IEnumerable<object> GetNamespaceOrGroupOrTypeEntry(SyntaxNode syntax) {
+            if (syntax.IsNamespaceEntry()) {
+                yield return new NamespaceEntry( syntax.GetNamespaceEntry(), null! );
+            }
+            if (syntax.IsTypeEntry()) {
+                if (syntax.HasGroupEntry()) yield return new GroupEntry( syntax.GetGroupEntry(), null! );
+                yield return new TypeEntry( syntax.GetTypeEntry() );
             }
         }
-        // Helpers/GetNamespacesGroupsTypes
-        private static IEnumerable<object> GetNamespacesGroupsTypes(this ClassDeclarationSyntax @class) {
-            var method = @class.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault( i => i.Identifier.ValueText == "DefineChildren" );
-            var body = (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
-            if (body == null) yield break;
-            foreach (var node in body.DescendantNodes()) {
-                if (IsNamespace( node )) {
-                    yield return GetNamespace( node );
-                } else
-                if (IsType( node )) {
-                    if (HasGroup( node )) {
-                        yield return GetGroup( node );
-                    }
-                    yield return GetType( node );
-                }
-            }
-        }
+        // Helpers/GetNamespaceHierarchy
         private static IEnumerable<NamespaceEntry> GetNamespaceHierarchy(this IEnumerable<object> namespaces) {
             return namespaces.Unflatten( i => i is NamespaceEntry ).Select( i => GetNamespace( (NamespaceEntry?) i.Key, i.Children.ToArray() ) );
         }
@@ -76,45 +80,6 @@ namespace ProjectArchitecture.Model {
             var group_ = group ?? new GroupEntry( "Default", null! );
             var types_ = types.Cast<TypeEntry>().ToArray();
             return new GroupEntry( group_.Name, types_ );
-        }
-        // Helpers/IsNode
-        private static bool IsModule(SyntaxNode syntax) {
-            return syntax is TypeOfExpressionSyntax;
-        }
-        private static bool IsNamespace(SyntaxNode syntax) {
-            return syntax is LiteralExpressionSyntax literal && literal.Kind() == SyntaxKind.StringLiteralExpression;
-        }
-        private static bool HasGroup(SyntaxNode syntax) {
-            // Note: SyntaxTrivia.ToString() doesn't return documentation comment!
-            // Note: So, one should use SyntaxTrivia.ToFullString()!
-            var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault().ToFullString();
-            return comment.StartsWith( "// " ) || comment.StartsWith( "/// " );
-        }
-        private static bool IsType(SyntaxNode syntax) {
-            return syntax is TypeOfExpressionSyntax;
-        }
-        // Helpers/GetNode
-        private static ModuleEntry GetModule(SyntaxNode syntax) {
-            var module = ((TypeOfExpressionSyntax) syntax).Type.ToString();
-            return new ModuleEntry( module );
-        }
-        private static NamespaceEntry GetNamespace(SyntaxNode syntax) {
-            var @namespace = ((LiteralExpressionSyntax) syntax).Token.ValueText;
-            return new NamespaceEntry( @namespace, null! );
-        }
-        private static GroupEntry GetGroup(SyntaxNode syntax) {
-            var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
-            var group = comment.ToString().GetCommentContent();
-            return new GroupEntry( group, null! );
-        }
-        private static TypeEntry GetType(SyntaxNode syntax) {
-            var type = ((TypeOfExpressionSyntax) syntax).Type.ToString();
-            return new TypeEntry( type );
-        }
-        // Helpers/String
-        private static string GetCommentContent(this string comment) {
-            var content = comment.SkipWhile( i => i == '/' );
-            return string.Concat( content ).Trim();
         }
 
 

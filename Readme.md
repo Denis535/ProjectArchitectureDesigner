@@ -31,7 +31,7 @@ It will give you:
 
 # The getting started
 
-In order to describe your architecture you need to write the `ProjectArchNode` and the `ModuleArcNode` classes with the list of modules, namespaces, groups and types.
+In order to describe your architecture you just need to write the `ProjectArchNode` and the `ModuleArcNode` classes with the list of modules, namespaces, groups and types.
 
 # The examples
 

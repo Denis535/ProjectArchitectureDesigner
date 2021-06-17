@@ -7,42 +7,43 @@ namespace ProjectArchitecture.Model {
     using System.Text;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-    // ProjectInfo
+    // Info/ProjectInfo
     internal record ProjectInfo(string Type, ModuleEntry[] Modules) {
-        public string Name => Type.WithoutPrefix( "Project_" ).Replace( '_', '.' );
+        public string Name => Type.GetName_Project();
         public string Type { get; } = Type;
         public ModuleEntry[] Modules { get; } = Modules;
     }
-    // ModuleInfo
+    // Info/ModuleInfo
     internal record ModuleInfo(string Type, NamespaceEntry[] Namespaces) {
-        public string Name => Type.WithoutPrefix( "Module_" ).Replace( '_', '.' );
+        public string Name => Type.GetName_Module();
         public string Type { get; } = Type;
         public NamespaceEntry[] Namespaces { get; } = Namespaces;
     }
+
     // Entries/ModuleEntry
     internal record ModuleEntry(string Type) {
-        public string Name { get; } = Type;
+        public string Name { get; } = Type.GetName_Module();
         public string Type { get; } = Type;
-        public string Identifier => Type.WithoutPrefix( "Module_" ).EscapeIdentifier(); // todo
+        public string Identifier => Type.GetIdentifier_Module();
     }
     // Entries/NamespaceEntry
     internal record NamespaceEntry(string Name, GroupEntry[] Groups) {
         public string Name { get; } = Name;
-        public string Type => "Namespace_" + Name.EscapeTypeName();
-        public string Identifier => Name.EscapeIdentifier();
+        public string Type => Name.GetTypeName_Namespace();
+        public string Identifier => Name.GetIdentifier();
         public GroupEntry[] Groups { get; } = Groups;
     }
     // Entries/GroupEntry
     internal record GroupEntry(string Name, TypeEntry[] Types) {
         public string Name { get; } = Name;
-        public string Type => "Group_" + Name.EscapeTypeName();
-        public string Identifier => Name.EscapeIdentifier();
+        public string Type => Name.GetTypeName_Group();
+        public string Identifier => Name.GetIdentifier();
         public TypeEntry[] Types { get; } = Types;
     }
     // Entries/TypeEntry
     internal record TypeEntry(string Type) {
         public string Name { get; } = Type;
         public string Type { get; } = Type;
-        public string Identifier => Type.EscapeIdentifier(); // todo
+        public string Identifier => Type.GetIdentifier();
     }
 }
