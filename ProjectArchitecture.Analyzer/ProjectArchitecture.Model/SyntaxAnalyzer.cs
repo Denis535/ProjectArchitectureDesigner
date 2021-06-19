@@ -16,15 +16,15 @@ namespace ProjectArchitecture.Model {
         public static bool IsProject(ClassDeclarationSyntax @class) {
             return @class.IsChildOf( "ProjectArchNode" );
         }
-        public static ProjectInfo GetProjectInfo(ClassDeclarationSyntax @class, SemanticModel model) {
+        public static ProjectInfo GetProjectInfo(ClassDeclarationSyntax @class) {
             var type = @class.Identifier.ValueText;
             var modules = @class
                 .GetMethods( "DefineChildren" )
                 .FirstOrDefault()?
                 .GetBody()?
                 .DescendantNodes()
-                .Select( GetModuleEntry )
-                .OfType<ModuleEntry>()
+                .Where( i => i is LiteralExpressionSyntax or TypeOfExpressionSyntax )
+                .GetModuleEntries()
                 .ToArray();
             return new ProjectInfo( type, modules ?? Array.Empty<ModuleEntry>() );
         }
@@ -34,52 +34,44 @@ namespace ProjectArchitecture.Model {
         public static bool IsModule(ClassDeclarationSyntax @class) {
             return @class.IsChildOf( "ModuleArchNode" );
         }
-        public static ModuleInfo GetModuleInfo(ClassDeclarationSyntax @class, SemanticModel model) {
+        public static ModuleInfo GetModuleInfo(ClassDeclarationSyntax @class) {
             var type = @class.Identifier.ValueText;
             var @namespaces = @class
                 .GetMethods( "DefineChildren" )
                 .FirstOrDefault()?
                 .GetBody()?
                 .DescendantNodes()
-                .SelectMany( GetNamespaceOrGroupOrTypeEntry )
-                .GetNamespaceHierarchy()
+                .Where( i => i is LiteralExpressionSyntax or TypeOfExpressionSyntax )
+                .GetNamespaceEntries()
                 .ToArray();
             return new ModuleInfo( type, namespaces ?? Array.Empty<NamespaceEntry>() );
         }
 
 
-        // Helpers/GetEntry
-        private static ModuleEntry? GetModuleEntry(SyntaxNode syntax) {
-            if (syntax.IsModuleEntry()) {
-                return new ModuleEntry( syntax.GetModuleEntry() );
-            }
-            return null;
-        }
-        private static IEnumerable<object> GetNamespaceOrGroupOrTypeEntry(SyntaxNode syntax) {
-            if (syntax.IsNamespaceEntry()) {
-                yield return new NamespaceEntry( syntax.GetNamespaceEntry(), null! );
-            }
-            if (syntax.IsTypeEntry()) {
-                if (syntax.HasGroupEntry()) yield return new GroupEntry( syntax.GetGroupEntry(), null! );
-                yield return new TypeEntry( syntax.GetTypeEntry() );
+        // Helpers/GetEntries
+        private static IEnumerable<ModuleEntry> GetModuleEntries(this IEnumerable<SyntaxNode> nodes) {
+            foreach (var module in nodes.Where( SyntaxUtils.IsModuleEntry )) {
+                yield return new ModuleEntry( module.GetModuleEntry() );
             }
         }
-        // Helpers/GetNamespaceHierarchy
-        private static IEnumerable<NamespaceEntry> GetNamespaceHierarchy(this IEnumerable<object> namespaces) {
-            return namespaces.Unflatten( i => i is NamespaceEntry ).Select( i => GetNamespace( (NamespaceEntry?) i.Key, i.Children.ToArray() ) );
+        private static IEnumerable<NamespaceEntry> GetNamespaceEntries(this IEnumerable<SyntaxNode> nodes) {
+            foreach (var (@namespace, types) in nodes.Where( SyntaxUtils.IsNamespaceOrTypeEntry ).Unflatten( SyntaxUtils.IsNamespaceEntry )) {
+                var name = @namespace?.GetNamespaceEntry() ?? "Global";
+                var groups = types.GetGroupEntries().ToArray();
+                yield return new NamespaceEntry( name, groups );
+            }
         }
-        private static NamespaceEntry GetNamespace(NamespaceEntry? @namespace, object[] groups) {
-            var namespace_ = @namespace ?? new NamespaceEntry( "Global", null! );
-            var groups_ = groups.GetGroupHierarchy().ToArray();
-            return new NamespaceEntry( namespace_.Name, groups_ );
+        private static IEnumerable<GroupEntry> GetGroupEntries(this IEnumerable<SyntaxNode> nodes) {
+            foreach (var group in nodes.SplitByFirst( SyntaxUtils.HasGroupEntry )) {
+                var name = group.First().HasGroupEntry() ? group.First().GetGroupEntry() : "Default";
+                var types = group.GetTypeEntries().ToArray();
+                yield return new GroupEntry( name, types );
+            }
         }
-        private static IEnumerable<GroupEntry> GetGroupHierarchy(this object[] groups) {
-            return groups.Unflatten( i => i is GroupEntry ).Select( i => GetGroup( (GroupEntry?) i.Key, i.Children.ToArray() ) );
-        }
-        private static GroupEntry GetGroup(GroupEntry? group, object[] types) {
-            var group_ = group ?? new GroupEntry( "Default", null! );
-            var types_ = types.Cast<TypeEntry>().ToArray();
-            return new GroupEntry( group_.Name, types_ );
+        private static IEnumerable<TypeEntry> GetTypeEntries(this IEnumerable<SyntaxNode> nodes) {
+            foreach (var type in nodes) {
+                yield return new TypeEntry( type.GetTypeEntry() );
+            }
         }
 
 

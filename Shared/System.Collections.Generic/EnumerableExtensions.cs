@@ -27,18 +27,31 @@ namespace System.Collections.Generic {
         }
         public static IEnumerable<(T? Key, IReadOnlyList<T> Children)> Unflatten<T>(this IEnumerable<T> source, Predicate<T> isKey) {
             var source_enumerator = source.GetPeekableEnumerator();
-            var key = default( Option<T> );
             var children = new List<T>();
             while (source_enumerator.PeekNext()) {
-                if (source_enumerator.TakeIf( isKey, out var curr )) {
-                    if (key.HasValue || children.Any()) yield return (key.ValueOrDefault, children);
-                    key = curr;
-                    children.Clear();
-                } else {
-                    children.AddRange( source_enumerator.TakeUntil( isKey ) );
-                }
+                source_enumerator.TakeIf( isKey, out var key );
+                children.Clear();
+                children.AddRange( source_enumerator.TakeUntil( isKey ) );
+                yield return (key, children);
             }
-            if (key.HasValue || children.Any()) yield return (key.ValueOrDefault, children);
+        }
+        public static IEnumerable<IReadOnlyList<T>> SplitByFirst<T>(this IEnumerable<T> source, Predicate<T> isFirst) {
+            var source_enumerator = source.GetPeekableEnumerator();
+            var slice = new List<T>();
+            while (source_enumerator.PeekNext()) {
+                slice.Clear();
+                slice.AddRange( source_enumerator.TakeSliceByFirst( isFirst ) );
+                yield return slice;
+            }
+        }
+        public static IEnumerable<IReadOnlyList<T>> SplitByLast<T>(this IEnumerable<T> source, Predicate<T> isLast) {
+            var source_enumerator = source.GetPeekableEnumerator();
+            var slice = new List<T>();
+            while (source_enumerator.PeekNext()) {
+                slice.Clear();
+                slice.AddRange( source_enumerator.TakeSliceByLast( isLast ) );
+                yield return slice;
+            }
         }
         public static IEnumerable<T> Append<T>(this T element, T element2) {
             return Enumerable.Empty<T>().Append( element ).Append( element2 );
@@ -55,19 +68,40 @@ namespace System.Collections.Generic {
     }
     internal static class PeekableEnumeratorExtensions {
         public static IEnumerable<T> TakeWhile<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate) {
-            while (enumerator.PeekNext( out var next ) && predicate( next )) {
-                enumerator.MoveNext( out var curr );
-                yield return curr!;
+            // true, true, [break], false
+            while (enumerator.TakeIf( predicate, out var value )) {
+                yield return value;
             }
         }
         public static IEnumerable<T> TakeUntil<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate) {
-            while (enumerator.PeekNext( out var next ) && !predicate( next )) {
-                enumerator.MoveNext( out var curr );
-                yield return curr!;
+            // false, false, [break], true
+            while (enumerator.TakeIfNot( predicate, out var value )) {
+                yield return value;
+            }
+        }
+        public static IEnumerable<T> TakeSliceByFirst<T>(this PeekableEnumerator<T> enumerator, Predicate<T> isFirst) {
+            // first, last, [break], first
+            while (enumerator.MoveNext( out var curr )) {
+                yield return curr;
+                if (enumerator.PeekNext( out var next ) && isFirst( next )) yield break;
+            }
+        }
+        public static IEnumerable<T> TakeSliceByLast<T>(this PeekableEnumerator<T> enumerator, Predicate<T> isLast) {
+            // first, last, [break]
+            while (enumerator.MoveNext( out var curr )) {
+                yield return curr;
+                if (isLast( curr )) yield break;
             }
         }
         public static bool TakeIf<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate, [MaybeNullWhen( false )] out T value) {
             if (enumerator.PeekNext( out var next ) && predicate( next )) {
+                return enumerator.MoveNext( out value );
+            }
+            value = default;
+            return false;
+        }
+        public static bool TakeIfNot<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate, [MaybeNullWhen( false )] out T value) {
+            if (enumerator.PeekNext( out var next ) && !predicate( next )) {
                 return enumerator.MoveNext( out value );
             }
             value = default;

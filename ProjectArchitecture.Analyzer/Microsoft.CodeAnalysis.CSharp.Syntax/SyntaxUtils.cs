@@ -14,6 +14,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         public static bool IsModuleEntry(this SyntaxNode syntax) {
             return syntax is TypeOfExpressionSyntax;
         }
+        public static bool IsNamespaceOrTypeEntry(this SyntaxNode syntax) {
+            return syntax.IsNamespaceEntry() || syntax.IsTypeEntry();
+        }
         public static bool IsNamespaceEntry(this SyntaxNode syntax) {
             return syntax is LiteralExpressionSyntax literal && literal.Kind() == SyntaxKind.StringLiteralExpression;
         }
