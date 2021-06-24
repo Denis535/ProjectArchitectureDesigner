@@ -27,11 +27,17 @@ namespace ProjectArchitecture.Renderers {
         }
         private static void AppendBody(this StringBuilder builder, ProjectArchNode project) {
             foreach (var node in project.DescendantNodesAndSelf) {
-                builder.AppendLine( node.GetDisplayString() );
+                if (!node.IsDefaultGroup()) {
+                    builder.AppendLine( node.GetDisplayString() );
+                }
             }
         }
 
 
+        // Helpers
+        private static bool IsDefaultGroup(this ArchNode node) {
+            return node is GroupArchNode group && group.IsDefault;
+        }
         // Helpers/GetLinks
         private static IEnumerable<(ArchNode Node, string Link, string Uri)> GetLinks(this IEnumerable<ArchNode> nodes) {
             var prevs = new List<string>();
@@ -62,7 +68,7 @@ namespace ProjectArchitecture.Renderers {
                 => "      - [{0}](#{1})".Format( link, uri ),
                 GroupArchNode
                 => "        - [{0}](#{1})".Format( link, uri ),
-                { } => throw new ArgumentException( "ArchNode is invalid: " + node.GetType() ),
+                { } => throw new ArgumentException( "ArchNode is invalid: " + node ),
                 null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
             };
         }
@@ -75,10 +81,10 @@ namespace ProjectArchitecture.Renderers {
                 NamespaceArchNode
                 => "### Namespace: {0}".Format( node.Name ),
                 GroupArchNode
-                => "#### Group: {0}".Format( node.Name ),
+                => "* Group: {0}".Format( node.Name ),
                 TypeArchNode
                 => "* {0}".Format( node.Name ),
-                { } => throw new ArgumentException( "ArchNode is invalid: " + node.GetType() ),
+                { } => throw new ArgumentException( "ArchNode is invalid: " + node ),
                 null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
             };
         }

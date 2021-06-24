@@ -7,7 +7,7 @@ namespace System {
     using System.Linq;
     using System.Text;
 
-    internal static class Option {
+    public static class Option {
         public static int Compare<T>(Option<T> opt1, Option<T> opt2) {
             if (opt1.HasValue && !opt2.HasValue) return 1;
             if (!opt1.HasValue && opt2.HasValue) return -1;
@@ -32,7 +32,7 @@ namespace System {
         }
     }
     [Serializable]
-    internal readonly struct Option<T> {
+    public readonly struct Option<T> {
 
         private readonly bool hasValue;
         private readonly T value;

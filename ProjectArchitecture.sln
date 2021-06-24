@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectArchitecture.Tests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectArchitecture.Analyzer", "ProjectArchitecture.Analyzer\ProjectArchitecture.Analyzer.csproj", "{1A48DB5C-AEE6-4C44-935E-696CAE6AFB78}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Shared", "Shared\Shared.shproj", "{BD32A4F2-A9CD-4254-AB6E-9BF649BA4598}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{669C044E-DF6C-4A76-8A4F-4B88DBE3C1D3}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
@@ -18,13 +16,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Readme.md = Readme.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectArchitecture.Internal", "ProjectArchitecture.Internal\ProjectArchitecture.Internal.csproj", "{736A2F28-53B7-49C2-B262-83A083EBE9B3}"
+EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Shared\Shared.projitems*{1a48db5c-aee6-4c44-935e-696cae6afb78}*SharedItemsImports = 5
-		Shared\Shared.projitems*{6b8b89e5-caaf-4e1c-9f80-03456caf5a5e}*SharedItemsImports = 5
-		Shared\Shared.projitems*{93fa3abc-8328-443d-bd68-a4057468d094}*SharedItemsImports = 5
-		Shared\Shared.projitems*{bd32a4f2-a9cd-4254-ab6e-9bf649ba4598}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -42,6 +36,10 @@ Global
 		{1A48DB5C-AEE6-4C44-935E-696CAE6AFB78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A48DB5C-AEE6-4C44-935E-696CAE6AFB78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A48DB5C-AEE6-4C44-935E-696CAE6AFB78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{736A2F28-53B7-49C2-B262-83A083EBE9B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{736A2F28-53B7-49C2-B262-83A083EBE9B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{736A2F28-53B7-49C2-B262-83A083EBE9B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{736A2F28-53B7-49C2-B262-83A083EBE9B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

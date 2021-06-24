@@ -5,12 +5,7 @@ namespace System.Text {
     using System;
     using System.Collections.Generic;
 
-    internal static class StringBuilderExtensions {
-        public static StringBuilder AppendLineFormat(this StringBuilder builder, string format, params object?[] args) {
-            return builder.AppendLine( string.Format( format, args ) );
-        }
-    }
-    internal class HierarchicalStringBuilder {
+    public class HierarchicalStringBuilder {
         private struct Node {
             public int Level { get; }
             public string Prefix { get; }

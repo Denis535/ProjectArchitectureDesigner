@@ -23,7 +23,6 @@ namespace ProjectArchitecture.Model {
                 .FirstOrDefault()?
                 .GetBody()?
                 .DescendantNodes()
-                .Where( i => i is LiteralExpressionSyntax or TypeOfExpressionSyntax )
                 .GetModuleEntries()
                 .ToArray();
             return new ProjectInfo( type, modules ?? Array.Empty<ModuleEntry>() );
@@ -41,7 +40,6 @@ namespace ProjectArchitecture.Model {
                 .FirstOrDefault()?
                 .GetBody()?
                 .DescendantNodes()
-                .Where( i => i is LiteralExpressionSyntax or TypeOfExpressionSyntax )
                 .GetNamespaceEntries()
                 .ToArray();
             return new ModuleInfo( type, namespaces ?? Array.Empty<NamespaceEntry>() );

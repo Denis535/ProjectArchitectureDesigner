@@ -47,10 +47,11 @@ namespace ProjectArchitecture.Renderers {
         }
 
 
-        // Helpers/GetDisplayString
+        // Helpers
         private static bool IsDefaultGroup(this ArchNode node) {
             return node is GroupArchNode group && group.IsDefault;
         }
+        // Helpers/GetDisplayString
         private static string GetDisplayString(this ArchNode node) {
             return node switch {
                 ProjectArchNode
@@ -67,6 +68,23 @@ namespace ProjectArchitecture.Renderers {
                 null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
             };
         }
+        //private static string GetDisplayString(this Type type) {
+        //    if (type.IsInterface) {
+
+        //    }
+        //    if (type.IsClass) {
+
+        //    }
+        //    if (type.IsValueType) {
+
+        //    }
+        //    if (type.IsEnum) {
+
+        //    }
+        //}
+        //private static bool IsStatic(this Type type) {
+        //    return type.IsAbstract && type.IsSealed;
+        //}
 
 
     }

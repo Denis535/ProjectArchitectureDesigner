@@ -1,15 +1,15 @@
 <Project>
 
-  <!--https://github.com/dotnet/project-system/issues/6250#issuecomment-635258518-->
-  <PropertyGroup>
-    <RootNamespace></RootNamespace>
-  </PropertyGroup>
-
-  <Target Name="DefineConstants" AfterTargets="PrepareForBuild">
+    <!--https://github.com/dotnet/project-system/issues/6250#issuecomment-635258518-->
     <PropertyGroup>
-      <DefineConstants>$(DefineConstants);$(MSBuildProjectName.Replace('.', '_'))</DefineConstants>
-      <DefineConstants Condition=" '%(PackageReference.Identity)' == 'nunit' ">$(DefineConstants);NUnit</DefineConstants>
+        <RootNamespace></RootNamespace>
     </PropertyGroup>
-  </Target>
+
+    <Target Name="DefineConstants" AfterTargets="PrepareForBuild">
+        <PropertyGroup>
+            <DefineConstants>$(DefineConstants);$(MSBuildProjectName.Replace('.', '_'))</DefineConstants>
+            <DefineConstants Condition=" '%(PackageReference.Identity)' == 'nunit' ">$(DefineConstants);NUnit</DefineConstants>
+        </PropertyGroup>
+    </Target>
 
 </Project>

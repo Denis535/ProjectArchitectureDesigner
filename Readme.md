@@ -1,7 +1,7 @@
 # The overview
 
 The **ProjectArchitecture** package allows you to describe the complex hierarchical architecture with a very, very simple code.
-Thanks to the Roslyn source generator we can now generate anything based on your very simple code.
+Thanks to the Roslyn source generator we can now generate code of any complexity based on your simple code.
 
 It will give you:
  - The readable list of all types.
@@ -37,6 +37,7 @@ In order to describe your architecture you just need to write the `ProjectArchNo
 
 ## The original source
 
+```csharp
     // Project/ProjectArchitecture
     public sealed partial class Project_ProjectArchitecture : ProjectArchNode {
         protected override void DefineChildren() => SetChildren(
@@ -77,9 +78,11 @@ In order to describe your architecture you just need to write the `ProjectArchNo
             typeof( SourceGenerator )
         );
     }
+```
 
 ## The generated source
 
+```csharp
     // Project: ProjectArchitecture
     public sealed partial class Project_ProjectArchitecture : ProjectArchNode {
         public override string Name { get; } = "ProjectArchitecture";
@@ -140,6 +143,7 @@ In order to describe your architecture you just need to write the `ProjectArchNo
             }
         }
     }
+```
 
 # The links
 
