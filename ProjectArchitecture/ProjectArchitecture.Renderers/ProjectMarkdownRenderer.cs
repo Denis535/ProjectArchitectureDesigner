@@ -20,7 +20,7 @@ namespace ProjectArchitecture.Renderers {
             return builder.ToString();
         }
         private static void AppendTableOfContents(this StringBuilder builder, ProjectArchNode project) {
-            builder.AppendLine( "# Table of Contents" );
+            builder.AppendLine( "Table of Contents".Header1() );
             foreach (var (node, link, uri) in project.DescendantNodesAndSelf.Where( i => i is ProjectArchNode or ModuleArchNode or NamespaceArchNode ).GetLinks()) {
                 builder.AppendLine( node.GetDisplayString( link, uri ) );
             }
@@ -61,13 +61,13 @@ namespace ProjectArchitecture.Renderers {
         private static string GetDisplayString(this ArchNode node, string link, string uri) {
             return node switch {
                 ProjectArchNode
-                => "  - [{0}](#{1})".Format( link, uri ),
+                => link.Link( uri ).Item1(),
                 ModuleArchNode
-                => "    - [{0}](#{1})".Format( link, uri ),
+                => link.Link( uri ).Item2(),
                 NamespaceArchNode
-                => "      - [{0}](#{1})".Format( link, uri ),
+                => link.Link( uri ).Item3(),
                 GroupArchNode
-                => "        - [{0}](#{1})".Format( link, uri ),
+                => link.Link( uri ).Item4(),
                 { } => throw new ArgumentException( "ArchNode is invalid: " + node ),
                 null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
             };
@@ -75,15 +75,15 @@ namespace ProjectArchitecture.Renderers {
         private static string GetDisplayString(this ArchNode node) {
             return node switch {
                 ProjectArchNode
-                => "# Project: {0}".Format( node.Name ),
+                => "Project: {0}".Format( node.Name ).Header1(),
                 ModuleArchNode
-                => "## Module: {0}".Format( node.Name ),
+                => "Module: {0}".Format( node.Name ).Header2(),
                 NamespaceArchNode
-                => "### Namespace: {0}".Format( node.Name ),
+                => "Namespace: {0}".Format( node.Name ).Header3(),
                 GroupArchNode
-                => "* Group: {0}".Format( node.Name ),
+                => "Group: {0}".Format( node.Name ).Item1(),
                 TypeArchNode
-                => "* {0}".Format( node.Name ),
+                => "{0}".Format( node.Name ).Item1(),
                 { } => throw new ArgumentException( "ArchNode is invalid: " + node ),
                 null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
             };

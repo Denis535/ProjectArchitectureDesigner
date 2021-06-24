@@ -68,23 +68,6 @@ namespace ProjectArchitecture.Renderers {
                 null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
             };
         }
-        //private static string GetDisplayString(this Type type) {
-        //    if (type.IsInterface) {
-
-        //    }
-        //    if (type.IsClass) {
-
-        //    }
-        //    if (type.IsValueType) {
-
-        //    }
-        //    if (type.IsEnum) {
-
-        //    }
-        //}
-        //private static bool IsStatic(this Type type) {
-        //    return type.IsAbstract && type.IsSealed;
-        //}
 
 
     }

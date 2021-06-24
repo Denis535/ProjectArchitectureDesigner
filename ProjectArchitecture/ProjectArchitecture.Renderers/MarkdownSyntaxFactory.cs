@@ -11,58 +11,34 @@ namespace ProjectArchitecture.Renderers {
     using System.Collections.Generic;
     using System.Text;
 
-    //internal struct Column {
-    //    public readonly TextAlignment Alignment;
-    //    public readonly int Length;
-    //    public Column(TextAlignment alignment, int length) {
-    //        Alignment = alignment;
-    //        Length = length;
-    //    }
-    //}
-
     internal static class MarkdownSyntaxFactory {
 
 
         // Blocks/Header
-        public static string Header1(string value) => Header( 1, value );
-        public static string Header2(string value) => Header( 2, value );
-        public static string Header3(string value) => Header( 3, value );
-        public static string Header(int level, string value) {
+        public static string Header1(this string value) => Header( value, 1 );
+        public static string Header2(this string value) => Header( value, 2 );
+        public static string Header3(this string value) => Header( value, 3 );
+        public static string Header4(this string value) => Header( value, 4 );
+        public static string Header(this string value, int level) {
             return Repeat( '#', level ) + " " + value;
         }
 
         // Blocks/Item
-        public static string Item1(string value) => Item( 1, value );
-        public static string Item2(string value) => Item( 2, value );
-        public static string Item3(string value) => Item( 3, value );
-        public static string Item(int level, string value) {
+        public static string Item1(this string value) => Item( value, 1 );
+        public static string Item2(this string value) => Item( value, 2 );
+        public static string Item3(this string value) => Item( value, 3 );
+        public static string Item4(this string value) => Item( value, 4 );
+        public static string Item(this string value, int level) {
             return Indent( level ) + "- " + value;
         }
 
         // Spans
-        public static string Italic(string value) => "*{0}*".Format( value );
-        public static string Bold(string value) => "**{0}**".Format( value );
-        public static string Code(string value) => "`{0}`".Format( value );
-        public static string Reference(string link, int id) => "[{0}] [{1}]".Format( link, id );
-        public static string Link(string link, string url) => "[{0}] ({1})".Format( link, url );
-        public static string Link(int id, string url) => "[{0}]: {1}".Format( id, url );
-
-
-        //public static string TableAlignment(params Column[] values) => TableAlignment( values.AsEnumerable() );
-        //public static string TableRow(params string[] values) => TableRow( values.AsEnumerable() );
-
-        //public static string TableAlignment(IEnumerable<Column> values) => "|" + string.Join( "|", values.Select( TableAlignment ) ) + "|";
-        //public static string TableRow(IEnumerable<string> values) => "| " + string.Join( " | ", values ) + " |";
-
-        //private static string TableAlignment(Column value) => TableAlignment( value.Alignment, value.Length );
-        //private static string TableAlignment(TextAlignment alignment, int length) {
-        //    // |:- |:- |
-        //    var line = new string( '-', length );
-        //    if (alignment == TextAlignment.Left) return $":{line} ";
-        //    if (alignment == TextAlignment.Right) return $" {line}:";
-        //    if (alignment == TextAlignment.Center) return $":{line}:";
-        //    return $" {line} ";
-        //}
+        public static string Italic(this string value) => "*{0}*".Format( value );
+        public static string Bold(this string value) => "**{0}**".Format( value );
+        public static string Code(this string value) => "`{0}`".Format( value );
+        public static string Reference(this string link, int id) => "[{0}] [{1}]".Format( link, id );
+        public static string Link(this string link, string url) => "[{0}] ({1})".Format( link, url );
+        public static string Link(this int id, string url) => "[{0}]: {1}".Format( id, url );
 
 
         // Helpers
