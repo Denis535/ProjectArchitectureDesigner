@@ -9,10 +9,10 @@
         <AnalysisLevel>latest</AnalysisLevel>
     </PropertyGroup>
 
-    <ItemGroup>
-        <!--<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+    <!--<ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
             <_Parameter1>ProjectArchitecture.Tests</_Parameter1>
-        </AssemblyAttribute>-->
-    </ItemGroup>
+        </AssemblyAttribute>
+    </ItemGroup>-->
 
 </Project>

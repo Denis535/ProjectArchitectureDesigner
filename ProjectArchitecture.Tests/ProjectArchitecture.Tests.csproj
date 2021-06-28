@@ -16,6 +16,7 @@
             <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
             <OutputItemType>Analyzer</OutputItemType>
         </ProjectReference>
+        <ProjectReference Include="..\ProjectArchitecture.Internal\ProjectArchitecture.Internal.csproj" />
     </ItemGroup>
 
 </Project>
