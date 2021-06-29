@@ -5,11 +5,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.10.0" PrivateAssets="All" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.10.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ProjectArchitecture.Internal\ProjectArchitecture.Internal.csproj" PrivateAssets="All" />
+        <ProjectReference Include="..\ProjectArchitecture.Internal\ProjectArchitecture.Internal.csproj" OutputItemType="Analyzer" PrivateAssets="All" />
     </ItemGroup>
 
 </Project>

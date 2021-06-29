@@ -37,7 +37,7 @@ namespace ProjectArchitecture.Model {
 
         public void Execute(GeneratorExecutionContext context) {
 #if DEBUG
-            //Debugger.Launch();
+            //if (!Debugger.IsAttached) Debugger.Launch();
 #endif
             var receiver = (SyntaxReceiver) context.SyntaxReceiver!;
             var compilation = context.Compilation;

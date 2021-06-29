@@ -12,10 +12,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\ProjectArchitecture\ProjectArchitecture.csproj" />
-        <ProjectReference Include="..\ProjectArchitecture.Analyzer\ProjectArchitecture.Analyzer.csproj">
-            <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-            <OutputItemType>Analyzer</OutputItemType>
-        </ProjectReference>
+        <ProjectReference Include="..\ProjectArchitecture.Analyzer\ProjectArchitecture.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
         <ProjectReference Include="..\ProjectArchitecture.Internal\ProjectArchitecture.Internal.csproj" />
     </ItemGroup>
 
