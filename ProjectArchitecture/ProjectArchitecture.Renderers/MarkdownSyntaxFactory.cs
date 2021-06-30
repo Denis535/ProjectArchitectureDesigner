@@ -43,7 +43,7 @@ namespace ProjectArchitecture.Renderers {
 
         // Helpers
         private static string Indent(int level) {
-            return Repeat( "  ", level - 1 );
+            return Repeat( "    ", level - 1 );
         }
         private static string Repeat(string value, int count) {
             return new StringBuilder( value.Length * count ).Insert( 0, value, count ).ToString();
