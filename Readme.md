@@ -1,12 +1,11 @@
 # The overview
 
-The **ProjectArchitecture** package allows you to describe the complex hierarchical architecture with a very, very simple code.
-Thanks to the Roslyn source generator we can now generate code of any complexity based on your simple code.
+The **ProjectArchitectureDesigner** package allows you to describe the complex hierarchical structure of your project with a very, very simple code.
+Thanks to the Roslyn source generator we can now generate code of any complexity based on your very simple code.
 
 It will give you:
- - The readable list of all types.
- - A comprehensive view of architecture.
- - The ability to render the architecture model in convenient format.
+ - The readable and comprehensive view of project.
+ - The ability to render the project structure into any convenient format.
  - The ability to validate dependencies between groups of types (third-party library is needed).
 
 # The Api overview
@@ -31,7 +30,7 @@ It will give you:
 
 # The getting started
 
-In order to describe your architecture you just need to write the `ProjectArchNode` and the `ModuleArcNode` classes with the list of modules, namespaces, groups and types.
+In order to describe your project you just need to write the `ProjectArchNode` and the `ModuleArcNode` classes with the list of modules, namespaces, groups and types.
 
 # The examples
 
@@ -145,8 +144,26 @@ In order to describe your architecture you just need to write the `ProjectArchNo
     }
 ```
 
+# The tips to make your project design better
+
+ - Separate low-level code from hight-level code. In more complex projects you can separate extra, unimportant, utility code. Do it on every level (low/hight-level modules, low/hight-level classes, low/hight-level functions). For example: Presentation, Application, Extensions, Domain, Infrastructure, Internal.
+ - Put all your code into folders reflecting the namespaces containing those code.
+ - Put your low-level code into existing namespaces: System, Microsoft, MyProject, ThirdPartyPackage instead of special namespaces: MyProject.Internal, MyProject.Helpers.
+ - Understand the semantic of your types. I can distinguish the following semantic categories:
+  * Service - only logic without any data or state.
+  * Entity - data and state.
+  * Component - in component-oriented programming entities can consist of components.
+  * Utility, helper
+  * Object, data structure
+- Understand the semantic of your type's members. [I can distinguish the following semantic categories](https://softwareengineering.stackexchange.com/a/404752/352915):
+  * Property, attribute: Name, Background, Color, Data, Content, Value, Children, Parent.
+  * Query, question: IsInitialized, IsRunning, HasValue, CanRun, DoesEqual(value), Equals(value), AreEqual(v1, v2), GetValue().
+  * Event: OnChange, OnChanged.
+  * Directive: IgnoreXml, RunOnLoad, CloseWhenError.
+  * Command: Initialize(), Run(), Stop(), SetValue(value).
+  * Event handler: OnChange(value), OnChanged(value).
+
 # The links
 
  - [ProjectArchitecture](https://github.com/Denis535/ProjectArchitecture)
-
  - [MakeTypesPublic](https://github.com/Denis535/MakeTypesPublic)
