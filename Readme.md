@@ -150,18 +150,18 @@ In order to describe your project you just need to write the `ProjectArchNode` a
  - Put all your code into folders reflecting the namespaces containing those code.
  - Put your low-level code into existing namespaces: System, Microsoft, MyProject, ThirdPartyPackage instead of special namespaces: MyProject.Internal, MyProject.Helpers.
  - Understand the semantic of your types. I can distinguish the following semantic categories:
-  * Service - only logic without any data or state
-  * Entity - data and state
-  * Component - in component-oriented programming entities can consist of components
-  * Utility, helper
-  * Object, data structure
+    * Service - only logic without any data or state
+    * Entity - data and state
+    * Component - in component-oriented programming entities can consist of components
+    * Utility, helper
+    * Object, data structure
 - Understand the semantic of your type's members. [I can distinguish the following semantic categories](https://softwareengineering.stackexchange.com/a/404752/352915):
-  * Property, attribute: Name, Background, Color, Data, Content, Value, Children, Parent
-  * Query, question: IsInitialized, IsRunning, HasValue, CanRun, DoesEqual(value), Equals(value), AreEqual(v1, v2), GetValue()
-  * Event: OnChange, OnChanged
-  * Directive: IgnoreXml, RunOnLoad, CloseWhenError
-  * Command: Initialize(), Run(), Stop(), SetValue(value)
-  * Event handler: OnChange(value), OnChanged(value)
+    * Property, attribute: Name, Background, Color, Data, Content, Value, Children, Parent
+    * Query, question: IsInitialized, IsRunning, HasValue, CanRun, DoesEqual(value), Equals(value), AreEqual(v1, v2), GetValue()
+    * Event: OnChange, OnChanged
+    * Directive: IgnoreXml, RunOnLoad, CloseWhenError
+    * Command: Initialize(), Run(), Stop(), SetValue(value)
+    * Event handler: OnChange(value), OnChanged(value)
 
 # The links
 
