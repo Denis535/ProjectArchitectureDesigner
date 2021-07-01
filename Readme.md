@@ -148,8 +148,9 @@ In order to describe your project you just need to write the `ProjectArchNode` a
 
  - Separate low-level code from hight-level code. In more complex projects you can separate extra, unimportant, utility code. Do it on every level (low/hight-level modules, low/hight-level classes, low/hight-level functions). For example: Presentation, Application, Extensions, Domain, Infrastructure, Internal.
  - Put all your code into folders reflecting the namespaces containing those code.
- - Put your low-level code into existing namespaces: System, Microsoft, MyProject, ThirdPartyPackage instead of special namespaces: MyProject.Internal, MyProject.Helpers.
+ - Put your low-level code into existing namespaces: System, Microsoft, MyProject, ThirdPartyProject instead of special namespaces: MyProject.Internal, MyProject.Helpers.
  - Understand the semantic of your types. I can distinguish the following semantic categories:
+    * `Attribute` - ideally only data
     * `Service` - only logic without any data or state
     * `Entity` - data and state
     * `Component` - in component-oriented programming entities can consist of components
