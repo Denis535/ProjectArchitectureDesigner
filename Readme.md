@@ -144,25 +144,26 @@ In order to describe your project you just need to write the `ProjectArchNode` a
     }
 ```
 
-# The tips to make your project design better
+# The best practices and tips to make your code design better
 
  - Separate low-level code from hight-level code. In more complex projects you can separate extra, unimportant, utility code. Do it on every level (low/hight-level modules, low/hight-level classes, low/hight-level functions). For example: Presentation, Application, Extensions, Domain, Infrastructure, Internal.
  - Put all your code into folders reflecting the namespaces containing those code.
  - Put your low-level code into existing namespaces: System, Microsoft, MyProject, ThirdPartyProject instead of special namespaces: MyProject.Internal, MyProject.Helpers.
  - Understand the semantic of your types. I can distinguish the following semantic categories:
-    * `Attribute` - ideally only data
-    * `Service` - only logic without any data or state
-    * `Entity` - data and state
-    * `Component` - in component-oriented programming entities can consist of components
+    * `Attribute` - ideally only data.
+    * `Service` - only logic without any data or state.
+    * `Entity` - data and state.
+    * `Component` - in component-oriented programming entities can consist of components.
     * `Utility, helper`
     * `Object, data structure`
 - Understand the semantic of your type's members. [I can distinguish the following semantic categories](https://softwareengineering.stackexchange.com/a/404752/352915):
-    * `Property, attribute`: Name, Background, Color, Data, Content, Value, Children, Parent
-    * `Query, question`: IsInitialized, IsRunning, HasValue, CanRun, DoesEqual(value), Equals(value), AreEqual(v1, v2), GetValue()
-    * `Event`: OnChange, OnChanged
-    * `Directive`: IgnoreXml, RunOnLoad, CloseWhenError
-    * `Command`: Initialize(), Run(), Stop(), SetValue(value)
-    * `Event handler`: OnChange(value), OnChanged(value)
+    * `Property`: Name, Background, Color, Data, Content, Value, Children, Parent.
+    * `Query` (`question`): IsInitialized, IsRunning, HasValue, CanRun, DoesEqual(value), Equals(value), AreEqual(v1, v2), GetValue().
+    * `Directive`: IgnoreXml, RunOnLoad, CloseWhenError.
+    * `Event`: OnChange, OnChanged.
+    * `Command`: Initialize(), Run(), Stop(), SetValue(value).
+    * `Event handler`: OnChange(value), OnChanged(value).
+    * `Utility function`: Sqrt(value), Cos(value), Sin(value), ToString(), GetHashCode().
 
 # The links
 

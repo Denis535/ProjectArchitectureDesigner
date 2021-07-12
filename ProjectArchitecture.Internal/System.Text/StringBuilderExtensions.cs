@@ -9,25 +9,49 @@ namespace System.Text {
 
 
         // Append/Range
-        public static StringBuilder AppendRangeIf(this StringBuilder builder, bool condition, IEnumerable<string> values) {
-            if (!condition) return builder;
-            foreach (var value in values) builder.Append( value );
-            return builder;
-        }
         public static StringBuilder AppendRange(this StringBuilder builder, IEnumerable<string> values) {
             foreach (var value in values) builder.Append( value );
             return builder;
         }
+        public static StringBuilder AppendRange<T>(this StringBuilder builder, IEnumerable<T> values, Action<StringBuilder, T> render) {
+            foreach (var value in values) render( builder, value );
+            return builder;
+        }
+        // Append/Range/If
+        public static StringBuilder AppendRangeIf(this StringBuilder builder, bool condition, IEnumerable<string> values) {
+            return condition ? builder.AppendRange( values ) : builder;
+        }
+        public static StringBuilder AppendRangeIf<T>(this StringBuilder builder, bool condition, IEnumerable<T> values, Action<StringBuilder, T> render) {
+            return condition ? builder.AppendRange( values, render ) : builder;
+        }
+
+
         // Append/Join
+        public static StringBuilder AppendJoin(this StringBuilder builder, string separator, IEnumerable<string> values) {
+            foreach (var (value, isLast) in values.TagLast()) {
+                builder.Append( value );
+                if (!isLast) builder.Append( separator );
+            }
+            return builder;
+        }
+        public static StringBuilder AppendJoin<T>(this StringBuilder builder, string separator, IEnumerable<T> values, Action<StringBuilder, T> render) {
+            foreach (var (value, isLast) in values.TagLast()) {
+                render( builder, value );
+                if (!isLast) builder.Append( separator );
+            }
+            return builder;
+        }
+        // Append/Join/If
         public static StringBuilder AppendJoinIf(this StringBuilder builder, bool condition, string separator, IEnumerable<string> values) {
             if (!condition) return builder;
-            foreach (var (value, isLast) in values.TagLast()) builder.Append( value ).AppendIf( !isLast, separator );
-            return builder;
+            return builder.AppendJoin( separator, values );
         }
-        public static StringBuilder AppendJoin(this StringBuilder builder, string separator, IEnumerable<string> values) {
-            foreach (var (value, isLast) in values.TagLast()) builder.Append( value ).AppendIf( !isLast, separator );
-            return builder;
+        public static StringBuilder AppendJoinIf<T>(this StringBuilder builder, bool condition, string separator, IEnumerable<T> values, Action<StringBuilder, T> render) {
+            if (!condition) return builder;
+            return builder.AppendJoin( separator, values, render );
         }
+
+
         // Append
         public static StringBuilder AppendIf(this StringBuilder builder, bool condition, string value) {
             if (!condition) return builder;
@@ -39,12 +63,12 @@ namespace System.Text {
             return builder.AppendLine( value );
         }
         // Append/Line/Format
+        public static StringBuilder AppendLineFormat(this StringBuilder builder, string format, params object?[] args) {
+            return builder.AppendFormat( format, args ).AppendLine();
+        }
         public static StringBuilder AppendLineFormatIf(this StringBuilder builder, bool condition, string format, params object?[] args) {
             if (!condition) return builder;
-            return builder.AppendLine( string.Format( format, args ) );
-        }
-        public static StringBuilder AppendLineFormat(this StringBuilder builder, string format, params object?[] args) {
-            return builder.AppendLine( string.Format( format, args ) );
+            return builder.AppendLineFormat( format, args );
         }
 
 

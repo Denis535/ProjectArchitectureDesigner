@@ -55,15 +55,15 @@ namespace ProjectArchitecture.Model {
         }
 
 
-        // Utils
-        public override string ToString() {
-            return "Project: " + Name;
+        // IsSupported
+        protected virtual bool IsSupported(Type type) {
+            return !type.IsObsolete() && !type.IsCompilerGenerated();
         }
 
 
-        // Infrastructure
-        protected virtual bool IsSupported(Type type) {
-            return !type.IsObsolete() && !type.IsCompilerGenerated();
+        // Utils
+        public override string ToString() {
+            return "Project: " + Name;
         }
 
 

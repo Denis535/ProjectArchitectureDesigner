@@ -32,17 +32,17 @@ namespace System.Collections.Generic {
         // Tag
         public static IEnumerable<(T Value, bool IsFirst)> TagFirst<T>(this IEnumerable<T> source) {
             using var source_enumerator = source.GetEnumerator();
-            if (source_enumerator.MoveNext( out var value )) {
-                yield return (value, true);
+            if (source_enumerator.MoveNext( out var first )) {
+                yield return (first, true);
             }
-            while (source_enumerator.MoveNext( out var value2 )) {
-                yield return (value2, false);
+            while (source_enumerator.MoveNext( out var value )) {
+                yield return (value, false);
             }
         }
         public static IEnumerable<(T Value, bool IsLast)> TagLast<T>(this IEnumerable<T> source) {
             using var source_enumerator = source.GetPeekableEnumerator();
             while (source_enumerator.MoveNext( out var value )) {
-                var isLast = !source_enumerator.MoveNext();
+                var isLast = !source_enumerator.PeekNext();
                 yield return (value, isLast);
             }
         }
