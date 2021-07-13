@@ -32,9 +32,9 @@ namespace System.Text.Markdown {
         public static string Italic(this string text) => "*{0}*".Format( text );
         public static string Bold(this string text) => "**{0}**".Format( text );
         public static string Code(this string text) => "`{0}`".Format( text );
-        public static string Reference(this string text, int id) => "[{0}] [{1}]".Format( text, id );
-        public static string Link(this string text, string url) => "[{0}] ({1})".Format( text, url );
-        public static string Link(this int id, string url) => "[{0}]: {1}".Format( id, url );
+        public static string Reference(this string text, int id) => "[{0}][{1}]".Format( text, id );
+        public static string Link(this string text, string url) => "[{0}]({1})".Format( text, url );
+        public static string Link(this int id, string url) => "[{0}]:{1}".Format( id, url );
 
 
         // Utils

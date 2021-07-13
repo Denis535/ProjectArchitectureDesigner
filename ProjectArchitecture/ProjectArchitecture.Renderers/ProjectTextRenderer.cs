@@ -13,10 +13,8 @@ namespace ProjectArchitecture.Renderers {
         // Render/Text
         public static string RenderToText(this ProjectArchNode project) {
             var builder = new StringBuilder();
-            foreach (var node in project.DescendantNodesAndSelf) {
-                if (!node.IsDefaultGroup()) {
-                    builder.AppendLine( node.GetDisplayString() );
-                }
+            foreach (var node in project.DescendantNodesAndSelf.WhereNot( IsDefaultGroup )) {
+                builder.AppendLine( node.GetDisplayString_Item_Aligned() );
             }
             return builder.ToString();
         }
@@ -25,25 +23,24 @@ namespace ProjectArchitecture.Renderers {
         // Render/Text/Hierarchical
         public static string RenderToHierarchicalText(this ProjectArchNode project) {
             var builder = new HierarchicalStringBuilder();
-            builder.AppendObject( project );
+            builder.AppendProject( project );
             return builder.ToString();
         }
-        private static void AppendObject(this HierarchicalStringBuilder builder, ProjectArchNode project) {
-            using (builder.AppendTitle( "Project: {0}", project.Name )) {
-                foreach (var module in project.Modules) builder.AppendObject( module );
-            }
+        private static void AppendProject(this HierarchicalStringBuilder builder, ProjectArchNode project) {
+            using var scope = builder.AppendTitle( project.GetDisplayString_Header() );
+            foreach (var module in project.Modules) builder.AppendModule( module );
         }
-        private static void AppendObject(this HierarchicalStringBuilder builder, ModuleArchNode module) {
-            using var scope = builder.AppendSection( "Module: {0}", module.Name );
-            foreach (var @namespace in module.Namespaces) builder.AppendObject( @namespace );
+        private static void AppendModule(this HierarchicalStringBuilder builder, ModuleArchNode module) {
+            using var scope = builder.AppendSection( module.GetDisplayString_Header() );
+            foreach (var @namespace in module.Namespaces) builder.AppendNamespace( @namespace );
         }
-        private static void AppendObject(this HierarchicalStringBuilder builder, NamespaceArchNode @namespace) {
-            using var scope = builder.AppendSection( "Namespace: {0}", @namespace.Name );
-            foreach (var group in @namespace.Groups) builder.AppendObject( group );
+        private static void AppendNamespace(this HierarchicalStringBuilder builder, NamespaceArchNode @namespace) {
+            using var scope = builder.AppendSection( @namespace.GetDisplayString_Header() );
+            foreach (var group in @namespace.Groups) builder.AppendGroup( group );
         }
-        private static void AppendObject(this HierarchicalStringBuilder builder, GroupArchNode group) {
-            if (!group.IsDefault) builder.AppendLineWithPrefix( "| - ", group.Name );
-            foreach (var type in group.Types) builder.AppendLineWithPrefix( "|   ", type.Name );
+        private static void AppendGroup(this HierarchicalStringBuilder builder, GroupArchNode group) {
+            if (!group.IsDefault) builder.AppendLine( group.GetDisplayString_Item() );
+            foreach (var type in group.Types) builder.AppendLineWithPrefix( "|   ", type.GetDisplayString_Item() );
         }
 
 
@@ -52,20 +49,42 @@ namespace ProjectArchitecture.Renderers {
             return node is GroupArchNode group && group.IsDefault;
         }
         // Helpers/GetDisplayString
-        private static string GetDisplayString(this ArchNode node) {
+        private static string GetDisplayString_Header(this ArchNode node) {
             return node switch {
                 ProjectArchNode
-                => "Project:      {0}".Format( node.Name ),
+                => "Project: {0}".Format( node.Name ),
                 ModuleArchNode
-                => "- Module:     {0}".Format( node.Name ),
+                => "Module: {0}".Format( node.Name ),
                 NamespaceArchNode
-                => "-- Namespace: {0}".Format( node.Name ),
+                => "Namespace: {0}".Format( node.Name ),
+                { } => throw new ArgumentException( "Node is invalid: " + node ),
+                null => throw new ArgumentNullException( nameof( node ), "Node is null" ),
+            };
+        }
+        private static string GetDisplayString_Item(this ArchNode node) {
+            return node switch {
                 GroupArchNode
-                => "--- Group:    {0}".Format( node.Name ),
+                => node.Name,
                 TypeArchNode
-                => "--- Type:     {0}".Format( node.Name ),
-                { } => throw new ArgumentException( "ArchNode is invalid: " + node.GetType() ),
-                null => throw new ArgumentNullException( nameof( node ), "ArchNode is null" ),
+                => node.Name,
+                { } => throw new ArgumentException( "Node is invalid: " + node.GetType() ),
+                null => throw new ArgumentNullException( nameof( node ), "Node is null" ),
+            };
+        }
+        private static string GetDisplayString_Item_Aligned(this ArchNode node) {
+            return node switch {
+                ProjectArchNode
+                => "Project: ——— {0}".Format( node.Name ),
+                ModuleArchNode
+                => "Module: ———— {0}".Format( node.Name ),
+                NamespaceArchNode
+                => "Namespace: — {0}".Format( node.Name ),
+                GroupArchNode
+                => "Group: ————— {0}".Format( node.Name ),
+                TypeArchNode
+                => "Type: —————— {0}".Format( node.Name ),
+                { } => throw new ArgumentException( "Node is invalid: " + node.GetType() ),
+                null => throw new ArgumentNullException( nameof( node ), "Node is null" ),
             };
         }
 

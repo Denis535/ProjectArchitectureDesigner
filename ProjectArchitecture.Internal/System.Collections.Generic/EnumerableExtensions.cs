@@ -79,6 +79,11 @@ namespace System.Collections.Generic {
             }
         }
 
+        // WhereNot
+        public static IEnumerable<T> WhereNot<T>(this IEnumerable<T> source, Predicate<T> predicate) {
+            return source.Where( i => !predicate( i ) );
+        }
+
         // Append
         public static IEnumerable<T> Append<T>(this T source, T element) {
             return Enumerable.Empty<T>().Append( source ).Append( element );

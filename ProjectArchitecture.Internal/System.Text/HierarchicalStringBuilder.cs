@@ -28,11 +28,11 @@ namespace System.Text {
             }
         }
 
-        private const string IndentPrefix = "|   ";
-        private const string IndentPrefix_Empty = "    ";
-        private const string TitlePrefix = "";
-        private const string SectionPrefix = "| - ";
-        private const string LinePrefix = "| - ";
+        public const string IndentPrefix = "|   ";
+        public const string IndentPrefix_Empty = "    ";
+        public const string TitlePrefix = "";
+        public const string SectionPrefix = "| - ";
+        public const string LinePrefix = "| - ";
 
         private List<Node> Nodes { get; }
         private int Level { get; set; }
