@@ -44,20 +44,20 @@ namespace ProjectArchitecture.Model {
         public void Test_00_Project_Types() {
             Project.Compare( Assemblies, out var intersected, out var missing, out var extra );
             if (missing.Any()) {
-                TestContext.WriteLine( GetDisplayString( Project.GetSupportedTypes( Assemblies ) ) );
                 Assert.Warn( "Missing types: {0}", missing.Select( i => i.ToString() ).Join() );
+                TestContext.WriteLine( GetMessage_SupportedTypes( Project.GetSupportedTypes( Assemblies ) ) );
             }
             if (extra.Any()) {
-                TestContext.WriteLine( GetDisplayString( Project.GetSupportedTypes( Assemblies ) ) );
                 Assert.Warn( "Extra types: {0}", extra.Select( i => i.ToString() ).Join() );
+                TestContext.WriteLine( GetMessage_SupportedTypes( Project.GetSupportedTypes( Assemblies ) ) );
             }
         }
 
 
         // Rendering
         [Test]
-        public void Test_01_Rendering_Text() {
-            TestContext.WriteLine( Project.RenderToText() );
+        public void Test_01_Rendering_AlignedText() {
+            TestContext.WriteLine( Project.RenderToAlignedText() );
         }
         [Test]
         public void Test_01_Rendering_HierarchicalText() {
@@ -69,16 +69,14 @@ namespace ProjectArchitecture.Model {
         }
 
 
-        // Helpers/GetDisplayString
-        private static string GetDisplayString(Type[] types) {
+        // Helpers/GetMessage
+        private static string GetMessage_SupportedTypes(IEnumerable<Type> types) {
             var builder = new StringBuilder();
-            // Assemblies
+            builder.AppendLine( "Supported types:" );
             foreach (var assembly in types.GroupBy( i => i.Assembly.GetName().Name )) {
-                builder.AppendLineFormat( "Module: \"{0}\",", assembly.Key );
-                // Namespaces
+                builder.AppendLineFormat( "Assembly: {0}", assembly.Key );
                 foreach (var @namespace in assembly.GroupBy( i => i.Namespace )) {
                     builder.AppendLineFormat( "\"{0}\",", @namespace.Key );
-                    // Types
                     foreach (var type in @namespace) {
                         builder.AppendLineFormat( "typeof( {0} ),", type.Name );
                     }

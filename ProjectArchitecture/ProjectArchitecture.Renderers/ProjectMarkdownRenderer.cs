@@ -14,17 +14,24 @@ namespace ProjectArchitecture.Renderers {
         // Render/Markdown
         public static string RenderToMarkdown(this ProjectArchNode project) {
             var builder = new MarkdownBuilder();
-            builder.AppendTableOfContents( project.DescendantNodesAndSelf.Where( IsHeader ).Select( GetHeader ) );
+            builder.AppendTableOfContents( project );
             builder.AppendLine();
             builder.AppendBody( project );
             return builder.ToString();
         }
+        private static void AppendTableOfContents(this MarkdownBuilder builder, ProjectArchNode project) {
+            var prevs = new List<string>();
+            builder.AppendHeader( "Table of Contents", 1 );
+            foreach (var header in project.DescendantNodesAndSelf.Where( IsHeader )) {
+                builder.AppendItemLink( header.GetString(), header.GetLevel(), prevs );
+            }
+        }
         private static void AppendBody(this MarkdownBuilder builder, ProjectArchNode project) {
             foreach (var node in project.DescendantNodesAndSelf.WhereNot( IsDefaultGroup )) {
                 if (node.IsHeader()) {
-                    builder.AppendHeader( node.GetDisplayString_Header(), node.GetHeaderLevel() );
+                    builder.AppendHeader( node.GetString(), node.GetLevel() );
                 } else {
-                    builder.AppendItem( node.GetDisplayString_Item(), 1 );
+                    builder.AppendItem( node.GetString(), 1 );
                 }
             }
         }
@@ -37,23 +44,8 @@ namespace ProjectArchitecture.Renderers {
         private static bool IsHeader(this ArchNode node) {
             return node is ProjectArchNode or ModuleArchNode or NamespaceArchNode;
         }
-        private static (string Text, int Level) GetHeader(this ArchNode node) {
-            return (node.GetDisplayString_Header(), node.GetHeaderLevel());
-        }
-        private static int GetHeaderLevel(this ArchNode node) {
-            return node switch {
-                ProjectArchNode
-                => 1,
-                ModuleArchNode
-                => 2,
-                NamespaceArchNode
-                => 3,
-                { } => throw new ArgumentException( "Node is invalid: " + node ),
-                null => throw new ArgumentNullException( nameof( node ), "Node is null" ),
-            };
-        }
-        // Helpers/GetDisplayString
-        private static string GetDisplayString_Header(this ArchNode node) {
+        // Helpers/GetString
+        private static string GetString(this ArchNode node) {
             return node switch {
                 ProjectArchNode
                 => "Project: {0}".Format( node.Name ),
@@ -61,16 +53,27 @@ namespace ProjectArchitecture.Renderers {
                 => "Module: {0}".Format( node.Name ),
                 NamespaceArchNode
                 => "Namespace: {0}".Format( node.Name ),
-                { } => throw new ArgumentException( "Node is invalid: " + node ),
-                null => throw new ArgumentNullException( nameof( node ), "Node is null" ),
-            };
-        }
-        private static string GetDisplayString_Item(this ArchNode node) {
-            return node switch {
                 GroupArchNode
                 => node.Name.Italic(),
                 TypeArchNode
                 => node.Name.Bold(),
+                { } => throw new ArgumentException( "Node is invalid: " + node ),
+                null => throw new ArgumentNullException( nameof( node ), "Node is null" ),
+            };
+        }
+        // Helpers/GetLevel
+        private static int GetLevel(this ArchNode node) {
+            return node switch {
+                ProjectArchNode
+                => 1,
+                ModuleArchNode
+                => 2,
+                NamespaceArchNode
+                => 3,
+                GroupArchNode
+                => 4,
+                TypeArchNode
+                => 5,
                 { } => throw new ArgumentException( "Node is invalid: " + node ),
                 null => throw new ArgumentNullException( nameof( node ), "Node is null" ),
             };

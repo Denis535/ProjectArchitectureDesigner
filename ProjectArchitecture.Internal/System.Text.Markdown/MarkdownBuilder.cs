@@ -12,20 +12,16 @@ namespace System.Text.Markdown {
 
 
         // Append/Block
-        public MarkdownBuilder AppendTableOfContents(IEnumerable<(string Text, int Level)> headers) {
-            var prevs = new List<string>();
-            Builder.AppendLine( "Table of Contents".Header1() );
-            foreach (var (header, level) in headers) {
-                Builder.AppendLine( header.Link( header.GetUri( prevs ) ).Item( level ) );
-            }
-            return this;
-        }
         public MarkdownBuilder AppendHeader(string text, int level) {
-            Builder.AppendLine( MarkdownSyntaxFactory.Header( text, level ) );
+            Builder.AppendLine( text.Header( level ) );
             return this;
         }
         public MarkdownBuilder AppendItem(string text, int level) {
-            Builder.AppendLine( MarkdownSyntaxFactory.Item( text, level ) );
+            Builder.AppendLine( text.Item( level ) );
+            return this;
+        }
+        public MarkdownBuilder AppendItemLink(string text, int level, IList<string> prevs) {
+            Builder.AppendLine( text.Link( text.GetUri( prevs ) ).Item( level ) );
             return this;
         }
 
