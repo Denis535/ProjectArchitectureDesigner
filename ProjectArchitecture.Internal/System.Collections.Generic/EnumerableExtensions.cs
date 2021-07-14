@@ -29,6 +29,33 @@ namespace System.Collections.Generic {
             }
         }
 
+        // With
+        public static IEnumerable<(T Current, Option<T> Prev)> WithPrevious<T>(this IEnumerable<T> source) {
+            using var source_enumerator = source.GetPeekableEnumerator();
+            var prev = default( Option<T> );
+            while (source_enumerator.MoveNext( out var current )) {
+                yield return (current, prev);
+                prev = current;
+            }
+        }
+        public static IEnumerable<(T Current, Option<T> Next)> WithNext<T>(this IEnumerable<T> source) {
+            using var source_enumerator = source.GetPeekableEnumerator();
+            while (source_enumerator.MoveNext( out var current )) {
+                if (source_enumerator.PeekNext( out var next )) {
+                    yield return (current, next);
+                } else {
+                    yield return (current, default);
+                }
+            }
+        }
+        public static IEnumerable<T> WithSeparator<T>(this IEnumerable<T> source, T separator) {
+            using var source_enumerator = source.GetPeekableEnumerator();
+            while (source_enumerator.MoveNext( out var current )) {
+                yield return current;
+                if (source_enumerator.HasNext()) yield return separator;
+            }
+        }
+
         // Tag
         public static IEnumerable<(T Value, bool IsFirst)> TagFirst<T>(this IEnumerable<T> source) {
             using var source_enumerator = source.GetEnumerator();
@@ -42,7 +69,7 @@ namespace System.Collections.Generic {
         public static IEnumerable<(T Value, bool IsLast)> TagLast<T>(this IEnumerable<T> source) {
             using var source_enumerator = source.GetPeekableEnumerator();
             while (source_enumerator.MoveNext( out var value )) {
-                var isLast = !source_enumerator.PeekNext();
+                var isLast = !source_enumerator.HasNext();
                 yield return (value, isLast);
             }
         }
@@ -51,7 +78,7 @@ namespace System.Collections.Generic {
         public static IEnumerable<(T? Key, IReadOnlyList<T> Children)> Unflatten<T>(this IEnumerable<T> source, Predicate<T> isKey) {
             var source_enumerator = source.GetPeekableEnumerator();
             var children = new List<T>();
-            while (source_enumerator.PeekNext()) {
+            while (source_enumerator.HasNext()) {
                 source_enumerator.TakeIf( isKey, out var key );
                 children.Clear();
                 children.AddRange( source_enumerator.TakeUntil( isKey ) );
@@ -63,7 +90,7 @@ namespace System.Collections.Generic {
         public static IEnumerable<IReadOnlyList<T>> SplitByFirst<T>(this IEnumerable<T> source, Predicate<T> isFirst) {
             var source_enumerator = source.GetPeekableEnumerator();
             var slice = new List<T>();
-            while (source_enumerator.PeekNext()) {
+            while (source_enumerator.HasNext()) {
                 slice.Clear();
                 slice.AddRange( source_enumerator.TakeSliceByFirst( isFirst ) );
                 yield return slice;
@@ -72,7 +99,7 @@ namespace System.Collections.Generic {
         public static IEnumerable<IReadOnlyList<T>> SplitByLast<T>(this IEnumerable<T> source, Predicate<T> isLast) {
             var source_enumerator = source.GetPeekableEnumerator();
             var slice = new List<T>();
-            while (source_enumerator.PeekNext()) {
+            while (source_enumerator.HasNext()) {
                 slice.Clear();
                 slice.AddRange( source_enumerator.TakeSliceByLast( isLast ) );
                 yield return slice;
@@ -101,6 +128,13 @@ namespace System.Collections.Generic {
         }
 
         // MoveNext
+        //public static Option<T> MoveNext<T>(this IEnumerator<T> enumerator) {
+        //    if (enumerator.MoveNext()) {
+        //        return enumerator.Current;
+        //    } else {
+        //        return default;
+        //    }
+        //}
         public static bool MoveNext<T>(this IEnumerator<T> enumerator, [MaybeNullWhen( false )] out T value) {
             if (enumerator.MoveNext()) {
                 value = enumerator.Current;

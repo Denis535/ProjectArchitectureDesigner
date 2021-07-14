@@ -58,6 +58,7 @@ namespace System.Collections.Generic {
 
         private IEnumerator<T> Source { get; }
         private State_ State { get; set; }
+
         T IEnumerator<T>.Current => Current.Value;
         object? IEnumerator.Current => Current.Value;
 
@@ -66,59 +67,67 @@ namespace System.Collections.Generic {
         public Option<T> Current { get; private set; }
         public Option<T> Next { get; private set; }
 
+
         public PeekableEnumerator(IEnumerator<T> source) {
             Source = source ?? throw new ArgumentNullException( nameof( source ) );
             State = State_.Uninitialized;
-            Current = default;
-            Next = default;
+            (Current, Next) = (default, default);
         }
         public void Dispose() {
             Source.Dispose();
         }
 
         // MoveNext
-        public bool MoveNext() {
-            Current = MoveNext( Next, Source );
-            Next = default;
+        bool IEnumerator.MoveNext() {
+            State = State_.Started;
+            (Current, Next) = MoveNext( Source, Next );
             State = Current.HasValue ? State_.Started : State_.Finished;
             return Current.HasValue;
         }
-        public bool MoveNext([MaybeNullWhen( false )] out T value) {
-            if (MoveNext()) {
-                value = Current.Value;
-                return true;
-            } else {
-                value = default;
-                return false;
-            }
+        public Option<T> MoveNext() {
+            State = State_.Started;
+            (Current, Next) = MoveNext( Source, Next );
+            State = Current.HasValue ? State_.Started : State_.Finished;
+            return Current;
         }
-        // PeekNext
-        public bool PeekNext() {
-            Next = MoveNext( Next, Source );
+        public bool MoveNext([MaybeNullWhen( false )] out T value) {
+            State = State_.Started;
+            (Current, Next) = MoveNext( Source, Next );
+            State = Current.HasValue ? State_.Started : State_.Finished;
+            value = Current.ValueOrDefault;
+            return Current.HasValue;
+        }
+        // HasNext
+        public bool HasNext() {
+            Next = PeekNext( Source, Next );
             return Next.HasValue;
         }
+        // PeekNext
+        public Option<T> PeekNext() {
+            Next = PeekNext( Source, Next );
+            return Next;
+        }
         public bool PeekNext([MaybeNullWhen( false )] out T value) {
-            if (PeekNext()) {
-                value = Next.Value;
-                return true;
-            } else {
-                value = default;
-                return false;
-            }
+            Next = PeekNext( Source, Next );
+            value = Next.ValueOrDefault;
+            return Next.HasValue;
         }
         // Reset
         public void Reset() {
             Source.Reset();
             State = State_.Uninitialized;
-            Current = default;
-            Next = default;
+            (Current, Next) = (default, default);
         }
 
         // Helpers
-        private static Option<T> MoveNext(Option<T> next, IEnumerator<T> enumerator) {
-            return next.HasValue ? next.Value : MoveNext( enumerator );
+        private static (Option<T>, Option<T>) MoveNext(IEnumerator<T> enumerator, Option<T> next) {
+            var value = next.HasValue ? next.Value : GetNext( enumerator );
+            return (value, default);
         }
-        private static Option<T> MoveNext(IEnumerator<T> enumerator) {
+        private static Option<T> PeekNext(IEnumerator<T> enumerator, Option<T> next) {
+            return next.HasValue ? next.Value : GetNext( enumerator );
+        }
+        private static Option<T> GetNext(IEnumerator<T> enumerator) {
             var hasValue = enumerator.MoveNext();
             return hasValue ? (Option<T>) enumerator.Current : default;
         }

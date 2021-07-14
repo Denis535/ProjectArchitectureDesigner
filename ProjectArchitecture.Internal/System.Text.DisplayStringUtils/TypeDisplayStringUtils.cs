@@ -5,7 +5,6 @@ namespace System.Text.DisplayStringUtils {
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Reflection;
     using System.Text;
 
     // public interface Interface<in/out T> : IInterface<T> where T : class, new()
@@ -18,45 +17,22 @@ namespace System.Text.DisplayStringUtils {
 
         public static string GetDisplayString(Type type) {
             if (type.IsInterface()) {
-                return GetTypeDeclaration( type.GetKeywords(), type, type.GetGenericArguments(), null, type.GetInterfaces() );
+                return CSharpSyntaxUtils.GetTypeDeclaration( type.GetKeywords(), type, type.GetGenericArguments(), null, type.GetInterfaces() );
             }
             if (type.IsClass()) {
-                return GetTypeDeclaration( type.GetKeywords(), type, type.GetGenericArguments(), type.BaseType, type.GetInterfaces() );
+                return CSharpSyntaxUtils.GetTypeDeclaration( type.GetKeywords(), type, type.GetGenericArguments(), type.BaseType, type.GetInterfaces() );
             }
             if (type.IsStruct()) {
-                return GetTypeDeclaration( type.GetKeywords(), type, type.GetGenericArguments(), null, type.GetInterfaces() );
+                return CSharpSyntaxUtils.GetTypeDeclaration( type.GetKeywords(), type, type.GetGenericArguments(), null, type.GetInterfaces() );
             }
             if (type.IsEnum()) {
-                return GetTypeDeclaration( type.GetKeywords(), type, type.GetGenericArguments(), Enum.GetUnderlyingType( type ), null );
+                return CSharpSyntaxUtils.GetTypeDeclaration( type.GetKeywords(), type, type.GetGenericArguments(), Enum.GetUnderlyingType( type ), null );
             }
             if (type.IsDelegate()) {
                 var method = type.GetMethod( "Invoke" );
-                return GetDelegateDeclaration( type.GetKeywords(), method.ReturnParameter, type, type.GetGenericArguments(), method.GetParameters() );
+                return CSharpSyntaxUtils.GetDelegateDeclaration( type.GetKeywords(), method.ReturnParameter, type, type.GetGenericArguments(), method.GetParameters() );
             }
             throw new ArgumentException( "Type is unsupported: " + type );
-        }
-
-
-        // Helpers/GetObjectDeclaration
-        private static string GetTypeDeclaration(IEnumerable<string> keywords, Type type, Type[] generics, Type? @base, Type[]? interfaces) {
-            var builder = new StringBuilder();
-            builder.AppendKeywords( keywords );
-            builder.AppendSimpleIdentifier( type );
-            builder.AppendGenerics( generics );
-            builder.AppendBaseTypeAndInterfaces( @base, interfaces );
-            builder.AppendConstraints( generics );
-            return builder.ToString();
-        }
-        private static string GetDelegateDeclaration(IEnumerable<string> keywords, ParameterInfo result, Type type, Type[] generics, ParameterInfo[] parameters) {
-            var builder = new StringBuilder();
-            builder.AppendKeywords( keywords );
-            builder.AppendResult( result );
-            builder.Append( ' ' );
-            builder.AppendSimpleIdentifier( type );
-            builder.AppendGenerics( generics );
-            builder.AppendParameters( parameters );
-            builder.AppendConstraints( generics );
-            return builder.ToString();
         }
 
 

@@ -7,6 +7,7 @@ namespace System {
     using System.Linq;
     using System.Text;
 
+    // Note: don't override true, false operators!
     public static class Option {
         public static int Compare<T>(Option<T> opt1, Option<T> opt2) {
             if (opt1.HasValue && !opt2.HasValue) return 1;
