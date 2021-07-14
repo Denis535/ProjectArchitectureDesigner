@@ -14,171 +14,172 @@ namespace System.Text.CSharp {
 
         // Type
         public static string GetTypeSyntax(IEnumerable<string> keywords, Type type, Type[] generics, Type? @base, Type[]? interfaces) {
-            var builder = new List<string>();
-            builder.AppendKeywords( keywords );
-            builder.AppendSimpleIdentifier( type );
-            builder.AppendGenerics( generics );
-            builder.AppendBaseTypeAndInterfaces( @base, interfaces );
-            builder.AppendConstraints( generics );
-            return builder.GetDeclarationString();
+            var tokens = new List<string>();
+            tokens.AddKeywords( keywords );
+            tokens.AddSimpleIdentifier( type );
+            tokens.AddGenerics( generics );
+            tokens.AddBaseTypeAndInterfaces( @base, interfaces );
+            tokens.AddConstraints( generics );
+            return tokens.Build();
         }
         // Type/Delegate
         public static string GetDelegateSyntax(IEnumerable<string> keywords, ParameterInfo result, Type type, Type[] generics, ParameterInfo[] parameters) {
-            var builder = new List<string>();
-            builder.AppendKeywords( keywords );
-            builder.AppendResult( result );
-            builder.AppendSimpleIdentifier( type );
-            builder.AppendGenerics( generics );
-            builder.AppendParameters( parameters );
-            builder.AppendConstraints( generics );
-            return builder.GetDeclarationString();
+            var tokens = new List<string>();
+            tokens.AddKeywords( keywords );
+            tokens.AddResult( result );
+            tokens.AddSimpleIdentifier( type );
+            tokens.AddGenerics( generics );
+            tokens.AddParameters( parameters );
+            tokens.AddConstraints( generics );
+            tokens.Add( ";" );
+            return tokens.Build();
         }
         // Members
         public static string GetFieldSyntax(IEnumerable<string> keywords, Type type, string name, bool isLiteral, object? value) {
-            var builder = new List<string>();
-            builder.AppendKeywords( keywords );
-            builder.AppendIdentifier( type );
-            builder.Append( name );
+            var tokens = new List<string>();
+            tokens.AddKeywords( keywords );
+            tokens.AddIdentifier( type );
+            tokens.Add( name );
             if (isLiteral) {
-                builder.Append( "=" );
-                builder.Append( value?.ToString() ?? "null" );
+                tokens.Add( "=" );
+                tokens.Add( value?.ToString() ?? "null" );
             }
-            builder.Add( ";" );
-            return builder.GetDeclarationString();
+            tokens.Add( ";" );
+            return tokens.Build();
         }
         public static string GetPropertySyntax(IEnumerable<string> keywords, Type type, string name, MethodInfo? getter, MethodInfo? setter) {
-            var builder = new List<string>();
-            builder.AppendKeywords( keywords );
-            builder.AppendIdentifier( type );
-            builder.Append( name );
-            builder.AppendPropertyAccessors( getter, setter );
-            return builder.GetDeclarationString();
+            var tokens = new List<string>();
+            tokens.AddKeywords( keywords );
+            tokens.AddIdentifier( type );
+            tokens.Add( name );
+            tokens.AddPropertyAccessors( getter, setter );
+            return tokens.Build();
         }
         public static string GetEventSyntax(IEnumerable<string> keywords, Type type, string name, MethodInfo? adder, MethodInfo? remover, MethodInfo? raiser) {
-            var builder = new List<string>();
-            builder.AppendKeywords( keywords );
-            builder.AppendIdentifier( type );
-            builder.Append( name );
-            builder.AppendEventAccessors( adder, remover, raiser );
-            return builder.GetDeclarationString();
+            var tokens = new List<string>();
+            tokens.AddKeywords( keywords );
+            tokens.AddIdentifier( type );
+            tokens.Add( name );
+            tokens.AddEventAccessors( adder, remover, raiser );
+            return tokens.Build();
         }
         public static string GetConstructorSyntax(IEnumerable<string> keywords, Type type, ParameterInfo[] parameters) {
-            var builder = new List<string>();
-            builder.AppendKeywords( keywords );
-            builder.AppendSimpleIdentifier( type );
-            builder.AppendParameters( parameters );
-            builder.Add( ";" );
-            return builder.GetDeclarationString();
+            var tokens = new List<string>();
+            tokens.AddKeywords( keywords );
+            tokens.AddSimpleIdentifier( type );
+            tokens.AddParameters( parameters );
+            tokens.Add( ";" );
+            return tokens.Build();
         }
         public static string GetMethodSyntax(IEnumerable<string> keywords, ParameterInfo result, string name, Type[] generics, ParameterInfo[] parameters) {
-            var builder = new List<string>();
-            builder.AppendKeywords( keywords );
-            builder.AppendResult( result );
-            builder.Append( name );
-            builder.AppendGenerics( generics );
-            builder.AppendParameters( parameters );
-            builder.AppendConstraints( generics );
-            builder.Add( ";" );
-            return builder.GetDeclarationString();
+            var tokens = new List<string>();
+            tokens.AddKeywords( keywords );
+            tokens.AddResult( result );
+            tokens.Add( name );
+            tokens.AddGenerics( generics );
+            tokens.AddParameters( parameters );
+            tokens.AddConstraints( generics );
+            tokens.Add( ";" );
+            return tokens.Build();
         }
 
 
         // Keywords
-        private static void AppendKeywords(this IList<string> builder, IEnumerable<string> keywords) {
-            builder.AddRange( keywords );
+        private static void AddKeywords(this IList<string> tokens, IEnumerable<string> keywords) {
+            tokens.AddRange( keywords );
         }
         // Type/Identifier
-        private static void AppendIdentifier(this IList<string> builder, Type type) {
-            builder.Add( type.GetIdentifier() );
+        private static void AddIdentifier(this IList<string> tokens, Type type) {
+            tokens.Add( type.GetIdentifier() );
         }
-        private static void AppendSimpleIdentifier(this IList<string> builder, Type type) {
-            builder.Add( type.GetSimpleIdentifier() );
+        private static void AddSimpleIdentifier(this IList<string> tokens, Type type) {
+            tokens.Add( type.GetSimpleIdentifier() );
         }
         // Type/Generics
-        private static void AppendGenerics(this IList<string> builder, IEnumerable<Type> generics) {
+        private static void AddGenerics(this IList<string> tokens, IEnumerable<Type> generics) {
             if (!generics.Any()) return;
-            builder.Add( "<" );
-            builder.AddRange( ",", generics, AppendGeneric );
-            builder.Add( ">" );
+            tokens.Add( "<" );
+            tokens.AddRange( ",", generics, AddGeneric );
+            tokens.Add( ">" );
         }
-        private static void AppendGeneric(this IList<string> builder, Type generic) {
-            builder.AddRange( generic.GetKeywords() );
-            builder.Add( generic.Name );
+        private static void AddGeneric(this IList<string> tokens, Type generic) {
+            tokens.AddRange( generic.GetKeywords() );
+            tokens.Add( generic.Name );
         }
         // Type/Generics/Constraints
-        private static void AppendConstraints(this IList<string> builder, IEnumerable<Type> generics) {
-            builder.AddRange( generics, AppendConstraints );
+        private static void AddConstraints(this IList<string> tokens, IEnumerable<Type> generics) {
+            tokens.AddRange( generics, AddConstraints );
         }
-        private static void AppendConstraints(this IList<string> builder, Type generic) {
+        private static void AddConstraints(this IList<string> tokens, Type generic) {
             if (generic.HasAnyConstraints()) {
-                builder.Add( "where" );
-                builder.Add( generic.Name );
-                builder.Add( ":" );
-                builder.AddRange( ",", generic.GetConstraints() );
+                tokens.Add( "where" );
+                tokens.Add( generic.Name );
+                tokens.Add( ":" );
+                tokens.AddRange( ",", generic.GetConstraints() );
             }
         }
         // Type/Base
-        private static void AppendBaseTypeAndInterfaces(this IList<string> builder, Type? @base, IEnumerable<Type>? interfaces) {
+        private static void AddBaseTypeAndInterfaces(this IList<string> tokens, Type? @base, IEnumerable<Type>? interfaces) {
             if (!Concat( @base, interfaces ).Any()) return;
-            builder.Add( ":" );
-            builder.AddRange( ",", Concat( @base, interfaces ), AppendIdentifier );
+            tokens.Add( ":" );
+            tokens.AddRange( ",", Concat( @base, interfaces ), AddIdentifier );
         }
         // Property/Accessors
-        private static void AppendPropertyAccessors(this IList<string> builder, params MethodInfo?[] accessors) {
-            builder.Add( "{" );
-            builder.AddRange( accessors, AppendPropertyAccessor );
-            builder.Add( "}" );
+        private static void AddPropertyAccessors(this IList<string> tokens, params MethodInfo?[] accessors) {
+            tokens.Add( "{" );
+            tokens.AddRange( accessors, AddPropertyAccessor );
+            tokens.Add( "}" );
         }
-        private static void AppendPropertyAccessor(this IList<string> builder, MethodInfo? method) {
+        private static void AddPropertyAccessor(this IList<string> tokens, MethodInfo? method) {
             if (method != null && method.Name.StartsWith( "get_" )) {
-                builder.Add( method.GetAccessModifier() );
-                builder.Add( "get" );
-                builder.Add( ";" );
+                tokens.Add( method.GetAccessModifier() );
+                tokens.Add( "get" );
+                tokens.Add( ";" );
             } else
             if (method != null && method.Name.StartsWith( "set_" )) {
-                builder.Add( method.GetAccessModifier() );
-                builder.Add( "set" );
-                builder.Add( ";" );
+                tokens.Add( method.GetAccessModifier() );
+                tokens.Add( "set" );
+                tokens.Add( ";" );
             }
         }
         // Event/Accessors
-        private static void AppendEventAccessors(this IList<string> builder, params MethodInfo?[] accessors) {
-            builder.Add( "{" );
-            builder.AddRange( accessors, AppendEventAccessor );
-            builder.Add( "}" );
+        private static void AddEventAccessors(this IList<string> tokens, params MethodInfo?[] accessors) {
+            tokens.Add( "{" );
+            tokens.AddRange( accessors, AddEventAccessor );
+            tokens.Add( "}" );
         }
-        private static void AppendEventAccessor(this IList<string> builder, MethodInfo? method) {
+        private static void AddEventAccessor(this IList<string> tokens, MethodInfo? method) {
             if (method != null && method.Name.StartsWith( "add_" )) {
-                builder.Add( method.GetAccessModifier() );
-                builder.Add( "add" );
-                builder.Add( ";" );
+                tokens.Add( method.GetAccessModifier() );
+                tokens.Add( "add" );
+                tokens.Add( ";" );
             } else
             if (method != null && method.Name.StartsWith( "remove_" )) {
-                builder.Add( method.GetAccessModifier() );
-                builder.Add( "remove" );
-                builder.Add( ";" );
+                tokens.Add( method.GetAccessModifier() );
+                tokens.Add( "remove" );
+                tokens.Add( ";" );
             } else
             if (method != null && method.Name.StartsWith( "raise_" )) {
-                builder.Add( method.GetAccessModifier() );
-                builder.Add( "raise" );
-                builder.Add( ";" );
+                tokens.Add( method.GetAccessModifier() );
+                tokens.Add( "raise" );
+                tokens.Add( ";" );
             }
         }
         // Method/Parameters
-        private static void AppendResult(this IList<string> builder, ParameterInfo parameter) {
-            builder.Add( parameter.ParameterType.GetIdentifier() );
+        private static void AddResult(this IList<string> tokens, ParameterInfo parameter) {
+            tokens.Add( parameter.ParameterType.GetIdentifier() );
         }
-        private static void AppendParameters(this IList<string> builder, IEnumerable<ParameterInfo> parameters) {
-            builder.Add( "(" );
-            builder.AddRange( ",", parameters, AppendParameter );
-            builder.Add( ")" );
+        private static void AddParameters(this IList<string> tokens, IEnumerable<ParameterInfo> parameters) {
+            tokens.Add( "(" );
+            tokens.AddRange( ",", parameters, AddParameter );
+            tokens.Add( ")" );
         }
-        private static void AppendParameter(this IList<string> builder, ParameterInfo parameter) {
-            builder.Add( parameter.ParameterType.GetIdentifier() );
-            builder.Add( parameter.Name );
+        private static void AddParameter(this IList<string> tokens, ParameterInfo parameter) {
+            tokens.Add( parameter.ParameterType.GetIdentifier() );
+            tokens.Add( parameter.Name );
             if (parameter.HasDefaultValue) {
-                builder.Add( "=" );
-                builder.Add( parameter.DefaultValue?.ToString() ?? "null" );
+                tokens.Add( "=" );
+                tokens.Add( parameter.DefaultValue?.ToString() ?? "null" );
             }
         }
 
@@ -197,31 +198,31 @@ namespace System.Text.CSharp {
             return Enumerable.Empty<Type>();
         }
         // Helpers/AddRange
-        private static void AddRange(this IList<string> builder, IEnumerable<string> collection) {
+        private static void AddRange(this IList<string> tokens, IEnumerable<string> collection) {
             foreach (var item in collection) {
-                builder.Add( item );
+                tokens.Add( item );
             }
         }
-        private static void AddRange<T>(this IList<string> builder, IEnumerable<T> collection, Action<IList<string>, T> render) {
+        private static void AddRange<T>(this IList<string> tokens, IEnumerable<T> collection, Action<IList<string>, T> render) {
             foreach (var item in collection) {
-                render( builder, item );
+                render( tokens, item );
             }
         }
         // Helpers/AddRange/Separator
-        private static void AddRange(this IList<string> builder, string separator, IEnumerable<string> collection) {
+        private static void AddRange(this IList<string> tokens, string separator, IEnumerable<string> collection) {
             foreach (var (item, isLast) in collection.TagLast()) {
-                builder.Add( item );
-                if (!isLast) builder.Add( separator );
+                tokens.Add( item );
+                if (!isLast) tokens.Add( separator );
             }
         }
-        private static void AddRange<T>(this IList<string> builder, string separator, IEnumerable<T> collection, Action<IList<string>, T> render) {
+        private static void AddRange<T>(this IList<string> tokens, string separator, IEnumerable<T> collection, Action<IList<string>, T> render) {
             foreach (var (item, isLast) in collection.TagLast()) {
-                render( builder, item );
-                if (!isLast) builder.Add( separator );
+                render( tokens, item );
+                if (!isLast) tokens.Add( separator );
             }
         }
-        // Helpers/GetDeclarationString
-        private static string GetDeclarationString(this IList<string> tokens) {
+        // Helpers/Build
+        private static string Build(this IList<string> tokens) {
             var builder = new StringBuilder();
             foreach (var (item, next) in tokens.WithNext()) {
                 builder.Append( item );

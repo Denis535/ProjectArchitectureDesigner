@@ -12,11 +12,11 @@ namespace System.Text.CSharp {
     
     public class Tests_01_MemberSyntaxFactory {
 
-        public abstract class SimpleClass<T> where T : class {
+        public abstract class ExampleClass<T> where T : class {
             public const object? Field = default;
             public object? Property { get; set; }
             public event Action? Event;
-            public SimpleClass(T arg) {
+            public ExampleClass(T arg) {
             }
             public T1? Method<T1, T2>(T arg, T1? arg1, T2? arg2) where T1 : class, IDisposable, new() where T2 : struct {
                 return default;
@@ -26,11 +26,11 @@ namespace System.Text.CSharp {
 
         [Test]
         public void Test_00_MemberSyntax() {
-            TestContext.WriteLine( typeof( SimpleClass<> ).GetTypeInfo().DeclaredFields.Single( IsUserDefined ).GetFieldSyntax() );
-            TestContext.WriteLine( typeof( SimpleClass<> ).GetTypeInfo().DeclaredProperties.Single( IsUserDefined ).GetPropertySyntax() );
-            TestContext.WriteLine( typeof( SimpleClass<> ).GetTypeInfo().DeclaredEvents.Single( IsUserDefined ).GetEventSyntax() );
-            TestContext.WriteLine( typeof( SimpleClass<> ).GetTypeInfo().DeclaredConstructors.Single().GetConstructorSyntax() );
-            TestContext.WriteLine( typeof( SimpleClass<> ).GetTypeInfo().DeclaredMethods.Single( IsUserDefined ).GetMethodSyntax() );
+            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().DeclaredFields.Single( IsUserDefined ).GetFieldSyntax() );
+            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().DeclaredProperties.Single( IsUserDefined ).GetPropertySyntax() );
+            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().DeclaredEvents.Single( IsUserDefined ).GetEventSyntax() );
+            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().DeclaredConstructors.Single().GetConstructorSyntax() );
+            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().DeclaredMethods.Single( IsUserDefined ).GetMethodSyntax() );
         }
 
 

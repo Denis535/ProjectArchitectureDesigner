@@ -13,43 +13,43 @@ namespace System.Text.CSharp {
             where T2 : struct {
         }
 
-        public interface ISimpleInterface<in T1, out T2> : IInterface<T1, T2>
+        public interface IExampleInterface<in T1, out T2> : IInterface<T1, T2>
             where T1 : class, IDisposable, new()
             where T2 : struct {
         }
 
-        public class SimpleClass<T1, T2> : object, IInterface<T1, T2>
+        public class ExampleClass<T1, T2> : object, IInterface<T1, T2>
             where T1 : class, IDisposable, new()
             where T2 : struct {
         }
 
-        public record SimpleRecord<T1, T2>(object Value1, object Value2, object Value3) : object, IInterface<T1, T2>
+        public record ExampleRecord<T1, T2>(object Value1, object Value2, object Value3) : object, IInterface<T1, T2>
             where T1 : class, IDisposable, new()
             where T2 : struct {
         }
 
-        public struct SimpleStruct<T1, T2> : IInterface<T1, T2>
+        public struct ExampleStruct<T1, T2> : IInterface<T1, T2>
             where T1 : class, IDisposable, new()
             where T2 : struct {
         }
 
-        public enum SimpleEnum {
+        public enum ExampleEnum {
             V1, V2, V3
         }
 
-        public delegate object SimpleDelegate<in T1, out T2>(object value)
+        public delegate object ExampleDelegate<in T1, out T2>(object value)
             where T1 : class, IDisposable, new()
             where T2 : struct;
 
 
         [Test]
         public void Test_00_TypeSyntax() {
-            TestContext.WriteLine( typeof( ISimpleInterface<,> ).GetTypeSyntax() );
-            TestContext.WriteLine( typeof( SimpleClass<,> ).GetTypeSyntax() );
-            TestContext.WriteLine( typeof( SimpleRecord<,> ).GetTypeSyntax() );
-            TestContext.WriteLine( typeof( SimpleStruct<,> ).GetTypeSyntax() );
-            TestContext.WriteLine( typeof( SimpleEnum ).GetTypeSyntax() );
-            TestContext.WriteLine( typeof( SimpleDelegate<,> ).GetTypeSyntax() );
+            TestContext.WriteLine( typeof( IExampleInterface<,> ).GetTypeSyntax() );
+            TestContext.WriteLine( typeof( ExampleClass<,> ).GetTypeSyntax() );
+            TestContext.WriteLine( typeof( ExampleRecord<,> ).GetTypeSyntax() );
+            TestContext.WriteLine( typeof( ExampleStruct<,> ).GetTypeSyntax() );
+            TestContext.WriteLine( typeof( ExampleEnum ).GetTypeSyntax() );
+            TestContext.WriteLine( typeof( ExampleDelegate<,> ).GetTypeSyntax() );
         }
 
 
