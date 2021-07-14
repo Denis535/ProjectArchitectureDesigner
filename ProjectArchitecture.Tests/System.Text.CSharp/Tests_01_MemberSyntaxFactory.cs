@@ -2,15 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #pragma warning disable CS0067 // The event is never used
-namespace System.Text.DisplayStringUtils {
+namespace System.Text.CSharp {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using NUnit.Framework;
-
-    public class Tests_01_MemberDisplayStringUtils {
+    
+    public class Tests_01_MemberSyntaxFactory {
 
         public abstract class SimpleClass<T> where T : class {
             public const object? Field = default;
@@ -25,12 +25,12 @@ namespace System.Text.DisplayStringUtils {
 
 
         [Test]
-        public void Test_00_GetDisplayString() {
-            TestContext.WriteLine( MemberDisplayStringUtils.GetDisplayString( typeof( SimpleClass<> ).GetTypeInfo().DeclaredFields.Single( IsUserDefined ) ) );
-            TestContext.WriteLine( MemberDisplayStringUtils.GetDisplayString( typeof( SimpleClass<> ).GetTypeInfo().DeclaredProperties.Single( IsUserDefined ) ) );
-            TestContext.WriteLine( MemberDisplayStringUtils.GetDisplayString( typeof( SimpleClass<> ).GetTypeInfo().DeclaredEvents.Single( IsUserDefined ) ) );
-            TestContext.WriteLine( MemberDisplayStringUtils.GetDisplayString( typeof( SimpleClass<> ).GetTypeInfo().DeclaredConstructors.Single() ) );
-            TestContext.WriteLine( MemberDisplayStringUtils.GetDisplayString( typeof( SimpleClass<> ).GetTypeInfo().DeclaredMethods.Single( IsUserDefined ) ) );
+        public void Test_00_MemberSyntax() {
+            TestContext.WriteLine( typeof( SimpleClass<> ).GetTypeInfo().DeclaredFields.Single( IsUserDefined ).GetFieldSyntax() );
+            TestContext.WriteLine( typeof( SimpleClass<> ).GetTypeInfo().DeclaredProperties.Single( IsUserDefined ).GetPropertySyntax() );
+            TestContext.WriteLine( typeof( SimpleClass<> ).GetTypeInfo().DeclaredEvents.Single( IsUserDefined ).GetEventSyntax() );
+            TestContext.WriteLine( typeof( SimpleClass<> ).GetTypeInfo().DeclaredConstructors.Single().GetConstructorSyntax() );
+            TestContext.WriteLine( typeof( SimpleClass<> ).GetTypeInfo().DeclaredMethods.Single( IsUserDefined ).GetMethodSyntax() );
         }
 
 

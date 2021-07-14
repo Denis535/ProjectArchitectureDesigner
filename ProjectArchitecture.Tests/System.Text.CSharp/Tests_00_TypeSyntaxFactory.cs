@@ -1,12 +1,12 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-namespace System.Text.DisplayStringUtils {
+namespace System.Text.CSharp {
     using System;
     using System.Collections.Generic;
     using NUnit.Framework;
 
-    public class Tests_00_TypeDisplayStringUtils {
+    public class Tests_00_TypeSyntaxFactory {
 
         public interface IInterface<in T1, out T2>
             where T1 : class, IDisposable, new()
@@ -43,13 +43,13 @@ namespace System.Text.DisplayStringUtils {
 
 
         [Test]
-        public void Test_00_GetDisplayString() {
-            TestContext.WriteLine( TypeDisplayStringUtils.GetDisplayString( typeof( ISimpleInterface<,> ) ) );
-            TestContext.WriteLine( TypeDisplayStringUtils.GetDisplayString( typeof( SimpleClass<,> ) ) );
-            TestContext.WriteLine( TypeDisplayStringUtils.GetDisplayString( typeof( SimpleRecord<,> ) ) );
-            TestContext.WriteLine( TypeDisplayStringUtils.GetDisplayString( typeof( SimpleStruct<,> ) ) );
-            TestContext.WriteLine( TypeDisplayStringUtils.GetDisplayString( typeof( SimpleEnum ) ) );
-            TestContext.WriteLine( TypeDisplayStringUtils.GetDisplayString( typeof( SimpleDelegate<,> ) ) );
+        public void Test_00_TypeSyntax() {
+            TestContext.WriteLine( typeof( ISimpleInterface<,> ).GetTypeSyntax() );
+            TestContext.WriteLine( typeof( SimpleClass<,> ).GetTypeSyntax() );
+            TestContext.WriteLine( typeof( SimpleRecord<,> ).GetTypeSyntax() );
+            TestContext.WriteLine( typeof( SimpleStruct<,> ).GetTypeSyntax() );
+            TestContext.WriteLine( typeof( SimpleEnum ).GetTypeSyntax() );
+            TestContext.WriteLine( typeof( SimpleDelegate<,> ).GetTypeSyntax() );
         }
 
 

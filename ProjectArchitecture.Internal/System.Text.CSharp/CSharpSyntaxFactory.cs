@@ -1,7 +1,7 @@
 ﻿// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-namespace System.Text.DisplayStringUtils {
+namespace System.Text.CSharp {
     using System;
     using System.Collections;
     using System.Collections.Generic;
@@ -9,21 +9,21 @@ namespace System.Text.DisplayStringUtils {
     using System.Reflection;
     using System.Text;
 
-    internal static class CSharpSyntaxUtils {
+    internal static class CSharpSyntaxFactory {
 
 
         // Type
-        public static string GetTypeDeclaration(IEnumerable<string> keywords, Type type, Type[] generics, Type? @base, Type[]? interfaces) {
+        public static string GetTypeSyntax(IEnumerable<string> keywords, Type type, Type[] generics, Type? @base, Type[]? interfaces) {
             var builder = new List<string>();
             builder.AppendKeywords( keywords );
             builder.AppendSimpleIdentifier( type );
             builder.AppendGenerics( generics );
             builder.AppendBaseTypeAndInterfaces( @base, interfaces );
             builder.AppendConstraints( generics );
-            return builder.GetDisplayString();
+            return builder.GetDeclarationString();
         }
         // Type/Delegate
-        public static string GetDelegateDeclaration(IEnumerable<string> keywords, ParameterInfo result, Type type, Type[] generics, ParameterInfo[] parameters) {
+        public static string GetDelegateSyntax(IEnumerable<string> keywords, ParameterInfo result, Type type, Type[] generics, ParameterInfo[] parameters) {
             var builder = new List<string>();
             builder.AppendKeywords( keywords );
             builder.AppendResult( result );
@@ -31,10 +31,10 @@ namespace System.Text.DisplayStringUtils {
             builder.AppendGenerics( generics );
             builder.AppendParameters( parameters );
             builder.AppendConstraints( generics );
-            return builder.GetDisplayString();
+            return builder.GetDeclarationString();
         }
         // Members
-        public static string GetFieldDeclaration(IEnumerable<string> keywords, Type type, string name, bool isLiteral, object? value) {
+        public static string GetFieldSyntax(IEnumerable<string> keywords, Type type, string name, bool isLiteral, object? value) {
             var builder = new List<string>();
             builder.AppendKeywords( keywords );
             builder.AppendIdentifier( type );
@@ -44,33 +44,33 @@ namespace System.Text.DisplayStringUtils {
                 builder.Append( value?.ToString() ?? "null" );
             }
             builder.Add( ";" );
-            return builder.GetDisplayString();
+            return builder.GetDeclarationString();
         }
-        public static string GetPropertyDeclaration(IEnumerable<string> keywords, Type type, string name, MethodInfo? getter, MethodInfo? setter) {
+        public static string GetPropertySyntax(IEnumerable<string> keywords, Type type, string name, MethodInfo? getter, MethodInfo? setter) {
             var builder = new List<string>();
             builder.AppendKeywords( keywords );
             builder.AppendIdentifier( type );
             builder.Append( name );
             builder.AppendPropertyAccessors( getter, setter );
-            return builder.GetDisplayString();
+            return builder.GetDeclarationString();
         }
-        public static string GetEventDeclaration(IEnumerable<string> keywords, Type type, string name, MethodInfo? adder, MethodInfo? remover, MethodInfo? raiser) {
+        public static string GetEventSyntax(IEnumerable<string> keywords, Type type, string name, MethodInfo? adder, MethodInfo? remover, MethodInfo? raiser) {
             var builder = new List<string>();
             builder.AppendKeywords( keywords );
             builder.AppendIdentifier( type );
             builder.Append( name );
             builder.AppendEventAccessors( adder, remover, raiser );
-            return builder.GetDisplayString();
+            return builder.GetDeclarationString();
         }
-        public static string GetConstructorDeclaration(IEnumerable<string> keywords, Type type, ParameterInfo[] parameters) {
+        public static string GetConstructorSyntax(IEnumerable<string> keywords, Type type, ParameterInfo[] parameters) {
             var builder = new List<string>();
             builder.AppendKeywords( keywords );
             builder.AppendSimpleIdentifier( type );
             builder.AppendParameters( parameters );
             builder.Add( ";" );
-            return builder.GetDisplayString();
+            return builder.GetDeclarationString();
         }
-        public static string GetMethodDeclaration(IEnumerable<string> keywords, ParameterInfo result, string name, Type[] generics, ParameterInfo[] parameters) {
+        public static string GetMethodSyntax(IEnumerable<string> keywords, ParameterInfo result, string name, Type[] generics, ParameterInfo[] parameters) {
             var builder = new List<string>();
             builder.AppendKeywords( keywords );
             builder.AppendResult( result );
@@ -79,7 +79,7 @@ namespace System.Text.DisplayStringUtils {
             builder.AppendParameters( parameters );
             builder.AppendConstraints( generics );
             builder.Add( ";" );
-            return builder.GetDisplayString();
+            return builder.GetDeclarationString();
         }
 
 
@@ -220,8 +220,8 @@ namespace System.Text.DisplayStringUtils {
                 if (!isLast) builder.Add( separator );
             }
         }
-        // Helpers/GetDisplayString
-        private static string GetDisplayString(this IList<string> tokens) {
+        // Helpers/GetDeclarationString
+        private static string GetDeclarationString(this IList<string> tokens) {
             var builder = new StringBuilder();
             foreach (var (item, next) in tokens.WithNext()) {
                 builder.Append( item );

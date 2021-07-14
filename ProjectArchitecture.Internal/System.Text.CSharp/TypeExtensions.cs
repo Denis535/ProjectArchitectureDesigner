@@ -1,7 +1,7 @@
 ﻿// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-namespace System.Text.DisplayStringUtils {
+namespace System.Text.CSharp {
     using System;
     using System.Collections;
     using System.Collections.Generic;
