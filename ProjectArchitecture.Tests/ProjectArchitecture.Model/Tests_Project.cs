@@ -15,7 +15,8 @@ namespace ProjectArchitecture.Model {
 
         private static Assembly[] Assemblies { get; } = new[] {
             typeof( ArchNode ).Assembly,
-            typeof( SourceGenerator ).Assembly
+            typeof( SourceGenerator ).Assembly,
+            typeof( Option ).Assembly,
         };
         private Project_ProjectArchitecture Project { get; set; } = default!;
 
@@ -44,12 +45,10 @@ namespace ProjectArchitecture.Model {
         public void Test_00_Project_Types() {
             Project.Compare( Assemblies, out var intersected, out var missing, out var extra );
             if (missing.Any()) {
-                Assert.Warn( "Missing types: {0}", missing.Select( i => i.ToString() ).Join() );
-                TestContext.WriteLine( GetMessage_SupportedTypes( Project.GetSupportedTypes( Assemblies ) ) );
+                Assert.Warn( GetMessage_Missing( missing ) );
             }
             if (extra.Any()) {
-                Assert.Warn( "Extra types: {0}", extra.Select( i => i.ToString() ).Join() );
-                TestContext.WriteLine( GetMessage_SupportedTypes( Project.GetSupportedTypes( Assemblies ) ) );
+                Assert.Warn( GetMessage_Extra( extra ) );
             }
         }
 
@@ -70,19 +69,44 @@ namespace ProjectArchitecture.Model {
 
 
         // Helpers/GetMessage
-        private static string GetMessage_SupportedTypes(IEnumerable<Type> types) {
+        private static string GetMessage_Missing(IEnumerable<Type> types) {
             var builder = new StringBuilder();
-            builder.AppendLine( "Supported types:" );
-            foreach (var assembly in types.GroupBy( i => i.Assembly.GetName().Name )) {
-                builder.AppendLineFormat( "Assembly: {0}", assembly.Key );
+            builder.AppendLine( "Missing:" );
+            foreach (var item in GetHierarchy( types )) {
+                builder.AppendLine( GetItemString( item ) );
+            }
+            return builder.ToString();
+        }
+        private static string GetMessage_Extra(IEnumerable<Type> types) {
+            var builder = new StringBuilder();
+            builder.AppendLine( "Extra:" );
+            foreach (var item in GetHierarchy( types )) {
+                builder.AppendLine( GetItemString( item ) );
+            }
+            return builder.ToString();
+        }
+        private static IEnumerable<object> GetHierarchy(IEnumerable<Type> types) {
+            foreach (var assembly in types.GroupBy( i => i.Assembly )) {
+                yield return assembly.Key;
                 foreach (var @namespace in assembly.GroupBy( i => i.Namespace )) {
-                    builder.AppendLineFormat( "\"{0}\",", @namespace.Key );
+                    yield return @namespace.Key ?? "";
                     foreach (var type in @namespace) {
-                        builder.AppendLineFormat( "typeof( {0} ),", type.Name );
+                        yield return type;
                     }
                 }
             }
-            return builder.ToString();
+        }
+        private static string GetItemString(object item) {
+            if (item is Assembly assembly) {
+                return string.Format( "Assembly: {0}", assembly.GetName().Name );
+            }
+            if (item is string @namespace) {
+                return string.Format( "\"{0}\",", @namespace );
+            }
+            if (item is Type type) {
+                return string.Format( "typeof( {0} ),", type.Name );
+            }
+            throw new ArgumentException( "Item is invalid: " + item?.ToString() ?? "null" );
         }
 
 

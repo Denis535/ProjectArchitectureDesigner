@@ -86,7 +86,7 @@ namespace ProjectArchitecture.Model {
             // Note: SyntaxTrivia.ToString() doesn't return documentation comment.
             // Note: So, you should use SyntaxTrivia.ToFullString()!
             var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
-            return comment.GetCommentContent().IsNotEmpty();
+            return comment.ToFullString().StartsWith( "// " ) || comment.ToFullString().StartsWith( "/// " );
         }
         private static bool IsTypeEntry(this SyntaxNode syntax) {
             return syntax is TypeOfExpressionSyntax;

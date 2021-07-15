@@ -64,11 +64,11 @@ namespace System.Text {
         }
         // Append/Line/Format
         public static StringBuilder AppendLineFormat(this StringBuilder builder, string format, params object?[] args) {
-            return builder.AppendFormat( format, args ).AppendLine();
+            return builder.AppendLine( string.Format( format, args ) );
         }
         public static StringBuilder AppendLineFormatIf(this StringBuilder builder, bool condition, string format, params object?[] args) {
             if (!condition) return builder;
-            return builder.AppendLineFormat( format, args );
+            return builder.AppendLine( string.Format( format, args ) );
         }
 
 
