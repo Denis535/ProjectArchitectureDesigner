@@ -23,9 +23,9 @@ namespace ProjectArchitecture.Model {
         }
 
 
-        // Initialization
-        protected abstract void DefineChildren(); // Used by source generator
-        protected void SetChildren(params object[] children) { // Used by source generator
+        // Initialize
+        protected abstract void Initialize(); // Used by source generator
+        protected virtual void SetChildren(params object[] children) { // Used by source generator
         }
 
 

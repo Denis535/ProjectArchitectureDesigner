@@ -1,4 +1,7 @@
-﻿namespace System {
+﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
+
+namespace System {
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -7,10 +10,6 @@
     public static class StringExtensions {
 
 
-        public static string WithoutPrefix(this string value, string prefix) {
-            if (value.StartsWith( prefix )) return value.Substring( prefix.Length );
-            return value;
-        }
         public static string Format(this string format, params object?[] args) {
             return string.Format( format, args );
         }

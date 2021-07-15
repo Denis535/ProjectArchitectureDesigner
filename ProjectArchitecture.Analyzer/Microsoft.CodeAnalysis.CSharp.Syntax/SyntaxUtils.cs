@@ -10,61 +10,17 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
     internal static class SyntaxUtils {
 
 
-        // IsEntry
-        public static bool IsModuleEntry(this SyntaxNode syntax) {
-            return syntax is TypeOfExpressionSyntax;
+        // ToName
+        public static string ToName(this string type, string? prefix) {
+            return type.WithoutPrefix( prefix ).Replace( '_', '.' );
         }
-        public static bool IsNamespaceOrTypeEntry(this SyntaxNode syntax) {
-            return syntax.IsNamespaceEntry() || syntax.IsTypeEntry();
+        // ToType
+        public static string ToType(this string name, string prefix) {
+            return prefix + name.EscapeTypeName();
         }
-        public static bool IsNamespaceEntry(this SyntaxNode syntax) {
-            return syntax is LiteralExpressionSyntax literal && literal.Kind() == SyntaxKind.StringLiteralExpression;
-        }
-        public static bool HasGroupEntry(this SyntaxNode syntax) {
-            // Note: SyntaxTrivia.ToString() doesn't return documentation comment.
-            // Note: So, you should use SyntaxTrivia.ToFullString()!
-            var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
-            return comment.ToFullString().StartsWith( "// " ) || comment.ToFullString().StartsWith( "/// " );
-        }
-        public static bool IsTypeEntry(this SyntaxNode syntax) {
-            return syntax is TypeOfExpressionSyntax;
-        }
-        // GetEntry
-        public static string GetModuleEntry(this SyntaxNode syntax) {
-            return ((TypeOfExpressionSyntax) syntax).Type.ToString();
-        }
-        public static string GetNamespaceEntry(this SyntaxNode syntax) {
-            return ((LiteralExpressionSyntax) syntax).Token.ValueText;
-        }
-        public static string GetGroupEntry(this SyntaxNode syntax) {
-            var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
-            return comment.GetCommentContent();
-        }
-        public static string GetTypeEntry(this SyntaxNode syntax) {
-            return ((TypeOfExpressionSyntax) syntax).Type.ToString();
-        }
-
-
-        // GetName
-        public static string GetName_Project(this string type) {
-            return type.WithoutPrefix( "Project_" ).Replace( '_', '.' );
-        }
-        public static string GetName_Module(this string type) {
-            return type.WithoutPrefix( "Module_" ).Replace( '_', '.' );
-        }
-        // GetTypeName
-        public static string GetTypeName_Namespace(this string name) {
-            return "Namespace_" + name.EscapeTypeName();
-        }
-        public static string GetTypeName_Group(this string name) {
-            return "Group_" + name.EscapeTypeName();
-        }
-        // GetIdentifier
-        public static string GetIdentifier(this string name) {
+        // ToIdentifier
+        public static string ToIdentifier(this string name) {
             return name.EscapeIdentifier();
-        }
-        public static string GetIdentifier_Module(this string name) {
-            return name.WithoutPrefix( "Module_" ).EscapeIdentifier();
         }
 
 
@@ -106,16 +62,19 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         public static SyntaxNode? GetBody(this MethodDeclarationSyntax method) {
             return (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
         }
-
-
-        // Helpers/Trivia
-        private static string GetCommentContent(this SyntaxTrivia comment) {
+        public static string GetCommentContent(this SyntaxTrivia comment) {
             // Note: SyntaxTrivia.ToString() doesn't return documentation comment.
-            // Note: So, you should use SyntaxTrivia.ToFullString()!
+            // Note: So, you should use SyntaxTrivia.ToFullString().
             var content = comment.ToFullString().SkipWhile( i => i == '/' );
             return string.Concat( content ).Trim();
         }
+
+
         // Helpers/String
+        private static string WithoutPrefix(this string value, string? prefix) {
+            if (prefix != null && value.StartsWith( prefix )) return value.Substring( prefix.Length );
+            return value;
+        }
         private static string EscapeTypeName(this string value) {
             value = string.Concat( value.Select( Escape ) );
             return value;
