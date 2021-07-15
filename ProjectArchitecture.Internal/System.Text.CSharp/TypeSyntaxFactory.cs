@@ -17,20 +17,20 @@ namespace System.Text.CSharp {
 
         public static string GetTypeSyntax(this Type type) {
             if (type.IsInterface()) {
-                return CSharpSyntaxFactory.GetTypeSyntax( type.GetKeywords(), type, type.GetGenericArguments(), null, type.GetInterfaces() );
+                return CSharpSyntaxUtils.GetTypeSyntax( type.GetKeywords(), type, type.GetGenericArguments(), null, type.GetInterfaces() );
             }
             if (type.IsClass()) {
-                return CSharpSyntaxFactory.GetTypeSyntax( type.GetKeywords(), type, type.GetGenericArguments(), type.BaseType, type.GetInterfaces() );
+                return CSharpSyntaxUtils.GetTypeSyntax( type.GetKeywords(), type, type.GetGenericArguments(), type.BaseType, type.GetInterfaces() );
             }
             if (type.IsStruct()) {
-                return CSharpSyntaxFactory.GetTypeSyntax( type.GetKeywords(), type, type.GetGenericArguments(), null, type.GetInterfaces() );
+                return CSharpSyntaxUtils.GetTypeSyntax( type.GetKeywords(), type, type.GetGenericArguments(), null, type.GetInterfaces() );
             }
             if (type.IsEnum()) {
-                return CSharpSyntaxFactory.GetTypeSyntax( type.GetKeywords(), type, type.GetGenericArguments(), Enum.GetUnderlyingType( type ), null );
+                return CSharpSyntaxUtils.GetTypeSyntax( type.GetKeywords(), type, type.GetGenericArguments(), Enum.GetUnderlyingType( type ), null );
             }
             if (type.IsDelegate()) {
                 var method = type.GetMethod( "Invoke" );
-                return CSharpSyntaxFactory.GetDelegateSyntax( type.GetKeywords(), method.ReturnParameter, type, type.GetGenericArguments(), method.GetParameters() );
+                return CSharpSyntaxUtils.GetDelegateSyntax( type.GetKeywords(), method.ReturnParameter, type, type.GetGenericArguments(), method.GetParameters() );
             }
             throw new ArgumentException( "Type is unsupported: " + type );
         }

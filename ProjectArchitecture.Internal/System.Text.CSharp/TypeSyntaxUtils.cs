@@ -10,7 +10,7 @@ namespace System.Text.CSharp {
     using System.Reflection;
     using System.Text;
 
-    internal static class TypeExtensions {
+    internal static class TypeSyntaxUtils {
 
 
         // GetIdentifier

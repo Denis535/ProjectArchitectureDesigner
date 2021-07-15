@@ -62,8 +62,8 @@ namespace ProjectArchitecture.Model {
             "Microsoft.CodeAnalysis.CSharp.Syntax",
             typeof( SyntaxFormatter ),
             typeof( SyntaxFormatterRewriter ),
-            typeof( SyntaxUtils ),
-            typeof( SyntaxFactoryUtils )
+            typeof( SyntaxFactoryUtils ),
+            typeof( SyntaxUtils )
         );
     }
 
@@ -71,11 +71,11 @@ namespace ProjectArchitecture.Model {
     public sealed partial class Module_ProjectArchitecture_Internal : ModuleArchNode {
         protected override void Initialize() => SetChildren(
             "System",
+            typeof( StringExtensions ),
+            typeof( TypeExtensions ),
+            typeof( CSharpExtensions ),
             typeof( Option ),
             typeof( Option<> ),
-            typeof( CSharpExtensions ),
-            typeof( StringExtensions ),
-            typeof( System.TypeExtensions ),
             "System.Collections.Generic",
             typeof( EnumerableExtensions ),
             typeof( PeekableEnumeratorExtensions ),
@@ -87,11 +87,11 @@ namespace ProjectArchitecture.Model {
             typeof( MarkdownBuilder ),
             typeof( MarkdownSyntaxFactory ),
             "System.Text.CSharp",
-            typeof( CSharpSyntaxFactory ),
-            typeof( MemberExtensions ),
+            typeof( TypeSyntaxFactory ),
             typeof( MemberSyntaxFactory ),
-            typeof( System.Text.CSharp.TypeExtensions ),
-            typeof( TypeSyntaxFactory )
+            typeof( TypeSyntaxUtils ),
+            typeof( MemberSyntaxUtils ),
+            typeof( CSharpSyntaxUtils )
         );
     }
 

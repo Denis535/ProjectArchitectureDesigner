@@ -9,7 +9,7 @@ namespace System.Text.CSharp {
     using System.Reflection;
     using System.Text;
 
-    internal static class MemberExtensions {
+    internal static class MemberSyntaxUtils {
 
 
         // GetKeywords
