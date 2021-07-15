@@ -51,10 +51,10 @@ namespace ProjectArchitecture.Model {
             typeof( SourceGenerator ),
             typeof( SyntaxAnalyzer ),
             typeof( SyntaxGenerator ),
-            /// Analysis
+            /// Analysis/Info
             typeof( ProjectInfo ),
             typeof( ModuleInfo ),
-            /// Analysis/Entries
+            /// Analysis/Info/Entries
             typeof( ModuleEntry ),
             typeof( NamespaceEntry ),
             typeof( GroupEntry ),
@@ -83,15 +83,15 @@ namespace ProjectArchitecture.Model {
             "System.Text",
             typeof( StringBuilderExtensions ),
             typeof( HierarchicalStringBuilder ),
-            "System.Text.Markdown",
-            typeof( MarkdownBuilder ),
-            typeof( MarkdownSyntaxFactory ),
             "System.Text.CSharp",
             typeof( TypeSyntaxFactory ),
             typeof( MemberSyntaxFactory ),
+            typeof( CSharpSyntaxFactory ),
             typeof( TypeSyntaxUtils ),
             typeof( MemberSyntaxUtils ),
-            typeof( CSharpSyntaxUtils )
+            "System.Text.Markdown",
+            typeof( MarkdownBuilder ),
+            typeof( MarkdownSyntaxFactory )
         );
     }
 

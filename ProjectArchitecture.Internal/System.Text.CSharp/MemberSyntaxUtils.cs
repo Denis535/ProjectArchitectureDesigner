@@ -12,6 +12,13 @@ namespace System.Text.CSharp {
     internal static class MemberSyntaxUtils {
 
 
+        // IsType
+        public static bool IsIndexer(this PropertyInfo property) {
+            return property.Name == "Item" && property.GetIndexParameters().Length > 0;
+        }
+        public static bool IsOperator(MethodInfo method) {
+            return method.IsPublic && method.IsStatic && method.IsSpecialName && method.Name.StartsWith( "op_" );
+        }
         // GetKeywords
         public static IEnumerable<string> GetKeywords(this FieldInfo field) {
             yield return field.GetAccessModifier();
@@ -21,19 +28,19 @@ namespace System.Text.CSharp {
         }
         public static IEnumerable<string> GetKeywords(this PropertyInfo property) {
             yield return property.GetAccessModifier();
-            if (property.GetAccessors( true ).IsStatic()) yield return "static";
-            if (property.GetAccessors( true ).IsAbstract()) yield return "abstract";
-            if (property.GetAccessors( true ).IsVirtual()) yield return "virtual";
-            if (property.GetAccessors( true ).IsOverride()) yield return "override";
-            if (property.GetAccessors( true ).IsSealed()) yield return "sealed";
+            if (property.GetAccessors( true ).Any( IsStatic )) yield return "static";
+            if (property.GetAccessors( true ).Any( IsAbstract )) yield return "abstract";
+            if (property.GetAccessors( true ).Any( IsVirtual )) yield return "virtual";
+            if (property.GetAccessors( true ).Any( IsOverride )) yield return "override";
+            if (property.GetAccessors( true ).Any( IsSealed )) yield return "sealed";
         }
         public static IEnumerable<string> GetKeywords(this EventInfo @event) {
             yield return @event.GetAccessModifier();
-            if (@event.GetAccessors( true ).IsStatic()) yield return "static";
-            if (@event.GetAccessors( true ).IsAbstract()) yield return "abstract";
-            if (@event.GetAccessors( true ).IsVirtual()) yield return "virtual";
-            if (@event.GetAccessors( true ).IsOverride()) yield return "override";
-            if (@event.GetAccessors( true ).IsSealed()) yield return "sealed";
+            if (@event.GetAccessors( true ).Any( IsStatic )) yield return "static";
+            if (@event.GetAccessors( true ).Any( IsAbstract )) yield return "abstract";
+            if (@event.GetAccessors( true ).Any( IsVirtual )) yield return "virtual";
+            if (@event.GetAccessors( true ).Any( IsOverride )) yield return "override";
+            if (@event.GetAccessors( true ).Any( IsSealed )) yield return "sealed";
         }
         public static IEnumerable<string> GetKeywords(this ConstructorInfo constructor) {
             yield return constructor.GetAccessModifier();
@@ -49,8 +56,8 @@ namespace System.Text.CSharp {
         }
 
 
-        // GetAccessModifier
-        public static string GetAccessModifier(this FieldInfo field) {
+        // Helpers/GetAccessModifier
+        private static string GetAccessModifier(this FieldInfo field) {
             if (field.IsPublic) return "public";
             if (field.IsAssembly) return "internal";
             if (field.IsFamily) return "protected";
@@ -59,15 +66,25 @@ namespace System.Text.CSharp {
             if (field.IsPrivate) return "private";
             throw new Exception( "Access modifier is unknown: " + field );
         }
-        public static string GetAccessModifier(this PropertyInfo property) {
-            var result = GetAccessModifier( property.GetMethod, property.SetMethod );
-            return result ?? throw new Exception( "Access modifier is unknown: " + property );
+        private static string GetAccessModifier(this PropertyInfo property) {
+            if (property.GetAccessors( true ).Any( i => i.IsPublic )) return "public";
+            if (property.GetAccessors( true ).Any( i => i.IsAssembly )) return "internal";
+            if (property.GetAccessors( true ).Any( i => i.IsFamily )) return "protected";
+            if (property.GetAccessors( true ).Any( i => i.IsFamilyOrAssembly )) return "protected internal";
+            if (property.GetAccessors( true ).Any( i => i.IsFamilyAndAssembly )) return "private protected";
+            if (property.GetAccessors( true ).Any( i => i.IsPrivate )) return "private";
+            throw new Exception( "Access modifier is unknown: " + property );
         }
-        public static string GetAccessModifier(this EventInfo @event) {
-            var result = GetAccessModifier( @event.AddMethod, @event.RemoveMethod, @event.RaiseMethod );
-            return result ?? throw new Exception( "Access modifier is unknown: " + @event );
+        private static string GetAccessModifier(this EventInfo @event) {
+            if (@event.GetAccessors( true ).Any( i => i.IsPublic )) return "public";
+            if (@event.GetAccessors( true ).Any( i => i.IsAssembly )) return "internal";
+            if (@event.GetAccessors( true ).Any( i => i.IsFamily )) return "protected";
+            if (@event.GetAccessors( true ).Any( i => i.IsFamilyOrAssembly )) return "protected internal";
+            if (@event.GetAccessors( true ).Any( i => i.IsFamilyAndAssembly )) return "private protected";
+            if (@event.GetAccessors( true ).Any( i => i.IsPrivate )) return "private";
+            throw new Exception( "Access modifier is unknown: " + @event );
         }
-        public static string GetAccessModifier(this MethodBase method) {
+        internal static string GetAccessModifier(this MethodBase method) {
             if (method.IsPublic) return "public";
             if (method.IsAssembly) return "internal";
             if (method.IsFamily) return "protected";
@@ -76,103 +93,21 @@ namespace System.Text.CSharp {
             if (method.IsPrivate) return "private";
             throw new Exception( "Access modifier is unknown: " + method );
         }
-
-
-        // IsKeyword/MethodInfo
-        public static bool IsStatic(this IEnumerable<MethodInfo> methods) {
-            return methods.Any( IsStatic );
-        }
-        public static bool IsAbstract(this IEnumerable<MethodInfo> methods) {
-            return methods.Any( IsAbstract );
-        }
-        public static bool IsVirtual(this IEnumerable<MethodInfo> methods) {
-            return methods.Any( IsVirtual );
-        }
-        public static bool IsOverride(this IEnumerable<MethodInfo> methods) {
-            return methods.Any( IsOverride );
-        }
-        public static bool IsSealed(this IEnumerable<MethodInfo> methods) {
-            return methods.Any( IsSealed );
-        }
-        // IsKeyword/MethodInfo
-        public static bool IsStatic(this MethodInfo method) {
+        // Helpers/IsKeyword
+        private static bool IsStatic(this MethodInfo method) {
             return method.IsStatic;
         }
-        public static bool IsAbstract(this MethodInfo method) {
+        private static bool IsAbstract(this MethodInfo method) {
             return method.IsAbstract;
         }
-        public static bool IsVirtual(this MethodInfo method) {
+        private static bool IsVirtual(this MethodInfo method) {
             return method.IsVirtual && !method.IsAbstract && method.DeclaringType == method.GetBaseDefinition().DeclaringType;
         }
-        public static bool IsOverride(this MethodInfo method) {
+        private static bool IsOverride(this MethodInfo method) {
             return method.IsVirtual && !method.IsAbstract && method.DeclaringType != method.GetBaseDefinition().DeclaringType;
         }
-        public static bool IsSealed(this MethodInfo method) {
+        private static bool IsSealed(this MethodInfo method) {
             return method.IsFinal;
-        }
-        // IsType
-        public static bool IsIndexer(this PropertyInfo property) {
-            return property.Name == "Item" && property.GetIndexParameters().Length > 0;
-        }
-        public static bool IsOperator(MethodInfo method) {
-            return method.IsPublic && method.IsStatic && method.IsSpecialName && method.Name.StartsWith( "op_" );
-        }
-        // IsSpecialName
-        public static bool IsSpecialName(this MemberInfo member) {
-            if (member is FieldInfo field) return field.IsSpecialName;
-            if (member is PropertyInfo prop) return prop.IsSpecialName;
-            if (member is EventInfo @event) return @event.IsSpecialName;
-            if (member is MethodBase method) return method.IsSpecialName;
-            return false;
-        }
-
-
-        // Helpers/GetAccessModifier
-        private static string? GetAccessModifier(MethodInfo? method1, MethodInfo? method2) {
-            if (method1?.IsPublic == true ||
-                method2?.IsPublic == true) return "public";
-
-            if (method1?.IsAssembly == true ||
-                method2?.IsAssembly == true) return "internal";
-
-            if (method1?.IsFamily == true ||
-                method2?.IsFamily == true) return "protected";
-
-            if (method1?.IsFamilyOrAssembly == true ||
-                method2?.IsFamilyOrAssembly == true) return "protected internal";
-
-            if (method1?.IsFamilyAndAssembly == true ||
-                method2?.IsFamilyAndAssembly == true) return "private protected";
-
-            if (method1?.IsPrivate == true ||
-                method2?.IsPrivate == true) return "private";
-            return null;
-        }
-        private static string? GetAccessModifier(MethodInfo? method1, MethodInfo? method2, MethodInfo? method3) {
-            if (method1?.IsPublic == true ||
-                method2?.IsPublic == true ||
-                method3?.IsPublic == true) return "public";
-
-            if (method1?.IsAssembly == true ||
-                method2?.IsAssembly == true ||
-                method3?.IsAssembly == true) return "internal";
-
-            if (method1?.IsFamily == true ||
-                method2?.IsFamily == true ||
-                method3?.IsFamily == true) return "protected";
-
-            if (method1?.IsFamilyOrAssembly == true ||
-                method2?.IsFamilyOrAssembly == true ||
-                method3?.IsFamilyOrAssembly == true) return "protected internal";
-
-            if (method1?.IsFamilyAndAssembly == true ||
-                method2?.IsFamilyAndAssembly == true ||
-                method3?.IsFamilyAndAssembly == true) return "private protected";
-
-            if (method1?.IsPrivate == true ||
-                method2?.IsPrivate == true ||
-                method3?.IsPrivate == true) return "private";
-            return null;
         }
         // Helpers/GetAccessors
         private static IEnumerable<MethodInfo> GetAccessors(this EventInfo @event, bool nonPublic) {

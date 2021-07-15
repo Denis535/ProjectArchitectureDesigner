@@ -9,36 +9,36 @@ namespace System.Text.CSharp {
     using System.Reflection;
     using System.Text;
 
-    internal static class CSharpSyntaxUtils {
+    internal static class CSharpSyntaxFactory {
 
 
         // Type
         public static string GetTypeSyntax(IEnumerable<string> keywords, Type type, Type[] generics, Type? @base, Type[]? interfaces) {
             var tokens = new List<string>();
-            tokens.AddKeywords( keywords );
-            tokens.AddSimpleIdentifier( type );
+            tokens.AddRange( keywords );
+            tokens.Add( type.GetSimpleIdentifier() );
             tokens.AddGenerics( generics );
             tokens.AddBaseTypeAndInterfaces( @base, interfaces );
-            tokens.AddConstraints( generics );
+            tokens.AddRange( generics, AddConstraints );
             return tokens.Build();
         }
         // Type/Delegate
         public static string GetDelegateSyntax(IEnumerable<string> keywords, ParameterInfo result, Type type, Type[] generics, ParameterInfo[] parameters) {
             var tokens = new List<string>();
-            tokens.AddKeywords( keywords );
+            tokens.AddRange( keywords );
             tokens.AddResult( result );
-            tokens.AddSimpleIdentifier( type );
+            tokens.Add( type.GetSimpleIdentifier() );
             tokens.AddGenerics( generics );
             tokens.AddParameters( parameters );
-            tokens.AddConstraints( generics );
+            tokens.AddRange( generics, AddConstraints );
             tokens.Add( ";" );
             return tokens.Build();
         }
         // Members
         public static string GetFieldSyntax(IEnumerable<string> keywords, Type type, string name, bool isLiteral, object? value) {
             var tokens = new List<string>();
-            tokens.AddKeywords( keywords );
-            tokens.AddIdentifier( type );
+            tokens.AddRange( keywords );
+            tokens.Add( type.GetIdentifier() );
             tokens.Add( name );
             if (isLiteral) {
                 tokens.Add( "=" );
@@ -49,52 +49,41 @@ namespace System.Text.CSharp {
         }
         public static string GetPropertySyntax(IEnumerable<string> keywords, Type type, string name, MethodInfo? getter, MethodInfo? setter) {
             var tokens = new List<string>();
-            tokens.AddKeywords( keywords );
-            tokens.AddIdentifier( type );
+            tokens.AddRange( keywords );
+            tokens.Add( type.GetIdentifier() );
             tokens.Add( name );
             tokens.AddPropertyAccessors( getter, setter );
             return tokens.Build();
         }
         public static string GetEventSyntax(IEnumerable<string> keywords, Type type, string name, MethodInfo? adder, MethodInfo? remover, MethodInfo? raiser) {
             var tokens = new List<string>();
-            tokens.AddKeywords( keywords );
-            tokens.AddIdentifier( type );
+            tokens.AddRange( keywords );
+            tokens.Add( type.GetIdentifier() );
             tokens.Add( name );
             tokens.AddEventAccessors( adder, remover, raiser );
             return tokens.Build();
         }
         public static string GetConstructorSyntax(IEnumerable<string> keywords, Type type, ParameterInfo[] parameters) {
             var tokens = new List<string>();
-            tokens.AddKeywords( keywords );
-            tokens.AddSimpleIdentifier( type );
+            tokens.AddRange( keywords );
+            tokens.Add( type.GetSimpleIdentifier() );
             tokens.AddParameters( parameters );
             tokens.Add( ";" );
             return tokens.Build();
         }
         public static string GetMethodSyntax(IEnumerable<string> keywords, ParameterInfo result, string name, Type[] generics, ParameterInfo[] parameters) {
             var tokens = new List<string>();
-            tokens.AddKeywords( keywords );
+            tokens.AddRange( keywords );
             tokens.AddResult( result );
             tokens.Add( name );
             tokens.AddGenerics( generics );
             tokens.AddParameters( parameters );
-            tokens.AddConstraints( generics );
+            tokens.AddRange( generics, AddConstraints );
             tokens.Add( ";" );
             return tokens.Build();
         }
 
 
-        // Keywords
-        private static void AddKeywords(this IList<string> tokens, IEnumerable<string> keywords) {
-            tokens.AddRange( keywords );
-        }
-        // Type/Identifier
-        private static void AddIdentifier(this IList<string> tokens, Type type) {
-            tokens.Add( type.GetIdentifier() );
-        }
-        private static void AddSimpleIdentifier(this IList<string> tokens, Type type) {
-            tokens.Add( type.GetSimpleIdentifier() );
-        }
         // Type/Generics
         private static void AddGenerics(this IList<string> tokens, IEnumerable<Type> generics) {
             if (!generics.Any()) return;
@@ -107,11 +96,8 @@ namespace System.Text.CSharp {
             tokens.Add( generic.Name );
         }
         // Type/Generics/Constraints
-        private static void AddConstraints(this IList<string> tokens, IEnumerable<Type> generics) {
-            tokens.AddRange( generics, AddConstraints );
-        }
         private static void AddConstraints(this IList<string> tokens, Type generic) {
-            if (generic.HasAnyConstraints()) {
+            if (generic.GetConstraints().Any()) {
                 tokens.Add( "where" );
                 tokens.Add( generic.Name );
                 tokens.Add( ":" );
@@ -122,7 +108,7 @@ namespace System.Text.CSharp {
         private static void AddBaseTypeAndInterfaces(this IList<string> tokens, Type? @base, IEnumerable<Type>? interfaces) {
             if (!Concat( @base, interfaces ).Any()) return;
             tokens.Add( ":" );
-            tokens.AddRange( ",", Concat( @base, interfaces ), AddIdentifier );
+            tokens.AddRange( ",", Concat( @base, interfaces ), (i, t) => i.Add( t.GetIdentifier() ) );
         }
         // Property/Accessors
         private static void AddPropertyAccessors(this IList<string> tokens, params MethodInfo?[] accessors) {

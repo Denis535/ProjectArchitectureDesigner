@@ -9,7 +9,7 @@ namespace System.Text.CSharp {
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using NUnit.Framework;
-    
+
     public class Tests_01_MemberSyntaxFactory {
 
         public abstract class ExampleClass<T> where T : class {
@@ -36,7 +36,14 @@ namespace System.Text.CSharp {
 
         // Helpers
         private static bool IsUserDefined(MemberInfo member) {
-            return !member.IsSpecialName() && !member.IsDefined( typeof( CompilerGeneratedAttribute ) );
+            return !IsSpecialName( member ) && !member.IsDefined( typeof( CompilerGeneratedAttribute ) );
+        }
+        private static bool IsSpecialName(MemberInfo member) {
+            if (member is FieldInfo field) return field.IsSpecialName;
+            if (member is PropertyInfo prop) return prop.IsSpecialName;
+            if (member is EventInfo @event) return @event.IsSpecialName;
+            if (member is MethodBase method) return method.IsSpecialName;
+            return false;
         }
 
 
