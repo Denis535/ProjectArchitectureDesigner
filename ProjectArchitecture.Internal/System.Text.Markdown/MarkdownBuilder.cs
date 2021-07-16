@@ -1,11 +1,11 @@
 ﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
+// https://guides.github.com/features/mastering-markdown/
 namespace System.Text.Markdown {
     using System;
     using System.Collections.Generic;
 
-    // https://guides.github.com/features/mastering-markdown/
     public class MarkdownBuilder {
 
         private StringBuilder Builder { get; } = new StringBuilder();

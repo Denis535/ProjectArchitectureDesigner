@@ -10,17 +10,28 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
     internal static class SyntaxUtils {
 
 
-        // ToName
-        public static string ToName(this string type, string? prefix) {
-            return type.WithoutPrefix( prefix ).Replace( '_', '.' );
+        // WithoutPrefix
+        public static string WithoutPrefix(this string value, string? prefix) {
+            if (prefix != null && value.StartsWith( prefix )) return value.Substring( prefix.Length );
+            return value;
         }
-        // ToType
-        public static string ToType(this string name, string prefix) {
-            return prefix + name.EscapeTypeName();
+        // ToBeautifulName
+        public static string ToBeautifulName(this string type) {
+            return type.Replace( '_', '.' );
         }
-        // ToIdentifier
-        public static string ToIdentifier(this string name) {
-            return name.EscapeIdentifier();
+        // EscapeType
+        public static string EscapeType(this string value) {
+            value = string.Concat( value.Select( Escape ) );
+            return value;
+        }
+        // EscapeIdentifier
+        public static string EscapeIdentifier(this string value) {
+            value = string.Concat( value.Select( Escape ) );
+            if (SyntaxFacts.GetKeywordKind( value ) != SyntaxKind.None) value = "@" + value;
+            return value;
+        }
+        private static char Escape(char @char) {
+            return char.IsLetterOrDigit( @char ) ? @char : '_';
         }
 
 
@@ -67,25 +78,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
             // Note: So, you should use SyntaxTrivia.ToFullString().
             var content = comment.ToFullString().SkipWhile( i => i == '/' );
             return string.Concat( content ).Trim();
-        }
-
-
-        // Helpers/String
-        private static string WithoutPrefix(this string value, string? prefix) {
-            if (prefix != null && value.StartsWith( prefix )) return value.Substring( prefix.Length );
-            return value;
-        }
-        private static string EscapeTypeName(this string value) {
-            value = string.Concat( value.Select( Escape ) );
-            return value;
-        }
-        private static string EscapeIdentifier(this string value) {
-            value = string.Concat( value.Select( Escape ) );
-            if (SyntaxFacts.GetKeywordKind( value ) != SyntaxKind.None) value = "@" + value;
-            return value;
-        }
-        private static char Escape(char @char) {
-            return char.IsLetterOrDigit( @char ) ? @char : '_';
         }
 
 

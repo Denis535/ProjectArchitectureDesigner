@@ -51,10 +51,10 @@ namespace ProjectArchitecture.Model {
             typeof( SourceGenerator ),
             typeof( SyntaxAnalyzer ),
             typeof( SyntaxGenerator ),
-            /// Analysis/Info
+            /// ClassInfo
             typeof( ProjectInfo ),
             typeof( ModuleInfo ),
-            /// Analysis/Info/Entries
+            /// ClassInfo/Entries
             typeof( ModuleEntry ),
             typeof( NamespaceEntry ),
             typeof( GroupEntry ),

@@ -105,7 +105,7 @@ namespace System.Text.CSharp {
         }
 
 
-        // AddGenerics
+        // Type/AddGenerics
         private static void AddGenerics(this IList<string> tokens, IEnumerable<Type> generics) {
             if (!generics.Any()) return;
             tokens.Add( "<" );
@@ -116,11 +116,66 @@ namespace System.Text.CSharp {
             tokens.AddRange( generic.GetKeywords() );
             tokens.Add( generic.Name );
         }
-        // AddResult
+        // Type/AddBaseTypeAndInterfaces
+        private static void AddBaseTypeAndInterfaces(this IList<string> tokens, Type? @base, IEnumerable<Type>? interfaces) {
+            if (!Concat( @base, interfaces ).Any()) return;
+            tokens.Add( ":" );
+            tokens.AddRange( ",", Concat( @base, interfaces ), (i, t) => i.Add( t.GetIdentifier() ) );
+        }
+        // Type/AddConstraints
+        private static void AddConstraints(this IList<string> tokens, Type generic) {
+            if (!generic.GetConstraints().Any()) return;
+            tokens.Add( "where" );
+            tokens.Add( generic.Name );
+            tokens.Add( ":" );
+            tokens.AddRange( ",", generic.GetConstraints() );
+        }
+        // Property/AddAccessors
+        private static void AddPropertyAccessors(this IList<string> tokens, MethodInfo? getter, MethodInfo? setter) {
+            tokens.Add( "{" );
+            if (getter != null) {
+                tokens.Add( getter.GetAccessModifier() );
+                tokens.Add( "get" );
+                tokens.Add( ";" );
+            }
+            if (setter != null) {
+                tokens.Add( setter.GetAccessModifier() );
+                tokens.Add( "set" );
+                tokens.Add( ";" );
+            }
+            tokens.Add( "}" );
+        }
+        // Property/AddIndices
+        private static void AddIndices(this IList<string> tokens, ParameterInfo[] indices) {
+            tokens.Add( "[" );
+            tokens.AddRange( ",", indices, AddParameter );
+            tokens.Add( "]" );
+        }
+        // Event/AddAccessors
+        private static void AddEventAccessors(this IList<string> tokens, MethodInfo? adder, MethodInfo? remover, MethodInfo? raiser) {
+            tokens.Add( "{" );
+            if (adder != null) {
+                tokens.Add( adder.GetAccessModifier() );
+                tokens.Add( "add" );
+                tokens.Add( ";" );
+            }
+            if (remover != null) {
+                tokens.Add( remover.GetAccessModifier() );
+                tokens.Add( "remove" );
+                tokens.Add( ";" );
+            }
+            if (raiser != null) {
+                tokens.Add( raiser.GetAccessModifier() );
+                tokens.Add( "raise" );
+                tokens.Add( ";" );
+            }
+            tokens.Add( "}" );
+        }
+        // Method/AddResult
         private static void AddResult(this IList<string> tokens, ParameterInfo parameter) {
             tokens.Add( parameter.ParameterType.GetIdentifier() );
         }
-        // AddParameters
+        // Method/AddParameters
         private static void AddParameters(this IList<string> tokens, IEnumerable<ParameterInfo> parameters) {
             tokens.Add( "(" );
             tokens.AddRange( ",", parameters, AddParameter );
@@ -134,66 +189,28 @@ namespace System.Text.CSharp {
                 tokens.Add( parameter.DefaultValue?.ToString() ?? "null" );
             }
         }
-        // AddIndices
-        private static void AddIndices(this IList<string> tokens, ParameterInfo[] indices) {
-            tokens.Add( "[" );
-            tokens.AddRange( ",", indices, AddParameter );
-            tokens.Add( "]" );
-        }
-        // AddAccessors/Property
-        private static void AddPropertyAccessors(this IList<string> tokens, params MethodInfo?[] accessors) {
-            tokens.Add( "{" );
-            tokens.AddRange( accessors, AddPropertyAccessor );
-            tokens.Add( "}" );
-        }
-        private static void AddPropertyAccessor(this IList<string> tokens, MethodInfo? method) {
-            if (method != null && method.Name.StartsWith( "get_" )) {
-                tokens.Add( method.GetAccessModifier() );
-                tokens.Add( "get" );
-                tokens.Add( ";" );
-            } else
-            if (method != null && method.Name.StartsWith( "set_" )) {
-                tokens.Add( method.GetAccessModifier() );
-                tokens.Add( "set" );
-                tokens.Add( ";" );
+
+
+        // Build
+        private static string Build(this IList<string> tokens) {
+            var builder = new StringBuilder();
+            foreach (var (item, next) in tokens.WithNext()) {
+                builder.Append( item );
+                if (next.HasValue && ShouldHaveSpaceAfter( item ) && ShouldHaveSpaceBefore( next.Value )) {
+                    builder.Append( ' ' );
+                }
             }
+            return builder.ToString();
         }
-        // AddAccessors/Event
-        private static void AddEventAccessors(this IList<string> tokens, params MethodInfo?[] accessors) {
-            tokens.Add( "{" );
-            tokens.AddRange( accessors, AddEventAccessor );
-            tokens.Add( "}" );
+        private static bool ShouldHaveSpaceAfter(string value) {
+            if (value is "<" or "(" or "[") return false;
+            return true;
         }
-        private static void AddEventAccessor(this IList<string> tokens, MethodInfo? method) {
-            if (method != null && method.Name.StartsWith( "add_" )) {
-                tokens.Add( method.GetAccessModifier() );
-                tokens.Add( "add" );
-                tokens.Add( ";" );
-            } else
-            if (method != null && method.Name.StartsWith( "remove_" )) {
-                tokens.Add( method.GetAccessModifier() );
-                tokens.Add( "remove" );
-                tokens.Add( ";" );
-            } else
-            if (method != null && method.Name.StartsWith( "raise_" )) {
-                tokens.Add( method.GetAccessModifier() );
-                tokens.Add( "raise" );
-                tokens.Add( ";" );
-            }
-        }
-        // AddBaseTypeAndInterfaces
-        private static void AddBaseTypeAndInterfaces(this IList<string> tokens, Type? @base, IEnumerable<Type>? interfaces) {
-            if (!Concat( @base, interfaces ).Any()) return;
-            tokens.Add( ":" );
-            tokens.AddRange( ",", Concat( @base, interfaces ), (i, t) => i.Add( t.GetIdentifier() ) );
-        }
-        // AddConstraints
-        private static void AddConstraints(this IList<string> tokens, Type generic) {
-            if (!generic.GetConstraints().Any()) return;
-            tokens.Add( "where" );
-            tokens.Add( generic.Name );
-            tokens.Add( ":" );
-            tokens.AddRange( ",", generic.GetConstraints() );
+        private static bool ShouldHaveSpaceBefore(string next) {
+            if (next is "<" or "(" or "[") return false;
+            if (next is ">" or ")" or "]") return false;
+            if (next is "," or ";") return false;
+            return true;
         }
 
 
@@ -233,27 +250,6 @@ namespace System.Text.CSharp {
                 render( tokens, item );
                 if (!isLast) tokens.Add( separator );
             }
-        }
-        // Helpers/Build
-        private static string Build(this IList<string> tokens) {
-            var builder = new StringBuilder();
-            foreach (var (item, next) in tokens.WithNext()) {
-                builder.Append( item );
-                if (next.HasValue && ShouldHaveSpaceAfter( item ) && ShouldHaveSpaceBefore( next.Value )) {
-                    builder.Append( ' ' );
-                }
-            }
-            return builder.ToString();
-        }
-        private static bool ShouldHaveSpaceAfter(string value) {
-            if (value is "<" or "(" or "[") return false;
-            return true;
-        }
-        private static bool ShouldHaveSpaceBefore(string next) {
-            if (next is "<" or "(" or "[") return false;
-            if (next is ">" or ")" or "]") return false;
-            if (next is "," or ";") return false;
-            return true;
         }
 
 
