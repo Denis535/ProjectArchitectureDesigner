@@ -42,7 +42,11 @@ namespace System.Text.CSharp {
             }
         }
         public static string GetPropertySyntax(this PropertyInfo property) {
-            return CSharpSyntaxFactory.GetPropertySyntax( property.GetKeywords(), property.PropertyType, property.Name, property.GetMethod, property.SetMethod );
+            if (property.IsIndexer()) {
+                return CSharpSyntaxFactory.GetIndexerSyntax( property.GetKeywords(), property.PropertyType, property.GetIndexParameters(), property.GetMethod, property.SetMethod );
+            } else {
+                return CSharpSyntaxFactory.GetPropertySyntax( property.GetKeywords(), property.PropertyType, property.Name, property.GetMethod, property.SetMethod );
+            }
         }
         public static string GetEventSyntax(this EventInfo @event) {
             return CSharpSyntaxFactory.GetEventSyntax( @event.GetKeywords(), @event.EventHandlerType, @event.Name, @event.AddMethod, @event.RemoveMethod, @event.RaiseMethod );
@@ -51,7 +55,11 @@ namespace System.Text.CSharp {
             return CSharpSyntaxFactory.GetConstructorSyntax( constructor.GetKeywords(), constructor.DeclaringType, constructor.GetParameters() );
         }
         public static string GetMethodSyntax(this MethodInfo method) {
-            return CSharpSyntaxFactory.GetMethodSyntax( method.GetKeywords(), method.ReturnParameter, method.Name, method.GetGenericArguments(), method.GetParameters() );
+            if (method.IsOperator()) {
+                return CSharpSyntaxFactory.GetOperatorSyntax( method.GetKeywords(), method.ReturnParameter, method.Name, method.GetGenericArguments(), method.GetParameters() );
+            } else {
+                return CSharpSyntaxFactory.GetMethodSyntax( method.GetKeywords(), method.ReturnParameter, method.Name, method.GetGenericArguments(), method.GetParameters() );
+            }
         }
 
 

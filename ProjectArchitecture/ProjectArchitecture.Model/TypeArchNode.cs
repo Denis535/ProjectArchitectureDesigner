@@ -5,10 +5,11 @@ namespace ProjectArchitecture.Model {
     using System;
     using System.Collections.Generic;
     using System.Text;
+    using System.Text.CSharp;
 
     public class TypeArchNode : ArchNode {
 
-        public override string Name => Value.Name;
+        public override string Name => Value.GetIdentifier();
         public Type Value { get; }
         // Parent
         public GroupArchNode Group { get; internal set; } = default!;

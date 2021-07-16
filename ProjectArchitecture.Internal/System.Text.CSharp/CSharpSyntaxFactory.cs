@@ -12,7 +12,7 @@ namespace System.Text.CSharp {
     internal static class CSharpSyntaxFactory {
 
 
-        // Type
+        // GetTypeSyntax
         public static string GetTypeSyntax(IEnumerable<string> keywords, Type type, Type[] generics, Type? @base, Type[]? interfaces) {
             var tokens = new List<string>();
             tokens.AddRange( keywords );
@@ -22,7 +22,7 @@ namespace System.Text.CSharp {
             tokens.AddRange( generics, AddConstraints );
             return tokens.Build();
         }
-        // Type/Delegate
+        // GetDelegateSyntax
         public static string GetDelegateSyntax(IEnumerable<string> keywords, ParameterInfo result, Type type, Type[] generics, ParameterInfo[] parameters) {
             var tokens = new List<string>();
             tokens.AddRange( keywords );
@@ -34,7 +34,7 @@ namespace System.Text.CSharp {
             tokens.Add( ";" );
             return tokens.Build();
         }
-        // Members
+        // GetMemberSyntax
         public static string GetFieldSyntax(IEnumerable<string> keywords, Type type, string name, bool isLiteral, object? value) {
             var tokens = new List<string>();
             tokens.AddRange( keywords );
@@ -52,6 +52,15 @@ namespace System.Text.CSharp {
             tokens.AddRange( keywords );
             tokens.Add( type.GetIdentifier() );
             tokens.Add( name );
+            tokens.AddPropertyAccessors( getter, setter );
+            return tokens.Build();
+        }
+        public static string GetIndexerSyntax(IEnumerable<string> keywords, Type type, ParameterInfo[] indices, MethodInfo? getter, MethodInfo? setter) {
+            var tokens = new List<string>();
+            tokens.AddRange( keywords );
+            tokens.Add( type.GetIdentifier() );
+            tokens.Add( "this" );
+            tokens.AddIndices( indices );
             tokens.AddPropertyAccessors( getter, setter );
             return tokens.Build();
         }
@@ -82,9 +91,21 @@ namespace System.Text.CSharp {
             tokens.Add( ";" );
             return tokens.Build();
         }
+        public static string GetOperatorSyntax(IEnumerable<string> keywords, ParameterInfo result, string name, Type[] generics, ParameterInfo[] parameters) {
+            // todo:
+            var tokens = new List<string>();
+            tokens.AddRange( keywords );
+            tokens.AddResult( result );
+            tokens.Add( name );
+            tokens.AddGenerics( generics );
+            tokens.AddParameters( parameters );
+            tokens.AddRange( generics, AddConstraints );
+            tokens.Add( ";" );
+            return tokens.Build();
+        }
 
 
-        // Type/Generics
+        // AddGenerics
         private static void AddGenerics(this IList<string> tokens, IEnumerable<Type> generics) {
             if (!generics.Any()) return;
             tokens.Add( "<" );
@@ -95,22 +116,31 @@ namespace System.Text.CSharp {
             tokens.AddRange( generic.GetKeywords() );
             tokens.Add( generic.Name );
         }
-        // Type/Generics/Constraints
-        private static void AddConstraints(this IList<string> tokens, Type generic) {
-            if (generic.GetConstraints().Any()) {
-                tokens.Add( "where" );
-                tokens.Add( generic.Name );
-                tokens.Add( ":" );
-                tokens.AddRange( ",", generic.GetConstraints() );
+        // AddResult
+        private static void AddResult(this IList<string> tokens, ParameterInfo parameter) {
+            tokens.Add( parameter.ParameterType.GetIdentifier() );
+        }
+        // AddParameters
+        private static void AddParameters(this IList<string> tokens, IEnumerable<ParameterInfo> parameters) {
+            tokens.Add( "(" );
+            tokens.AddRange( ",", parameters, AddParameter );
+            tokens.Add( ")" );
+        }
+        private static void AddParameter(this IList<string> tokens, ParameterInfo parameter) {
+            tokens.Add( parameter.ParameterType.GetIdentifier() );
+            tokens.Add( parameter.Name );
+            if (parameter.HasDefaultValue) {
+                tokens.Add( "=" );
+                tokens.Add( parameter.DefaultValue?.ToString() ?? "null" );
             }
         }
-        // Type/Base
-        private static void AddBaseTypeAndInterfaces(this IList<string> tokens, Type? @base, IEnumerable<Type>? interfaces) {
-            if (!Concat( @base, interfaces ).Any()) return;
-            tokens.Add( ":" );
-            tokens.AddRange( ",", Concat( @base, interfaces ), (i, t) => i.Add( t.GetIdentifier() ) );
+        // AddIndices
+        private static void AddIndices(this IList<string> tokens, ParameterInfo[] indices) {
+            tokens.Add( "[" );
+            tokens.AddRange( ",", indices, AddParameter );
+            tokens.Add( "]" );
         }
-        // Property/Accessors
+        // AddAccessors/Property
         private static void AddPropertyAccessors(this IList<string> tokens, params MethodInfo?[] accessors) {
             tokens.Add( "{" );
             tokens.AddRange( accessors, AddPropertyAccessor );
@@ -128,7 +158,7 @@ namespace System.Text.CSharp {
                 tokens.Add( ";" );
             }
         }
-        // Event/Accessors
+        // AddAccessors/Event
         private static void AddEventAccessors(this IList<string> tokens, params MethodInfo?[] accessors) {
             tokens.Add( "{" );
             tokens.AddRange( accessors, AddEventAccessor );
@@ -151,22 +181,19 @@ namespace System.Text.CSharp {
                 tokens.Add( ";" );
             }
         }
-        // Method/Parameters
-        private static void AddResult(this IList<string> tokens, ParameterInfo parameter) {
-            tokens.Add( parameter.ParameterType.GetIdentifier() );
+        // AddBaseTypeAndInterfaces
+        private static void AddBaseTypeAndInterfaces(this IList<string> tokens, Type? @base, IEnumerable<Type>? interfaces) {
+            if (!Concat( @base, interfaces ).Any()) return;
+            tokens.Add( ":" );
+            tokens.AddRange( ",", Concat( @base, interfaces ), (i, t) => i.Add( t.GetIdentifier() ) );
         }
-        private static void AddParameters(this IList<string> tokens, IEnumerable<ParameterInfo> parameters) {
-            tokens.Add( "(" );
-            tokens.AddRange( ",", parameters, AddParameter );
-            tokens.Add( ")" );
-        }
-        private static void AddParameter(this IList<string> tokens, ParameterInfo parameter) {
-            tokens.Add( parameter.ParameterType.GetIdentifier() );
-            tokens.Add( parameter.Name );
-            if (parameter.HasDefaultValue) {
-                tokens.Add( "=" );
-                tokens.Add( parameter.DefaultValue?.ToString() ?? "null" );
-            }
+        // AddConstraints
+        private static void AddConstraints(this IList<string> tokens, Type generic) {
+            if (!generic.GetConstraints().Any()) return;
+            tokens.Add( "where" );
+            tokens.Add( generic.Name );
+            tokens.Add( ":" );
+            tokens.AddRange( ",", generic.GetConstraints() );
         }
 
 
@@ -212,14 +239,19 @@ namespace System.Text.CSharp {
             var builder = new StringBuilder();
             foreach (var (item, next) in tokens.WithNext()) {
                 builder.Append( item );
-                if (next.HasValue && ShouldHaveSpace( item, next.Value )) builder.Append( ' ' );
+                if (next.HasValue && ShouldHaveSpaceAfter( item ) && ShouldHaveSpaceBefore( next.Value )) {
+                    builder.Append( ' ' );
+                }
             }
             return builder.ToString();
         }
-        private static bool ShouldHaveSpace(string value, string next) {
-            if (value is "<" or "(") return false;
-            if (next is "<" or "(") return false;
-            if (next is ">" or ")") return false;
+        private static bool ShouldHaveSpaceAfter(string value) {
+            if (value is "<" or "(" or "[") return false;
+            return true;
+        }
+        private static bool ShouldHaveSpaceBefore(string next) {
+            if (next is "<" or "(" or "[") return false;
+            if (next is ">" or ")" or "]") return false;
             if (next is "," or ";") return false;
             return true;
         }

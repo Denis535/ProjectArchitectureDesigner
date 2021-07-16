@@ -43,7 +43,7 @@ namespace System.Text.CSharp {
 
 
         [Test]
-        public void Test_00_TypeSyntax() {
+        public void Test_00_GetTypeSyntax() {
             TestContext.WriteLine( typeof( IExampleInterface<,> ).GetTypeSyntax() );
             TestContext.WriteLine( typeof( ExampleClass<,> ).GetTypeSyntax() );
             TestContext.WriteLine( typeof( ExampleRecord<,> ).GetTypeSyntax() );

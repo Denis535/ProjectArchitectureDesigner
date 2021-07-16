@@ -16,7 +16,7 @@ namespace System.Text.CSharp {
         public static bool IsIndexer(this PropertyInfo property) {
             return property.Name == "Item" && property.GetIndexParameters().Length > 0;
         }
-        public static bool IsOperator(MethodInfo method) {
+        public static bool IsOperator(this MethodInfo method) {
             return method.IsPublic && method.IsStatic && method.IsSpecialName && method.Name.StartsWith( "op_" );
         }
         // GetKeywords

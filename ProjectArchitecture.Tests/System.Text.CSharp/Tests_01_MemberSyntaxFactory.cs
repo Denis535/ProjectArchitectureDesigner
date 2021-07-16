@@ -7,15 +7,15 @@ namespace System.Text.CSharp {
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
-    using System.Runtime.CompilerServices;
     using NUnit.Framework;
 
     public class Tests_01_MemberSyntaxFactory {
 
-        public abstract class ExampleClass<T> where T : class {
-            public const object? Field = default;
+        public abstract class ExampleClass<T> {
+            public object? Field = default;
             public object? Property { get; set; }
-            public event Action? Event;
+            public object? this[ int ind1, int ind2 ] { get { return default; } set { } }
+            public event Action? Event { add { } remove { } }
             public ExampleClass(T arg) {
             }
             public T1? Method<T1, T2>(T arg, T1? arg1, T2? arg2) where T1 : class, IDisposable, new() where T2 : struct {
@@ -25,25 +25,13 @@ namespace System.Text.CSharp {
 
 
         [Test]
-        public void Test_00_MemberSyntax() {
-            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().DeclaredFields.Single( IsUserDefined ).GetFieldSyntax() );
-            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().DeclaredProperties.Single( IsUserDefined ).GetPropertySyntax() );
-            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().DeclaredEvents.Single( IsUserDefined ).GetEventSyntax() );
+        public void Test_00_GetMemberSyntax() {
+            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().GetDeclaredField( "Field" )!.GetFieldSyntax() );
+            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().GetDeclaredProperty( "Property" )!.GetPropertySyntax() );
+            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().GetDeclaredProperty( "Item" )!.GetPropertySyntax() );
+            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().GetDeclaredEvent( "Event" )!.GetEventSyntax() );
             TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().DeclaredConstructors.Single().GetConstructorSyntax() );
-            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().DeclaredMethods.Single( IsUserDefined ).GetMethodSyntax() );
-        }
-
-
-        // Helpers
-        private static bool IsUserDefined(MemberInfo member) {
-            return !IsSpecialName( member ) && !member.IsDefined( typeof( CompilerGeneratedAttribute ) );
-        }
-        private static bool IsSpecialName(MemberInfo member) {
-            if (member is FieldInfo field) return field.IsSpecialName;
-            if (member is PropertyInfo prop) return prop.IsSpecialName;
-            if (member is EventInfo @event) return @event.IsSpecialName;
-            if (member is MethodBase method) return method.IsSpecialName;
-            return false;
+            TestContext.WriteLine( typeof( ExampleClass<> ).GetTypeInfo().GetDeclaredMethod( "Method" )!.GetMethodSyntax() );
         }
 
 
