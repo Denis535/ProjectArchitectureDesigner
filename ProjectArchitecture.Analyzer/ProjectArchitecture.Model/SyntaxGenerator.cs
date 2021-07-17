@@ -49,12 +49,10 @@ namespace ProjectArchitecture.Model {
                 .AddMembers( classes );
         }
         private static ClassDeclarationSyntax CreateClassDeclaration_Group(GroupEntry group) {
-            var comment = SyntaxFactoryUtils.Comment( "// Group: {0}", group.Name );
             var name = CreatePropertyDeclaration_Name( group.Name );
             var properties = group.Types.Select( CreatePropertyDeclaration_Type ).ToArray();
             return
                 SyntaxFactoryUtils.ClassDeclaration( group.Type, "GroupArchNode" )
-                .WithLeadingTrivia( comment )
                 .AddMembers( name )
                 .AddMembers( properties );
         }
@@ -67,25 +65,21 @@ namespace ProjectArchitecture.Model {
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Module(ModuleEntry module) {
             var type = module.Type;
             var identifier = module.Identifier;
-            //var comment = SyntaxFactoryUtils.Comment( "// Module: {0}", module.Name );
             return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, $"new {type}()" );
         }
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Namespace(NamespaceEntry @namespace) {
             var type = @namespace.Type;
             var identifier = @namespace.Identifier;
-            //var comment = SyntaxFactoryUtils.Comment( "// Namespace: {0}", @namespace.Name );
             return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, $"new {type}()" );
         }
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Group(GroupEntry group) {
             var type = group.Type;
             var identifier = group.Identifier;
-            //var comment = SyntaxFactoryUtils.Comment( "// Group: {0}", group.Name );
             return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, $"new {type}()" );
         }
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Type(TypeEntry type) {
             var type_ = type.Type;
             var identifier = type.Identifier;
-            //var comment = SyntaxFactoryUtils.Comment( "// Type: {0}", type.Name );
             return SyntaxFactoryUtils.PropertyDeclaration( "TypeArchNode", identifier, $"typeof({type_})" );
         }
 

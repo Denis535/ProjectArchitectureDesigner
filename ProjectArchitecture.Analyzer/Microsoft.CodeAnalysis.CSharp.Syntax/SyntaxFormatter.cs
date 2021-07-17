@@ -53,7 +53,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
                     return SyntaxFactoryUtils.EndOfLine().AsEnumerable();
                 }
             }
-            if (ShouldHaveSpace( token )) {
+            if (ShouldHaveSpace( token, token.GetNextToken() )) {
                 return SyntaxFactory.Space.AsEnumerable();
             }
             return Enumerable.Empty<SyntaxTrivia>();
@@ -71,14 +71,22 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
             if (token.Kind() == SyntaxKind.CloseBraceToken && token.Parent is CompilationUnitSyntax or MemberDeclarationSyntax or BlockSyntax) return true; // } [eol]
             return false;
         }
-        private static bool ShouldHaveSpace(SyntaxToken token) {
-            var nextToken = token.GetNextToken();
-            if (token.Kind() is SyntaxKind.DotToken) return false; // . [space]
-            if (token.Kind() is SyntaxKind.OpenParenToken or SyntaxKind.OpenBracketToken) return false; // ([ [space]
-            if (nextToken.Kind() is SyntaxKind.DotToken) return false; // [space] .
-            if (nextToken.Kind() is SyntaxKind.OpenParenToken or SyntaxKind.OpenBracketToken) return false; // [space] ([
-            if (nextToken.Kind() is SyntaxKind.CloseParenToken or SyntaxKind.CloseBracketToken) return false; // [space] ])
-            if (nextToken.Kind() is SyntaxKind.SemicolonToken) return false; // [space] ;
+        private static bool ShouldHaveSpace(SyntaxToken current, SyntaxToken next) {
+            if (current.Kind() is SyntaxKind.OpenParenToken) return false;   // ( [space]
+            if (current.Kind() is SyntaxKind.OpenBracketToken) return false; // [ [space]
+            if (current.Kind() is SyntaxKind.LessThanToken && current.Parent is TypeArgumentListSyntax) return false;  // < [space]
+            if (current.Kind() is SyntaxKind.DotToken) return false;         // . [space]
+
+            if (next.Kind() is SyntaxKind.OpenParenToken) return false;   // [space] (
+            if (next.Kind() is SyntaxKind.OpenBracketToken) return false; // [space] [
+            if (next.Kind() is SyntaxKind.LessThanToken && next.Parent is TypeArgumentListSyntax) return false;    // [space] <
+
+            if (next.Kind() is SyntaxKind.CloseParenToken) return false;   // [space] )
+            if (next.Kind() is SyntaxKind.CloseBracketToken) return false; // [space] ]
+            if (next.Kind() is SyntaxKind.GreaterThanToken && next.Parent is TypeArgumentListSyntax) return false;  // [space] >
+
+            if (next.Kind() is SyntaxKind.DotToken) return false;       // [space] .
+            if (next.Kind() is SyntaxKind.SemicolonToken) return false; // [space] ;
             return true;
         }
         private static string GetIndent(SyntaxToken token) {
@@ -100,6 +108,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         private static bool IsNotTrash(SyntaxTrivia trivia) {
             return trivia.FullSpan.Length > 0 && trivia.Kind() is not SyntaxKind.WhitespaceTrivia;
         }
+
 
     }
 }
