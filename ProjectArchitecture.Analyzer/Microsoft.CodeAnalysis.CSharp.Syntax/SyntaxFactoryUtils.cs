@@ -6,12 +6,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
     internal static class SyntaxFactoryUtils {
 
 
-        // CompilationUnit
+        // Syntax
         public static CompilationUnitSyntax CompilationUnit(CompilationUnitSyntax unit) {
             return SyntaxFactory.CompilationUnit(
                 unit.Externs.WithoutTrivia(),
@@ -20,9 +19,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
                 List<MemberDeclarationSyntax>()
                 );
         }
-
-
-        // Members
         public static NamespaceDeclarationSyntax NamespaceDeclaration(NamespaceDeclarationSyntax @namespace) {
             return SyntaxFactory.NamespaceDeclaration(
                 @namespace.Name.WithoutTrivia(),
@@ -43,69 +39,16 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
                 );
         }
         public static ClassDeclarationSyntax ClassDeclaration(string identifier, string @base) {
-            return SyntaxFactory.ClassDeclaration(
-                List<AttributeListSyntax>(),
-                TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                Identifier( identifier ),
-                null,
-                BaseList( SeparatedList<BaseTypeSyntax>( NodeOrTokenList( SimpleBaseType( ParseTypeName( @base ) ) ) ) ),
-                List<TypeParameterConstraintClauseSyntax>(),
-                List<MemberDeclarationSyntax>()
-                );
+            var syntax = $"public class {identifier} : {@base} {{\r\n}}";
+            return (ClassDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( syntax ) ?? throw new Exception( "Class declaration syntax is invalid" );
         }
-        public static PropertyDeclarationSyntax PropertyDeclaration(string type, string identifier, ExpressionSyntax expression) {
-            return SyntaxFactory.PropertyDeclaration(
-                List<AttributeListSyntax>(),
-                TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                ParseTypeName( type ),
-                null,
-                Identifier( identifier ),
-                AccessorList( List( AccessorDeclaration( SyntaxKind.GetAccessorDeclaration, List<AttributeListSyntax>(), TokenList(), Token( SyntaxKind.GetKeyword ), null, null, Token( SyntaxKind.SemicolonToken ) ) ) ),
-                null,
-                EqualsValueClause( expression ),
-                Token( SyntaxKind.SemicolonToken )
-                );
+        public static PropertyDeclarationSyntax PropertyDeclaration(string type, string identifier, string expression) {
+            var syntax = $"public {type} {identifier} {{ get; }} = {expression};";
+            return (PropertyDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( syntax ) ?? throw new Exception( "Property declaration syntax is invalid" );
         }
-        public static PropertyDeclarationSyntax PropertyDeclaration_Overriding(string type, string identifier, ExpressionSyntax expression) {
-            return SyntaxFactory.PropertyDeclaration(
-                List<AttributeListSyntax>(),
-                TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.OverrideKeyword ) ),
-                ParseTypeName( type ),
-                null,
-                Identifier( identifier ),
-                AccessorList( List( AccessorDeclaration( SyntaxKind.GetAccessorDeclaration, List<AttributeListSyntax>(), TokenList(), Token( SyntaxKind.GetKeyword ), null, null, Token( SyntaxKind.SemicolonToken ) ) ) ),
-                null,
-                EqualsValueClause( expression ),
-                Token( SyntaxKind.SemicolonToken )
-                );
-        }
-
-
-        // Expressions
-        public static ExpressionSyntax StringLiteral(string value) {
-            return LiteralExpression(
-                SyntaxKind.StringLiteralExpression,
-                Token( default, SyntaxKind.StringLiteralToken, '\"' + value + '\"', value, default )
-                );
-        }
-        public static ExpressionSyntax ObjectCreationExpression(string type) {
-            return SyntaxFactory.ObjectCreationExpression(
-                ParseTypeName( type ),
-                ArgumentList(),
-                null
-                );
-        }
-        //public static ExpressionSyntax ObjectCreationExpression(string type, string argument) {
-        //    return SyntaxFactory.ObjectCreationExpression(
-        //        ParseTypeName( type ),
-        //        ArgumentList( SeparatedList<ArgumentSyntax>( NodeOrTokenList( Literal( argument ) ) ) ),
-        //        null
-        //        );
-        //}
-        public static ExpressionSyntax TypeOfExpression(string type) {
-            return SyntaxFactory.TypeOfExpression(
-                ParseTypeName( type )
-                );
+        public static PropertyDeclarationSyntax PropertyDeclaration_Overriding(string type, string identifier, string expression) {
+            var syntax = $"public override {type} {identifier} {{ get; }} = {expression};";
+            return (PropertyDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( syntax ) ?? throw new Exception( "Property declaration syntax is invalid" );
         }
 
 

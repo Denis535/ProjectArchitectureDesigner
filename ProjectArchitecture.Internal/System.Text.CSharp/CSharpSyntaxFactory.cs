@@ -134,7 +134,7 @@ namespace System.Text.CSharp {
         private static void AddPropertyAccessors(this IList<string> tokens, MethodInfo? getter, MethodInfo? setter) {
             tokens.Add( "{" );
             if (getter != null) {
-                tokens.Add( getter.GetAccessModifier() );
+                tokens.Add( getter.GetAccessModifier() ); // todo: don't add default accessor
                 tokens.Add( "get" );
                 tokens.Add( ";" );
             }

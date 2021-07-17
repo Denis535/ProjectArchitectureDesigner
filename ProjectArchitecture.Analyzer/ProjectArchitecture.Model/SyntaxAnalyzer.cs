@@ -14,10 +14,10 @@ namespace ProjectArchitecture.Model {
 
 
         // Project
-        public static bool IsProject(ClassDeclarationSyntax @class) {
+        public static bool IsProject(this ClassDeclarationSyntax @class) {
             return @class.IsChildOf( "ProjectArchNode" );
         }
-        public static ProjectInfo GetProjectInfo(ClassDeclarationSyntax @class) {
+        public static ProjectInfo GetProjectInfo(this ClassDeclarationSyntax @class) {
             var type = @class.Identifier.ValueText;
             var modules = @class
                 .GetMethods( "Initialize" )
@@ -31,10 +31,10 @@ namespace ProjectArchitecture.Model {
 
 
         // Module
-        public static bool IsModule(ClassDeclarationSyntax @class) {
+        public static bool IsModule(this ClassDeclarationSyntax @class) {
             return @class.IsChildOf( "ModuleArchNode" );
         }
-        public static ModuleInfo GetModuleInfo(ClassDeclarationSyntax @class) {
+        public static ModuleInfo GetModuleInfo(this ClassDeclarationSyntax @class) {
             var type = @class.Identifier.ValueText;
             var @namespaces = @class
                 .GetMethods( "Initialize" )

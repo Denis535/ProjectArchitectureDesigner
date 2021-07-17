@@ -55,9 +55,10 @@ namespace ProjectArchitecture.Model {
             }
         }
         private static void Execute(GeneratorExecutionContext context, CompilationUnitSyntax unit) {
-            var name = GetGeneratedSourceName( unit );
-            var source = GetGeneratedSource( unit );
-            if (source != null) {
+            var unit_generated = Generate( unit );
+            if (unit_generated != null) {
+                var name = GetGeneratedName( unit );
+                var source = unit_generated.Format().ToFullString();
                 Debug.WriteLine( "Generated source: " + name );
                 Debug.WriteLine( source );
                 context.AddSource( name, source );
@@ -66,38 +67,33 @@ namespace ProjectArchitecture.Model {
 
 
         // Helpers
-        private static string GetGeneratedSourceName(CompilationUnitSyntax unit) {
+        private static CompilationUnitSyntax? Generate(CompilationUnitSyntax unit) {
+            var members_generated = Generate( unit.Members ).ToArray();
+            if (members_generated.Any()) {
+                return SyntaxFactoryUtils.CompilationUnit( unit ).AddMembers( members_generated );
+            }
+            return null;
+        }
+        private static IEnumerable<MemberDeclarationSyntax> Generate(IEnumerable<MemberDeclarationSyntax> members) {
+            foreach (var member in members) {
+                if (member is NamespaceDeclarationSyntax @namespace) {
+                    var members_generated = Generate( @namespace.Members ).ToArray();
+                    if (members_generated.Any()) {
+                        yield return SyntaxFactoryUtils.NamespaceDeclaration( @namespace ).AddMembers( members_generated );
+                    }
+                } else
+                if (member is ClassDeclarationSyntax @class) {
+                    if (@class.IsPartial() && @class.IsProject()) {
+                        yield return SyntaxGenerator.CreateClassDeclaration_Project( @class, @class.GetProjectInfo() );
+                    }
+                    if (@class.IsPartial() && @class.IsModule()) {
+                        yield return SyntaxGenerator.CreateClassDeclaration_Module( @class, @class.GetModuleInfo() );
+                    }
+                }
+            }
+        }
+        private static string GetGeneratedName(CompilationUnitSyntax unit) {
             return Path.GetFileNameWithoutExtension( unit.SyntaxTree.FilePath ) + ".Generated.cs";
-        }
-        private static string? GetGeneratedSource(CompilationUnitSyntax unit) {
-            return CreateCompilationUnit( unit )?.Format().ToFullString();
-        }
-        // Helpers/CreateSyntax
-        private static CompilationUnitSyntax? CreateCompilationUnit(CompilationUnitSyntax unit) {
-            var members = unit.Members.Select( CreateMemberDeclaration ).OfType<MemberDeclarationSyntax>().ToArray();
-            if (!members.Any()) return null;
-            return SyntaxFactoryUtils.CompilationUnit( unit ).AddMembers( members );
-        }
-        private static MemberDeclarationSyntax? CreateMemberDeclaration(MemberDeclarationSyntax member) {
-            if (member is NamespaceDeclarationSyntax @namespace) return CreateNamespaceDeclaration( @namespace );
-            if (member is ClassDeclarationSyntax @class) return CreateClassDeclaration( @class );
-            return null;
-        }
-        private static NamespaceDeclarationSyntax? CreateNamespaceDeclaration(NamespaceDeclarationSyntax @namespace) {
-            var members = @namespace.Members.Select( CreateMemberDeclaration ).OfType<MemberDeclarationSyntax>().ToArray();
-            if (!members.Any()) return null;
-            return SyntaxFactoryUtils.NamespaceDeclaration( @namespace ).AddMembers( members );
-        }
-        private static ClassDeclarationSyntax? CreateClassDeclaration(ClassDeclarationSyntax @class) {
-            if (@class.IsPartial() && SyntaxAnalyzer.IsProject( @class )) {
-                var project = SyntaxAnalyzer.GetProjectInfo( @class );
-                return SyntaxGenerator.CreateClassDeclaration_Project( @class, project );
-            }
-            if (@class.IsPartial() && SyntaxAnalyzer.IsModule( @class )) {
-                var module = SyntaxAnalyzer.GetModuleInfo( @class );
-                return SyntaxGenerator.CreateClassDeclaration_Module( @class, module );
-            }
-            return null;
         }
 
 
