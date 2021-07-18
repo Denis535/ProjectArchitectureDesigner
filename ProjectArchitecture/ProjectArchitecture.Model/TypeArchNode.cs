@@ -9,12 +9,13 @@ namespace ProjectArchitecture.Model {
 
     public class TypeArchNode : ArchNode {
 
-        public override string Name => Value.GetIdentifier();
         public Type Value { get; }
+        public override string Name => Value.GetIdentifier();
         // Parent
-        public GroupArchNode Group { get; internal set; } = default!;
-        public NamespaceArchNode Namespace => Group.Namespace;
+        public ProjectArchNode Project => Group.Namespace.Module.Project;
         public ModuleArchNode Module => Group.Namespace.Module;
+        public NamespaceArchNode Namespace => Group.Namespace;
+        public GroupArchNode Group { get; internal set; } = default!;
 
 
         public TypeArchNode(Type value) {

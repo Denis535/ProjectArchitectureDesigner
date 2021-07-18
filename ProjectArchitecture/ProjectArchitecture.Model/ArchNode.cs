@@ -20,24 +20,24 @@ namespace ProjectArchitecture.Model {
 
 
         // Helpers/GetName
-        private protected static string GetName(ProjectArchNode node) {
+        protected static string GetName(ProjectArchNode node) {
             return WithoutPrefix( node.GetType().Name, "Project_" ).Replace( '_', '.' );
         }
-        private protected static string GetName(ModuleArchNode node) {
+        protected static string GetName(ModuleArchNode node) {
             return WithoutPrefix( node.GetType().Name, "Module_" ).Replace( '_', '.' );
         }
-        private protected static string GetName(NamespaceArchNode node) {
+        protected static string GetName(NamespaceArchNode node) {
             return WithoutPrefix( node.GetType().Name, "Namespace_" ).Replace( '_', '.' );
         }
-        private protected static string GetName(GroupArchNode node) {
+        protected static string GetName(GroupArchNode node) {
             return WithoutPrefix( node.GetType().Name, "Group_" ).Replace( '_', ' ' );
         }
         // Helpers/GetChildren
-        private protected static IEnumerable<T> GetChildren<T>(ArchNode node) {
+        protected static IEnumerable<T> GetChildren<T>(ArchNode node) {
             return
                 node
                 .GetType()
-                .GetProperties( BindingFlags.Public | BindingFlags.Instance )
+                .GetProperties( BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly )
                 .Where( IsOfType<T> )
                 .Select( i => i.GetValue( node ) )
                 .Cast<T>();
@@ -48,17 +48,17 @@ namespace ProjectArchitecture.Model {
                 property.PropertyType.IsSubclassOf( typeof( T ) );
         }
         // Helpers/GetDescendantNodes
-        private protected static IEnumerable<ArchNode> GetDescendantNodes(ProjectArchNode node) {
-            return node.Modules.SelectMany( i => GetDescendantNodes( i ).Prepend( i ) );
+        private protected static IEnumerable<ArchNode> GetDescendantNodes(ProjectArchNode project) {
+            return project.Modules.SelectMany( i => GetDescendantNodes( i ).Prepend( i ) );
         }
-        private protected static IEnumerable<ArchNode> GetDescendantNodes(ModuleArchNode node) {
-            return node.Namespaces.SelectMany( i => GetDescendantNodes( i ).Prepend( i ) );
+        private protected static IEnumerable<ArchNode> GetDescendantNodes(ModuleArchNode module) {
+            return module.Namespaces.SelectMany( i => GetDescendantNodes( i ).Prepend( i ) );
         }
-        private protected static IEnumerable<ArchNode> GetDescendantNodes(NamespaceArchNode node) {
-            return node.Groups.SelectMany( i => GetDescendantNodes( i ).Prepend( i ) );
+        private protected static IEnumerable<ArchNode> GetDescendantNodes(NamespaceArchNode @namespace) {
+            return @namespace.Groups.SelectMany( i => GetDescendantNodes( i ).Prepend( i ) );
         }
-        private protected static IEnumerable<ArchNode> GetDescendantNodes(GroupArchNode node) {
-            return node.Types;
+        private protected static IEnumerable<ArchNode> GetDescendantNodes(GroupArchNode group) {
+            return group.Types;
         }
         // Helpers/String
         private static string WithoutPrefix(string value, string prefix) {

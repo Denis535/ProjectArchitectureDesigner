@@ -50,7 +50,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
                 if (trivia.Any()) {
                     return SyntaxFactory.Space.Append( trivia );
                 } else {
-                    return SyntaxFactoryUtils.EndOfLine().AsEnumerable();
+                    return SyntaxFactory2.EndOfLine().AsEnumerable();
                 }
             }
             if (ShouldHaveSpace( token, token.GetNextToken() )) {
@@ -86,6 +86,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
             if (next.Kind() is SyntaxKind.GreaterThanToken && next.Parent is TypeArgumentListSyntax) return false;  // [space] >
 
             if (next.Kind() is SyntaxKind.DotToken) return false;       // [space] .
+            if (next.Kind() is SyntaxKind.CommaToken) return false;     // [space] ,
             if (next.Kind() is SyntaxKind.SemicolonToken) return false; // [space] ;
             return true;
         }
@@ -99,9 +100,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
                 if (trivia_.Kind() is not SyntaxKind.EndOfLineTrivia) {
                     yield return SyntaxFactory.Whitespace( indent );
                     yield return trivia_;
-                    yield return SyntaxFactoryUtils.EndOfLine();
+                    yield return SyntaxFactory2.EndOfLine();
                 } else {
-                    yield return SyntaxFactoryUtils.EndOfLine();
+                    yield return SyntaxFactory2.EndOfLine();
                 }
             }
         }

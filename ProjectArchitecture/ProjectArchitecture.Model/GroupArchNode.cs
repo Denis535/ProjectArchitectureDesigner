@@ -9,20 +9,15 @@ namespace ProjectArchitecture.Model {
 
     public abstract class GroupArchNode : ArchNode {
 
-        public override string Name => GetName( this );
         public bool IsDefault => Name is (null or "" or "Default");
         // Parent
-        public NamespaceArchNode Namespace { get; internal set; } = default!;
+        public ProjectArchNode Project => Namespace.Module.Project;
         public ModuleArchNode Module => Namespace.Module;
+        public NamespaceArchNode Namespace { get; internal set; } = default!;
         // Children
-        public virtual TypeArchNode[] Types => GetChildren<TypeArchNode>( this ).ToArray();
+        public abstract TypeArchNode[] Types { get; }
         public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
         public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
-
-
-        public GroupArchNode() {
-            foreach (var type in Types) type.Group = this;
-        }
 
 
         // Utils

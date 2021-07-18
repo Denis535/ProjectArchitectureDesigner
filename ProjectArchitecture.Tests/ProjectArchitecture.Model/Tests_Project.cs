@@ -30,15 +30,32 @@ namespace ProjectArchitecture.Model {
 
         // Project
         [Test]
+        public void Test_00_Project() {
+            foreach (var module in Project.DescendantNodes.OfType<ModuleArchNode>()) {
+                Assert.NotNull( module.Project );
+            }
+            foreach (var @namespace in Project.DescendantNodes.OfType<NamespaceArchNode>()) {
+                Assert.NotNull( @namespace.Module );
+            }
+            foreach (var group in Project.DescendantNodes.OfType<GroupArchNode>()) {
+                Assert.NotNull( group.Namespace );
+            }
+            foreach (var type in Project.DescendantNodes.OfType<TypeArchNode>()) {
+                Assert.NotNull( type.Value );
+                Assert.NotNull( type.Name );
+                Assert.NotNull( type.Group );
+            }
+        }
+        [Test]
         public void Test_00_Project_Modules() {
             foreach (var type in Project.DescendantNodes.OfType<TypeArchNode>()) {
-                Assert.That( type.Value.Assembly.GetName().Name, Is.EqualTo( type.Module.Name ) );
+                Assert.That( type.Module.Name, Is.EqualTo( type.Value.Assembly.GetName().Name ) );
             }
         }
         [Test]
         public void Test_00_Project_Namespaces() {
             foreach (var type in Project.DescendantNodes.OfType<TypeArchNode>()) {
-                Assert.That( type.Value.Namespace, Is.EqualTo( type.Namespace.Name ) );
+                Assert.That( type.Namespace.Name, Is.EqualTo( type.Value.Namespace ) );
             }
         }
         [Test]

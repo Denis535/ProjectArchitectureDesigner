@@ -70,7 +70,7 @@ namespace ProjectArchitecture.Model {
         private static CompilationUnitSyntax? Generate(CompilationUnitSyntax unit) {
             var members_generated = Generate( unit.Members ).ToArray();
             if (members_generated.Any()) {
-                return SyntaxFactoryUtils.CompilationUnit( unit ).AddMembers( members_generated );
+                return SyntaxFactory2.CompilationUnit( unit ).AddMembers( members_generated );
             }
             return null;
         }
@@ -79,7 +79,7 @@ namespace ProjectArchitecture.Model {
                 if (member is NamespaceDeclarationSyntax @namespace) {
                     var members_generated = Generate( @namespace.Members ).ToArray();
                     if (members_generated.Any()) {
-                        yield return SyntaxFactoryUtils.NamespaceDeclaration( @namespace ).AddMembers( members_generated );
+                        yield return SyntaxFactory2.NamespaceDeclaration( @namespace ).AddMembers( members_generated );
                     }
                 } else
                 if (member is ClassDeclarationSyntax @class) {

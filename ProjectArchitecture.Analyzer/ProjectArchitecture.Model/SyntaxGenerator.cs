@@ -14,73 +14,92 @@ namespace ProjectArchitecture.Model {
 
         // Project
         public static ClassDeclarationSyntax CreateClassDeclaration_Project(ClassDeclarationSyntax @class, ProjectInfo project) {
-            var comment = SyntaxFactoryUtils.Comment( "// Project: {0}", project.Name );
+            var comment = SyntaxFactory2.Comment( "// Project: {0}", project.Name );
             var name = CreatePropertyDeclaration_Name( project.Name );
-            var properties = project.Modules.Select( CreatePropertyDeclaration_Module ).ToArray();
+            var modules = CreatePropertyDeclaration_Modules( project.Modules );
+            var modules_properties = project.Modules.Select( CreatePropertyDeclaration_Module ).ToArray();
             return
-                SyntaxFactoryUtils.ClassDeclaration( @class )
-                .WithLeadingTrivia( SyntaxFactoryUtils.EndOfLine(), comment )
+                SyntaxFactory2.ClassDeclaration( @class )
+                .WithLeadingTrivia( SyntaxFactory2.EndOfLine(), comment )
                 .AddMembers( name )
-                .AddMembers( properties );
+                .AddMembers( modules )
+                .AddMembers( modules_properties );
         }
         // Module
         public static ClassDeclarationSyntax CreateClassDeclaration_Module(ClassDeclarationSyntax @class, ModuleInfo module) {
-            var comment = SyntaxFactoryUtils.Comment( "// Module: {0}", module.Name );
+            var comment = SyntaxFactory2.Comment( "// Module: {0}", module.Name );
             var name = CreatePropertyDeclaration_Name( module.Name );
-            var properties = module.Namespaces.Select( CreatePropertyDeclaration_Namespace ).ToArray();
-            var classes = module.Namespaces.Select( CreateClassDeclaration_Namespace ).ToArray();
+            var namespaces = CreatePropertyDeclaration_Namespaces( module.Namespaces );
+            var namespaces_properties = module.Namespaces.Select( CreatePropertyDeclaration_Namespace ).ToArray();
+            var namespaces_classes = module.Namespaces.Select( CreateClassDeclaration_Namespace ).ToArray();
             return
-                SyntaxFactoryUtils.ClassDeclaration( @class )
-                .WithLeadingTrivia( SyntaxFactoryUtils.EndOfLine(), comment )
+                SyntaxFactory2.ClassDeclaration( @class )
+                .WithLeadingTrivia( SyntaxFactory2.EndOfLine(), comment )
                 .AddMembers( name )
-                .AddMembers( properties )
-                .AddMembers( classes );
+                .AddMembers( namespaces )
+                .AddMembers( namespaces_properties )
+                .AddMembers( namespaces_classes );
         }
         private static ClassDeclarationSyntax CreateClassDeclaration_Namespace(NamespaceEntry @namespace) {
-            var comment = SyntaxFactoryUtils.Comment( "// Namespace: {0}", @namespace.Name );
+            var comment = SyntaxFactory2.Comment( "// Namespace: {0}", @namespace.Name );
             var name = CreatePropertyDeclaration_Name( @namespace.Name );
-            var properties = @namespace.Groups.Select( CreatePropertyDeclaration_Group ).ToArray();
-            var classes = @namespace.Groups.Select( CreateClassDeclaration_Group ).ToArray();
+            var groups = CreatePropertyDeclaration_Groups( @namespace.Groups );
+            var groups_properties = @namespace.Groups.Select( CreatePropertyDeclaration_Group ).ToArray();
+            var groups_classes = @namespace.Groups.Select( CreateClassDeclaration_Group ).ToArray();
             return
-                SyntaxFactoryUtils.ClassDeclaration( @namespace.Type, "NamespaceArchNode" )
+                SyntaxFactory2.ClassDeclaration( @namespace.Type, "NamespaceArchNode" )
                 .WithLeadingTrivia( comment )
                 .AddMembers( name )
-                .AddMembers( properties )
-                .AddMembers( classes );
+                .AddMembers( groups )
+                .AddMembers( groups_properties )
+                .AddMembers( groups_classes );
         }
         private static ClassDeclarationSyntax CreateClassDeclaration_Group(GroupEntry group) {
             var name = CreatePropertyDeclaration_Name( group.Name );
-            var properties = group.Types.Select( CreatePropertyDeclaration_Type ).ToArray();
+            var types = CreatePropertyDeclaration_Types( group.Types );
             return
-                SyntaxFactoryUtils.ClassDeclaration( group.Type, "GroupArchNode" )
+                SyntaxFactory2.ClassDeclaration( group.Type, "GroupArchNode" )
                 .AddMembers( name )
-                .AddMembers( properties );
+                .AddMembers( types );
         }
 
 
-        // Helpers/CreateSyntax
+        // Helpers/CreatePropertyDeclaration/Overriding
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Name(string name) {
-            return SyntaxFactoryUtils.PropertyDeclaration_Overriding( "string", "Name", $"\"{name}\"" );
+            return SyntaxFactory2.PropertyDeclaration_Deferred_Overriding( "string", "Name", $"\"{name}\"" );
         }
+        // Helpers/CreatePropertyDeclaration/Overriding
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Modules(ModuleEntry[] modules) {
+            var expression = SyntaxFactory2.NewArrayExpression( "ModuleArchNode", modules.Select( i => i.Identifier ) );
+            return SyntaxFactory2.PropertyDeclaration_Deferred_Overriding( "ModuleArchNode[]", "Modules", expression );
+        }
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Namespaces(NamespaceEntry[] namespaces) {
+            var expression = SyntaxFactory2.NewArrayExpression( "NamespaceArchNode", namespaces.Select( i => i.Identifier ) );
+            return SyntaxFactory2.PropertyDeclaration_Deferred_Overriding( "NamespaceArchNode[]", "Namespaces", expression );
+        }
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Groups(GroupEntry[] groups) {
+            var expression = SyntaxFactory2.NewArrayExpression( "GroupArchNode", groups.Select( i => i.Identifier ) );
+            return SyntaxFactory2.PropertyDeclaration_Deferred_Overriding( "GroupArchNode[]", "Groups", expression );
+        }
+        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Types(TypeEntry[] types) {
+            var expression = SyntaxFactory2.NewArrayExpression( "TypeArchNode", types.Select( i => SyntaxFactory2.TypeOfExpression( i.Type ) ) );
+            return SyntaxFactory2.PropertyDeclaration_Immediate_Overriding( "TypeArchNode[]", "Types", expression );
+        }
+        // Helpers/CreatePropertyDeclaration
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Module(ModuleEntry module) {
             var type = module.Type;
             var identifier = module.Identifier;
-            return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, $"new {type}()" );
+            return SyntaxFactory2.PropertyDeclaration_Immediate( type, identifier, $"new {type}()" );
         }
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Namespace(NamespaceEntry @namespace) {
             var type = @namespace.Type;
             var identifier = @namespace.Identifier;
-            return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, $"new {type}()" );
+            return SyntaxFactory2.PropertyDeclaration_Immediate( type, identifier, $"new {type}()" );
         }
         private static PropertyDeclarationSyntax CreatePropertyDeclaration_Group(GroupEntry group) {
             var type = group.Type;
             var identifier = group.Identifier;
-            return SyntaxFactoryUtils.PropertyDeclaration( type, identifier, $"new {type}()" );
-        }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Type(TypeEntry type) {
-            var type_ = type.Type;
-            var identifier = type.Identifier;
-            return SyntaxFactoryUtils.PropertyDeclaration( "TypeArchNode", identifier, $"typeof({type_})" );
+            return SyntaxFactory2.PropertyDeclaration_Immediate( type, identifier, $"new {type}()" );
         }
 
 

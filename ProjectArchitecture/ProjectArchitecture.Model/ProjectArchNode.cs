@@ -4,21 +4,35 @@
 namespace ProjectArchitecture.Model {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
     using System.Text;
 
     public abstract class ProjectArchNode : ArchNode {
 
-        public override string Name => GetName( this );
         // Children
-        public virtual ModuleArchNode[] Modules => GetChildren<ModuleArchNode>( this ).ToArray();
+        public abstract ModuleArchNode[] Modules { get; }
         public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
         public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
 
 
         public ProjectArchNode() {
-            foreach (var module in Modules) module.Project = this;
+            foreach (var module in Modules) {
+                module.Project = this;
+
+                foreach (var @namespace in module.Namespaces) {
+                    @namespace.Module = module;
+
+                    foreach (var group in @namespace.Groups) {
+                        group.Namespace = @namespace;
+
+                        foreach (var type in group.Types) {
+                            type.Group = group;
+                        }
+                    }
+                }
+            }
         }
 
 

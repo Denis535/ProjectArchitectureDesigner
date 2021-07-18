@@ -10,11 +10,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
     internal static class SyntaxUtils {
 
 
-        // WithoutPrefix
-        public static string WithoutPrefix(this string value, string? prefix) {
-            if (prefix != null && value.StartsWith( prefix )) return value.Substring( prefix.Length );
-            return value;
-        }
         // ToBeautifulName
         public static string ToBeautifulName(this string type) {
             return type.Replace( '_', '.' );
@@ -32,6 +27,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         }
         private static char Escape(char @char) {
             return char.IsLetterOrDigit( @char ) ? @char : '_';
+        }
+        // WithoutPrefix
+        public static string WithoutPrefix(this string value, string? prefix) {
+            if (prefix != null && value.StartsWith( prefix )) return value.Substring( prefix.Length );
+            return value;
         }
 
 
