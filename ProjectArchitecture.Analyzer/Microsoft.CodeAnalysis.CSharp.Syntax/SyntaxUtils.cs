@@ -29,11 +29,6 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         private static char Escape(char @char) {
             return char.IsLetterOrDigit( @char ) ? @char : '_';
         }
-        // WithoutPrefix
-        public static string WithoutPrefix(this string value, string? prefix) {
-            if (prefix != null && value.StartsWith( prefix )) return value.Substring( prefix.Length );
-            return value;
-        }
 
 
         // EnsureIdentifierIsValid
@@ -74,15 +69,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         public static SyntaxNode? GetBody(this MethodDeclarationSyntax method) {
             return (SyntaxNode?) method?.Body ?? method?.ExpressionBody;
         }
-        public static string GetCommentContent(this SyntaxTrivia comment) {
-            // Note: SyntaxTrivia.ToString() doesn't return documentation comment.
-            // Note: So, you should use SyntaxTrivia.ToFullString().
-            var content = comment.ToFullString().SkipWhile( i => i == '/' );
-            return string.Concat( content ).Trim();
-        }
 
 
-        // String
+        // String/Format2
         public static string Format2(this string value, params object?[] args) {
             var builder = new StringBuilder( value.Length * 2 );
             for (int i = 0, j = 0; i < value.Length;) {
@@ -118,6 +107,17 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
                 return;
             }
             builder.Append( arg );
+        }
+        // String/WithoutPrefix
+        public static string WithoutPrefix(this string value, string prefix) {
+            if (value.StartsWith( prefix )) return value.Substring( prefix.Length );
+            return value;
+        }
+        // String/TakeAfter
+        public static string? TakeAfter(this string value, string prefix) {
+            var i = value.IndexOf( prefix );
+            if (i != -1) return value.Substring( i + prefix.Length );
+            return null;
         }
 
 

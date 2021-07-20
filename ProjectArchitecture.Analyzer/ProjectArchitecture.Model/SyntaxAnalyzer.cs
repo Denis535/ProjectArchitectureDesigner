@@ -21,7 +21,7 @@ namespace ProjectArchitecture.Model {
             var type = @class.Identifier.ValueText;
             var modules = @class
                 .GetMethods( "Initialize" )
-                .FirstOrDefault()?
+                .SingleOrDefault()?
                 .GetBody()?
                 .DescendantNodes()
                 .GetModuleEntries()
@@ -38,7 +38,7 @@ namespace ProjectArchitecture.Model {
             var type = @class.Identifier.ValueText;
             var @namespaces = @class
                 .GetMethods( "Initialize" )
-                .FirstOrDefault()?
+                .SingleOrDefault()?
                 .GetBody()?
                 .DescendantNodes()
                 .GetNamespaceEntries()
@@ -62,7 +62,7 @@ namespace ProjectArchitecture.Model {
         }
         private static IEnumerable<GroupEntry> GetGroupEntries(this IEnumerable<SyntaxNode> nodes) {
             foreach (var group in nodes.SplitByFirst( HasGroupEntry )) {
-                var group_ = group.First().HasGroupEntry() ? group.First().GetGroupEntry() : "Default";
+                var group_ = group.First().GetGroupEntry() ?? "Default";
                 var types = group.GetTypeEntries().ToArray();
                 yield return new GroupEntry( group_, types );
             }
@@ -83,10 +83,16 @@ namespace ProjectArchitecture.Model {
             return syntax is LiteralExpressionSyntax literal && literal.Kind() == SyntaxKind.StringLiteralExpression;
         }
         private static bool HasGroupEntry(this SyntaxNode syntax) {
-            // Note: SyntaxTrivia.ToString() doesn't return documentation comment.
-            // Note: So, you should use SyntaxTrivia.ToFullString()!
-            var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
-            return comment.ToFullString().StartsWith( "// " ) || comment.ToFullString().StartsWith( "/// " ); // todo: // Group:
+            var comment = syntax.GetLeadingTrivia().LastOrDefault( IsGroupEntry );
+            return comment != default;
+        }
+        private static bool IsGroupEntry(this SyntaxTrivia trivia) {
+            // Note: You should use SyntaxTrivia.ToFullString() to support SingleLineDocumentationCommentTrivia.
+            if (trivia.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia) {
+                var @string = trivia.ToFullString();
+                return @string.StartsWith( "// Group:" ) || @string.StartsWith( "/// Group:" );
+            }
+            return false;
         }
         private static bool IsTypeEntry(this SyntaxNode syntax) {
             return syntax is TypeOfExpressionSyntax;
@@ -95,12 +101,18 @@ namespace ProjectArchitecture.Model {
         private static string GetModuleEntry(this SyntaxNode syntax) {
             return ((TypeOfExpressionSyntax) syntax).Type.ToString();
         }
-        private static string GetNamespaceEntry(this SyntaxNode syntax) {
-            return ((LiteralExpressionSyntax) syntax).Token.ValueText;
+        private static string? GetNamespaceEntry(this SyntaxNode syntax) {
+            var @namespace = ((LiteralExpressionSyntax) syntax).Token.ValueText.Trim();
+            if (@namespace.IsNotEmpty()) return @namespace;
+            return null;
         }
-        private static string GetGroupEntry(this SyntaxNode syntax) {
-            var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
-            return comment.GetCommentContent(); // todo: // Group:
+        private static string? GetGroupEntry(this SyntaxNode syntax) {
+            var comment = syntax.GetLeadingTrivia().LastOrDefault( IsGroupEntry );
+            if (comment != default) {
+                var group = comment.ToFullString().TakeAfter( "Group:" )?.Trim();
+                if (group.IsNotEmpty()) return group;
+            }
+            return null;
         }
         private static string GetTypeEntry(this SyntaxNode syntax) {
             return ((TypeOfExpressionSyntax) syntax).Type.ToString();

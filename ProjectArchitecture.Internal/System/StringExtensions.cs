@@ -19,10 +19,10 @@ namespace System {
         public static string Join<T>(this IEnumerable<T> values, Func<T, string> selector, string separator = ", ") {
             return string.Join( separator, values.Select( selector ) );
         }
-        public static bool IsEmpty(this string value) {
+        public static bool IsEmpty(this string? value) {
             return string.IsNullOrEmpty( value );
         }
-        public static bool IsNotEmpty(this string value) {
+        public static bool IsNotEmpty(this string? value) {
             return !string.IsNullOrEmpty( value );
         }
 

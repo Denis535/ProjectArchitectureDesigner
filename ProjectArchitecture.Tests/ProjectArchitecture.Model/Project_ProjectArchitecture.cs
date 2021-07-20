@@ -30,9 +30,9 @@ namespace ProjectArchitecture.Model {
     public sealed partial class Module_ProjectArchitecture : ModuleArchNode {
         protected override void Initialize() => SetChildren(
             "ProjectArchitecture.Model",
-            /// ArchNode
+            /// Group: ArchNode
             typeof( ArchNode ),
-            /// ArchNode/Children
+            /// Group: ArchNode/Children
             typeof( ProjectArchNode ),
             typeof( ModuleArchNode ),
             typeof( NamespaceArchNode ),
@@ -51,10 +51,10 @@ namespace ProjectArchitecture.Model {
             typeof( SourceGenerator ),
             typeof( SyntaxAnalyzer ),
             typeof( SyntaxGenerator ),
-            /// ClassInfo
+            /// Group: ClassInfo
             typeof( ProjectInfo ),
             typeof( ModuleInfo ),
-            /// ClassInfo/Entries
+            /// Group: ClassInfo/Entries
             typeof( ModuleEntry ),
             typeof( NamespaceEntry ),
             typeof( GroupEntry ),
