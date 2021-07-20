@@ -86,7 +86,7 @@ namespace ProjectArchitecture.Model {
             // Note: SyntaxTrivia.ToString() doesn't return documentation comment.
             // Note: So, you should use SyntaxTrivia.ToFullString()!
             var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
-            return comment.ToFullString().StartsWith( "// " ) || comment.ToFullString().StartsWith( "/// " );
+            return comment.ToFullString().StartsWith( "// " ) || comment.ToFullString().StartsWith( "/// " ); // todo: // Group:
         }
         private static bool IsTypeEntry(this SyntaxNode syntax) {
             return syntax is TypeOfExpressionSyntax;
@@ -100,7 +100,7 @@ namespace ProjectArchitecture.Model {
         }
         private static string GetGroupEntry(this SyntaxNode syntax) {
             var comment = syntax.GetLeadingTrivia().Where( i => i.Kind() is SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ).LastOrDefault();
-            return comment.GetCommentContent();
+            return comment.GetCommentContent(); // todo: // Group:
         }
         private static string GetTypeEntry(this SyntaxNode syntax) {
             return ((TypeOfExpressionSyntax) syntax).Type.ToString();

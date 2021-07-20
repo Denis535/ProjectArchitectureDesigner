@@ -30,37 +30,47 @@ namespace ProjectArchitecture.Model {
 
         // Project
         [Test]
-        public void Test_00_Project() {
-            foreach (var module in Project.DescendantNodes.OfType<ModuleArchNode>()) {
+        public void Test_00_Project_IsInitialized() {
+            {
+                Assert.NotNull( Project.Name );
+                Assert.NotNull( Project.Modules );
+            }
+            foreach (var module in Project.Modules) {
+                Assert.NotNull( module.Name );
                 Assert.NotNull( module.Project );
+                Assert.NotNull( module.Namespaces );
             }
-            foreach (var @namespace in Project.DescendantNodes.OfType<NamespaceArchNode>()) {
+            foreach (var @namespace in Project.Modules.SelectMany( i => i.Namespaces )) {
+                Assert.NotNull( @namespace.Name );
                 Assert.NotNull( @namespace.Module );
+                Assert.NotNull( @namespace.Groups );
             }
-            foreach (var group in Project.DescendantNodes.OfType<GroupArchNode>()) {
+            foreach (var group in Project.Modules.SelectMany( i => i.Namespaces ).SelectMany( i => i.Groups )) {
+                Assert.NotNull( group.Name );
                 Assert.NotNull( group.Namespace );
+                Assert.NotNull( group.Types );
             }
-            foreach (var type in Project.DescendantNodes.OfType<TypeArchNode>()) {
+            foreach (var type in Project.Modules.SelectMany( i => i.Namespaces ).SelectMany( i => i.Groups ).SelectMany( i => i.Types )) {
                 Assert.NotNull( type.Value );
                 Assert.NotNull( type.Name );
                 Assert.NotNull( type.Group );
             }
         }
         [Test]
-        public void Test_00_Project_Modules() {
+        public void Test_01_Modules_AreValid() {
             foreach (var type in Project.DescendantNodes.OfType<TypeArchNode>()) {
                 Assert.That( type.Module.Name, Is.EqualTo( type.Value.Assembly.GetName().Name ) );
             }
         }
         [Test]
-        public void Test_00_Project_Namespaces() {
+        public void Test_02_Namespaces_AreValid() {
             foreach (var type in Project.DescendantNodes.OfType<TypeArchNode>()) {
                 Assert.That( type.Namespace.Name, Is.EqualTo( type.Value.Namespace ) );
             }
         }
         [Test]
-        public void Test_00_Project_Types() {
-            Project.Compare( Assemblies, out var intersected, out var missing, out var extra );
+        public void Test_03_Types_AreComplete() {
+            Project.Compare( Assemblies, out _, out var missing, out var extra );
             if (missing.Any()) {
                 Assert.Warn( GetMessage_Missing( missing ) );
             }
@@ -72,15 +82,15 @@ namespace ProjectArchitecture.Model {
 
         // Rendering
         [Test]
-        public void Test_01_Rendering_AlignedText() {
+        public void Test_10_Rendering_AlignedText() {
             TestContext.WriteLine( Project.RenderToAlignedText() );
         }
         [Test]
-        public void Test_01_Rendering_HierarchicalText() {
+        public void Test_11_Rendering_HierarchicalText() {
             TestContext.WriteLine( Project.RenderToHierarchicalText() );
         }
         [Test]
-        public void Test_01_Rendering_Markdown() {
+        public void Test_21_Rendering_Markdown() {
             TestContext.WriteLine( Project.RenderToMarkdown() );
         }
 

@@ -37,8 +37,6 @@ namespace ProjectArchitecture.Model {
         public TypeEntry[] Types { get; } = Types;
     }
     internal record TypeEntry(string Type) {
-        public string Name { get; } = Type;
         public string Type { get; } = Type;
-        public string Identifier => Name.EscapeIdentifier();
     }
 }

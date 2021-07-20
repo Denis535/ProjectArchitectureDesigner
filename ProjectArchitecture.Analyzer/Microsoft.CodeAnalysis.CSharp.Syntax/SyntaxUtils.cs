@@ -3,6 +3,7 @@
 
 namespace Microsoft.CodeAnalysis.CSharp.Syntax {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
@@ -78,6 +79,45 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
             // Note: So, you should use SyntaxTrivia.ToFullString().
             var content = comment.ToFullString().SkipWhile( i => i == '/' );
             return string.Concat( content ).Trim();
+        }
+
+
+        // String
+        public static string Format2(this string value, params object?[] args) {
+            var builder = new StringBuilder( value.Length * 2 );
+            for (int i = 0, j = 0; i < value.Length;) {
+                if (value.IsPlaceholder( ref i )) {
+                    builder.AppendArgument( args, ref j );
+                    continue;
+                }
+                builder.Append( value[ i ] );
+                i++;
+            }
+            return builder.ToString();
+        }
+        private static bool IsPlaceholder(this string value, ref int i) {
+            if (value[ i ] == '$') {
+                i++;
+                while (i < value.Length && char.IsLetterOrDigit( value[ i ] )) i++;
+                return true;
+            }
+            return false;
+        }
+        private static void AppendArgument(this StringBuilder builder, object?[] args, ref int i) {
+            var arg = args[ i++ ];
+            if (arg is string @string) {
+                builder.Append( @string );
+                return;
+            }
+            if (arg is IEnumerable enumerable) {
+                foreach (var item in enumerable) {
+                    builder.Append( item );
+                    builder.Append( ", " );
+                }
+                builder.Length -= 2;
+                return;
+            }
+            builder.Append( arg );
         }
 
 

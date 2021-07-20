@@ -15,9 +15,9 @@ namespace ProjectArchitecture.Model {
         // Project
         public static ClassDeclarationSyntax CreateClassDeclaration_Project(ClassDeclarationSyntax @class, ProjectInfo project) {
             var comment = SyntaxFactory2.Comment( "// Project: {0}", project.Name );
-            var name = CreatePropertyDeclaration_Name( project.Name );
-            var modules = CreatePropertyDeclaration_Modules( project.Modules );
-            var modules_properties = project.Modules.Select( CreatePropertyDeclaration_Module ).ToArray();
+            var name = PropertyDeclaration_Name( project.Name );
+            var modules = PropertyDeclaration_Modules( project.Modules );
+            var modules_properties = project.Modules.Select( PropertyDeclaration_Module ).ToArray();
             return
                 SyntaxFactory2.ClassDeclaration( @class )
                 .WithLeadingTrivia( SyntaxFactory2.EndOfLine(), comment )
@@ -28,9 +28,9 @@ namespace ProjectArchitecture.Model {
         // Module
         public static ClassDeclarationSyntax CreateClassDeclaration_Module(ClassDeclarationSyntax @class, ModuleInfo module) {
             var comment = SyntaxFactory2.Comment( "// Module: {0}", module.Name );
-            var name = CreatePropertyDeclaration_Name( module.Name );
-            var namespaces = CreatePropertyDeclaration_Namespaces( module.Namespaces );
-            var namespaces_properties = module.Namespaces.Select( CreatePropertyDeclaration_Namespace ).ToArray();
+            var name = PropertyDeclaration_Name( module.Name );
+            var namespaces = PropertyDeclaration_Namespaces( module.Namespaces );
+            var namespaces_properties = module.Namespaces.Select( PropertyDeclaration_Namespace ).ToArray();
             var namespaces_classes = module.Namespaces.Select( CreateClassDeclaration_Namespace ).ToArray();
             return
                 SyntaxFactory2.ClassDeclaration( @class )
@@ -42,12 +42,12 @@ namespace ProjectArchitecture.Model {
         }
         private static ClassDeclarationSyntax CreateClassDeclaration_Namespace(NamespaceEntry @namespace) {
             var comment = SyntaxFactory2.Comment( "// Namespace: {0}", @namespace.Name );
-            var name = CreatePropertyDeclaration_Name( @namespace.Name );
-            var groups = CreatePropertyDeclaration_Groups( @namespace.Groups );
-            var groups_properties = @namespace.Groups.Select( CreatePropertyDeclaration_Group ).ToArray();
+            var name = PropertyDeclaration_Name( @namespace.Name );
+            var groups = PropertyDeclaration_Groups( @namespace.Groups );
+            var groups_properties = @namespace.Groups.Select( PropertyDeclaration_Group ).ToArray();
             var groups_classes = @namespace.Groups.Select( CreateClassDeclaration_Group ).ToArray();
             return
-                SyntaxFactory2.ClassDeclaration( @namespace.Type, "NamespaceArchNode" )
+                SyntaxFactory2.ClassDeclaration( "public class $name : NamespaceArchNode {}", @namespace.Type )
                 .WithLeadingTrivia( comment )
                 .AddMembers( name )
                 .AddMembers( groups )
@@ -55,51 +55,51 @@ namespace ProjectArchitecture.Model {
                 .AddMembers( groups_classes );
         }
         private static ClassDeclarationSyntax CreateClassDeclaration_Group(GroupEntry group) {
-            var name = CreatePropertyDeclaration_Name( group.Name );
-            var types = CreatePropertyDeclaration_Types( group.Types );
+            var name = PropertyDeclaration_Name( group.Name );
+            var types = PropertyDeclaration_Types( group.Types );
             return
-                SyntaxFactory2.ClassDeclaration( group.Type, "GroupArchNode" )
+                SyntaxFactory2.ClassDeclaration( "public class $name : GroupArchNode {}", group.Type )
                 .AddMembers( name )
                 .AddMembers( types );
         }
 
 
-        // Helpers/CreatePropertyDeclaration/Overriding
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Name(string name) {
-            return SyntaxFactory2.PropertyDeclaration_Deferred_Overriding( "string", "Name", $"\"{name}\"" );
+        // Helpers/PropertyDeclaration
+        private static PropertyDeclarationSyntax PropertyDeclaration_Name(string name) {
+            return SyntaxFactory2.PropertyDeclaration( "public override string Name => \"$name\";", name );
         }
-        // Helpers/CreatePropertyDeclaration/Overriding
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Modules(ModuleEntry[] modules) {
-            var expression = SyntaxFactory2.NewArrayExpression( "ModuleArchNode", modules.Select( i => i.Identifier ) );
-            return SyntaxFactory2.PropertyDeclaration_Deferred_Overriding( "ModuleArchNode[]", "Modules", expression );
+        // Helpers/PropertyDeclaration
+        private static PropertyDeclarationSyntax PropertyDeclaration_Modules(ModuleEntry[] modules) {
+            var items = modules.Select( i => i.Identifier );
+            return SyntaxFactory2.PropertyDeclaration( "public override ModuleArchNode[] Modules => new ModuleArchNode[] { $items };", items );
         }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Namespaces(NamespaceEntry[] namespaces) {
-            var expression = SyntaxFactory2.NewArrayExpression( "NamespaceArchNode", namespaces.Select( i => i.Identifier ) );
-            return SyntaxFactory2.PropertyDeclaration_Deferred_Overriding( "NamespaceArchNode[]", "Namespaces", expression );
+        private static PropertyDeclarationSyntax PropertyDeclaration_Namespaces(NamespaceEntry[] namespaces) {
+            var items = namespaces.Select( i => i.Identifier );
+            return SyntaxFactory2.PropertyDeclaration( "public override NamespaceArchNode[] Namespaces => new NamespaceArchNode[] { $items };", items );
         }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Groups(GroupEntry[] groups) {
-            var expression = SyntaxFactory2.NewArrayExpression( "GroupArchNode", groups.Select( i => i.Identifier ) );
-            return SyntaxFactory2.PropertyDeclaration_Deferred_Overriding( "GroupArchNode[]", "Groups", expression );
+        private static PropertyDeclarationSyntax PropertyDeclaration_Groups(GroupEntry[] groups) {
+            var items = groups.Select( i => i.Identifier );
+            return SyntaxFactory2.PropertyDeclaration( "public override GroupArchNode[] Groups => new GroupArchNode[] { $items };", items );
         }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Types(TypeEntry[] types) {
-            var expression = SyntaxFactory2.NewArrayExpression( "TypeArchNode", types.Select( i => SyntaxFactory2.TypeOfExpression( i.Type ) ) );
-            return SyntaxFactory2.PropertyDeclaration_Immediate_Overriding( "TypeArchNode[]", "Types", expression );
+        private static PropertyDeclarationSyntax PropertyDeclaration_Types(TypeEntry[] types) {
+            var items = types.Select( i => $"typeof( {i.Type} )" );
+            return SyntaxFactory2.PropertyDeclaration( "public override TypeArchNode[] Types { get; } = new TypeArchNode[] { $items };", items );
         }
-        // Helpers/CreatePropertyDeclaration
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Module(ModuleEntry module) {
+        // Helpers/PropertyDeclaration
+        private static PropertyDeclarationSyntax PropertyDeclaration_Module(ModuleEntry module) {
             var type = module.Type;
             var identifier = module.Identifier;
-            return SyntaxFactory2.PropertyDeclaration_Immediate( type, identifier, $"new {type}()" );
+            return SyntaxFactory2.PropertyDeclaration( "public $type $name { get; } = new $type();", type, identifier, type );
         }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Namespace(NamespaceEntry @namespace) {
+        private static PropertyDeclarationSyntax PropertyDeclaration_Namespace(NamespaceEntry @namespace) {
             var type = @namespace.Type;
             var identifier = @namespace.Identifier;
-            return SyntaxFactory2.PropertyDeclaration_Immediate( type, identifier, $"new {type}()" );
+            return SyntaxFactory2.PropertyDeclaration( "public $type $name { get; } = new $type();", type, identifier, type );
         }
-        private static PropertyDeclarationSyntax CreatePropertyDeclaration_Group(GroupEntry group) {
+        private static PropertyDeclarationSyntax PropertyDeclaration_Group(GroupEntry group) {
             var type = group.Type;
             var identifier = group.Identifier;
-            return SyntaxFactory2.PropertyDeclaration_Immediate( type, identifier, $"new {type}()" );
+            return SyntaxFactory2.PropertyDeclaration( "public $type $name { get; } = new $type();", type, identifier, type );
         }
 
 

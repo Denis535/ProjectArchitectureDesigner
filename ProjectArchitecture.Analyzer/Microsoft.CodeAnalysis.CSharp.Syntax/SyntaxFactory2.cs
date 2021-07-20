@@ -42,73 +42,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
 
 
         // Syntax/Declarations
-        public static ClassDeclarationSyntax ClassDeclaration(string identifier, string @base) {
-            var builder = new StringBuilder( 100 );
-            builder.Append( "public " );
-            builder.Append( "class " );
-            builder.Append( identifier );
-            builder.Append( ':' );
-            builder.Append( @base );
-            builder.Append( '{' );
-            builder.Append( '}' );
-            return (ClassDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( builder.ToString() ) ?? throw new Exception( "Class declaration syntax is invalid" );
+        public static ClassDeclarationSyntax ClassDeclaration(string syntax, params object[] args) {
+            return (ClassDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( syntax.Format2( args ) ) ?? throw new Exception( "Class declaration syntax is invalid" );
         }
-        public static PropertyDeclarationSyntax PropertyDeclaration_Immediate(string type, string identifier, string expression) {
-            var builder = new StringBuilder( 1000 );
-            builder.Append( "public " );
-            builder.Append( type );
-            builder.Append( ' ' );
-            builder.Append( identifier );
-            builder.Append( '{' );
-            builder.Append( "get;" );
-            builder.Append( '}' );
-            builder.Append( '=' );
-            builder.Append( expression );
-            builder.Append( ';' );
-            return (PropertyDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( builder.ToString() ) ?? throw new Exception( "Property declaration syntax is invalid" );
-        }
-        public static PropertyDeclarationSyntax PropertyDeclaration_Immediate_Overriding(string type, string identifier, string expression) {
-            var builder = new StringBuilder( 1000 );
-            builder.Append( "public " );
-            builder.Append( "override " );
-            builder.Append( type );
-            builder.Append( ' ' );
-            builder.Append( identifier );
-            builder.Append( '{' );
-            builder.Append( "get;" );
-            builder.Append( '}' );
-            builder.Append( '=' );
-            builder.Append( expression );
-            builder.Append( ';' );
-            return (PropertyDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( builder.ToString() ) ?? throw new Exception( "Property declaration syntax is invalid" );
-        }
-        public static PropertyDeclarationSyntax PropertyDeclaration_Deferred_Overriding(string type, string identifier, string expression) {
-            var builder = new StringBuilder( 1000 );
-            builder.Append( "public " );
-            builder.Append( "override " );
-            builder.Append( type );
-            builder.Append( ' ' );
-            builder.Append( identifier );
-            builder.Append( "=>" );
-            builder.Append( expression );
-            builder.Append( ';' );
-            return (PropertyDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( builder.ToString() ) ?? throw new Exception( "Property declaration syntax is invalid" );
-        }
-
-
-        // Syntax/Expressions
-        public static string NewArrayExpression(string type, IEnumerable<string> items) {
-            var builder = new StringBuilder( 1000 );
-            builder.Append( "new " );
-            builder.Append( type );
-            builder.Append( "[] " );
-            builder.Append( '{' );
-            builder.AppendJoin( ",", items );
-            builder.Append( '}' );
-            return builder.ToString();
-        }
-        public static string TypeOfExpression(string type) {
-            return $"typeof({type})";
+        public static PropertyDeclarationSyntax PropertyDeclaration(string syntax, params object[] args) {
+            return (PropertyDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( syntax.Format2( args ) ) ?? throw new Exception( "Property declaration syntax is invalid" );
         }
 
 
@@ -121,7 +59,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         }
 
 
-        // Helpers
+        // Helpers/Syntax
         private static SyntaxList<TNode> List<TNode>() where TNode : SyntaxNode {
             return SyntaxFactory.List<TNode>();
         }
