@@ -70,15 +70,15 @@ namespace ProjectArchitecture.Model {
         }
         // Helpers/PropertyDeclaration
         private static PropertyDeclarationSyntax PropertyDeclaration_Modules(ModuleEntry[] modules) {
-            var items = modules.Select( i => i.Identifier );
+            var items = modules.Select( i => i.Property );
             return SyntaxFactory2.PropertyDeclaration( "public override ModuleArchNode[] Modules => new ModuleArchNode[] { $items };", items );
         }
         private static PropertyDeclarationSyntax PropertyDeclaration_Namespaces(NamespaceEntry[] namespaces) {
-            var items = namespaces.Select( i => i.Identifier );
+            var items = namespaces.Select( i => i.Property );
             return SyntaxFactory2.PropertyDeclaration( "public override NamespaceArchNode[] Namespaces => new NamespaceArchNode[] { $items };", items );
         }
         private static PropertyDeclarationSyntax PropertyDeclaration_Groups(GroupEntry[] groups) {
-            var items = groups.Select( i => i.Identifier );
+            var items = groups.Select( i => i.Property );
             return SyntaxFactory2.PropertyDeclaration( "public override GroupArchNode[] Groups => new GroupArchNode[] { $items };", items );
         }
         private static PropertyDeclarationSyntax PropertyDeclaration_Types(TypeEntry[] types) {
@@ -88,18 +88,18 @@ namespace ProjectArchitecture.Model {
         // Helpers/PropertyDeclaration
         private static PropertyDeclarationSyntax PropertyDeclaration_Module(ModuleEntry module) {
             var type = module.Type;
-            var identifier = module.Identifier;
-            return SyntaxFactory2.PropertyDeclaration( "public $type $name { get; } = new $type();", type, identifier, type );
+            var property = module.Property;
+            return SyntaxFactory2.PropertyDeclaration( "public $type $name { get; } = new $type();", type, property, type );
         }
         private static PropertyDeclarationSyntax PropertyDeclaration_Namespace(NamespaceEntry @namespace) {
             var type = @namespace.Type;
-            var identifier = @namespace.Identifier;
-            return SyntaxFactory2.PropertyDeclaration( "public $type $name { get; } = new $type();", type, identifier, type );
+            var property = @namespace.Property;
+            return SyntaxFactory2.PropertyDeclaration( "public $type $name { get; } = new $type();", type, property, type );
         }
         private static PropertyDeclarationSyntax PropertyDeclaration_Group(GroupEntry group) {
             var type = group.Type;
-            var identifier = group.Identifier;
-            return SyntaxFactory2.PropertyDeclaration( "public $type $name { get; } = new $type();", type, identifier, type );
+            var property = group.Property;
+            return SyntaxFactory2.PropertyDeclaration( "public $type $name { get; } = new $type();", type, property, type );
         }
 
 

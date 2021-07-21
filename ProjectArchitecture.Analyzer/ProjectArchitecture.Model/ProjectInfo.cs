@@ -22,18 +22,18 @@ namespace ProjectArchitecture.Model {
     internal record ModuleEntry(string Type) {
         public string Name { get; } = Type.WithoutPrefix( "Module_" ).ToBeautifulName();
         public string Type { get; } = Type;
-        public string Identifier => Name.EscapeIdentifier();
+        public string Property => Name.EscapeMemberIdentifier();
     }
     internal record NamespaceEntry(string Name, GroupEntry[] Groups) {
         public string Name { get; } = Name;
-        public string Type => "Namespace_" + Name.EscapeType();
-        public string Identifier => Name.EscapeIdentifier();
+        public string Type => "Namespace_" + Name.EscapeTypeIdentifier();
+        public string Property => Name.EscapeMemberIdentifier();
         public GroupEntry[] Groups { get; } = Groups;
     }
     internal record GroupEntry(string Name, TypeEntry[] Types) {
         public string Name { get; } = Name;
-        public string Type => "Group_" + Name.EscapeType();
-        public string Identifier => Name.EscapeIdentifier();
+        public string Type => "Group_" + Name.EscapeTypeIdentifier();
+        public string Property => Name.EscapeMemberIdentifier();
         public TypeEntry[] Types { get; } = Types;
     }
     internal record TypeEntry(string Type) {

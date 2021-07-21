@@ -15,13 +15,13 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         public static string ToBeautifulName(this string type) {
             return type.Replace( '_', '.' );
         }
-        // EscapeType
-        public static string EscapeType(this string value) {
+        // EscapeTypeIdentifier
+        public static string EscapeTypeIdentifier(this string value) {
             value = string.Concat( value.Select( Escape ) );
             return value;
         }
-        // EscapeIdentifier
-        public static string EscapeIdentifier(this string value) {
+        // EscapeMemberIdentifier
+        public static string EscapeMemberIdentifier(this string value) {
             value = string.Concat( value.Select( Escape ) );
             if (SyntaxFacts.GetKeywordKind( value ) != SyntaxKind.None) value = "@" + value;
             return value;
@@ -71,7 +71,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         }
 
 
-        // String/Format2
+        // String
         public static string Format2(this string value, params object?[] args) {
             var builder = new StringBuilder( value.Length * 2 );
             for (int i = 0, j = 0; i < value.Length;) {
@@ -108,13 +108,11 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
             }
             builder.Append( arg );
         }
-        // String/WithoutPrefix
         public static string WithoutPrefix(this string value, string prefix) {
             if (value.StartsWith( prefix )) return value.Substring( prefix.Length );
             return value;
         }
-        // String/TakeAfter
-        public static string? TakeAfter(this string value, string prefix) {
+        public static string? GetStringAfter(this string value, string prefix) {
             var i = value.IndexOf( prefix );
             if (i != -1) return value.Substring( i + prefix.Length );
             return null;

@@ -109,7 +109,7 @@ namespace ProjectArchitecture.Model {
         private static string? GetGroupEntry(this SyntaxNode syntax) {
             var comment = syntax.GetLeadingTrivia().LastOrDefault( IsGroupEntry );
             if (comment != default) {
-                var group = comment.ToFullString().TakeAfter( "Group:" )?.Trim();
+                var group = comment.ToFullString().GetStringAfter( "Group:" )?.Trim();
                 if (group.IsNotEmpty()) return group;
             }
             return null;
