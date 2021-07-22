@@ -15,6 +15,7 @@ namespace ProjectArchitecture.Model {
         public ModuleArchNode Module { get; internal set; } = default!;
         // Children
         public abstract GroupArchNode[] Groups { get; }
+        public TypeArchNode[] Types => Groups.SelectMany( i => i.Types ).ToArray();
         public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
         public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
 

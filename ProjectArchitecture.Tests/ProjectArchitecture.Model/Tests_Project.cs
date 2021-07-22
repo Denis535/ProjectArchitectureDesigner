@@ -6,18 +6,12 @@ namespace ProjectArchitecture.Model {
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
-    using System.Reflection;
     using System.Text;
     using NUnit.Framework;
     using ProjectArchitecture.Renderers;
 
     public class Tests_Project {
 
-        private static Assembly[] Assemblies { get; } = new[] {
-            typeof( ArchNode ).Assembly,
-            typeof( SourceGenerator ).Assembly,
-            typeof( Option ).Assembly,
-        };
         private Project_ProjectArchitecture Project { get; set; } = default!;
 
 
@@ -57,20 +51,20 @@ namespace ProjectArchitecture.Model {
             }
         }
         [Test]
-        public void Test_01_Modules_AreValid() {
+        public void Test_01_Project_Modules_AreValid() {
             foreach (var type in Project.DescendantNodes.OfType<TypeArchNode>()) {
                 Assert.That( type.Module.Name, Is.EqualTo( type.Value.Assembly.GetName().Name ) );
             }
         }
         [Test]
-        public void Test_02_Namespaces_AreValid() {
+        public void Test_02_Project_Namespaces_AreValid() {
             foreach (var type in Project.DescendantNodes.OfType<TypeArchNode>()) {
                 Assert.That( type.Namespace.Name, Is.EqualTo( type.Value.Namespace ) );
             }
         }
         [Test]
-        public void Test_03_Types_AreComplete() {
-            Project.Compare( Assemblies, out _, out var missing, out var extra );
+        public void Test_03_Project_Types_AreComplete() {
+            Project.Compare( Project.Assemblies, out _, out var missing, out var extra );
             if (missing.Any()) {
                 Assert.Warn( GetMessage_Missing( missing ) );
             }
@@ -80,18 +74,18 @@ namespace ProjectArchitecture.Model {
         }
 
 
-        // Rendering
+        // Render
         [Test]
-        public void Test_10_Rendering_AlignedText() {
-            TestContext.WriteLine( Project.RenderToAlignedText() );
+        public void Test_10_RenderToAlignedText() {
+            TestContext.WriteLine( Project.RenderToAlignedText( IsVisible ) );
         }
         [Test]
-        public void Test_11_Rendering_HierarchicalText() {
-            TestContext.WriteLine( Project.RenderToHierarchicalText() );
+        public void Test_11_RenderToHierarchicalText() {
+            TestContext.WriteLine( Project.RenderToHierarchicalText( IsVisible ) );
         }
         [Test]
-        public void Test_21_Rendering_Markdown() {
-            TestContext.WriteLine( Project.RenderToMarkdown() );
+        public void Test_12_RenderToMarkdown() {
+            TestContext.WriteLine( Project.RenderToMarkdown( IsVisible ) );
         }
 
 
@@ -100,7 +94,7 @@ namespace ProjectArchitecture.Model {
             var builder = new StringBuilder();
             builder.AppendLine( "Missing:" );
             foreach (var item in GetHierarchy( types )) {
-                builder.AppendLine( GetItemString( item ) );
+                builder.AppendLine( item );
             }
             return builder.ToString();
         }
@@ -108,32 +102,27 @@ namespace ProjectArchitecture.Model {
             var builder = new StringBuilder();
             builder.AppendLine( "Extra:" );
             foreach (var item in GetHierarchy( types )) {
-                builder.AppendLine( GetItemString( item ) );
+                builder.AppendLine( item );
             }
             return builder.ToString();
         }
-        private static IEnumerable<object> GetHierarchy(IEnumerable<Type> types) {
+        private static IEnumerable<string> GetHierarchy(IEnumerable<Type> types) {
+            // Assembly
             foreach (var assembly in types.GroupBy( i => i.Assembly )) {
-                yield return assembly.Key;
+                yield return string.Format( "Assembly: {0}", assembly.Key.GetName().Name );
+                // Namespace
                 foreach (var @namespace in assembly.GroupBy( i => i.Namespace )) {
-                    yield return @namespace.Key ?? "";
+                    yield return string.Format( "\"{0}\",", @namespace.Key ?? "Global" );
+                    // Type
                     foreach (var type in @namespace) {
-                        yield return type;
+                        yield return string.Format( "typeof( {0} ),", type.Name );
                     }
                 }
             }
         }
-        private static string GetItemString(object item) {
-            if (item is Assembly assembly) {
-                return string.Format( "Assembly: {0}", assembly.GetName().Name );
-            }
-            if (item is string @namespace) {
-                return string.Format( "\"{0}\",", @namespace );
-            }
-            if (item is Type type) {
-                return string.Format( "typeof( {0} ),", type.Name );
-            }
-            throw new ArgumentException( "Item is invalid: " + item?.ToString() ?? "null" );
+        // Helpers/Type
+        private static bool IsVisible(TypeArchNode type) {
+            return type.Value.IsVisible && !type.Value.Assembly.GetName().Name!.EndsWith( ".Internal" );
         }
 
 

@@ -4,35 +4,24 @@
 namespace ProjectArchitecture.Model {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
     using System.Text;
 
     public abstract class ProjectArchNode : ArchNode {
 
+        public Assembly[] Assemblies => Modules.Select( i => i.Assembly ).OfType<Assembly>().ToArray();
         // Children
         public abstract ModuleArchNode[] Modules { get; }
+        public NamespaceArchNode[] Namespaces => Modules.SelectMany( i => i.Namespaces ).ToArray();
+        public GroupArchNode[] Groups => Modules.SelectMany( i => i.Namespaces ).SelectMany( i => i.Groups ).ToArray();
+        public TypeArchNode[] Types => Modules.SelectMany( i => i.Namespaces ).SelectMany( i => i.Groups ).SelectMany( i => i.Types ).ToArray();
         public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
         public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
 
 
         public ProjectArchNode() {
-            foreach (var module in Modules) {
-                module.Project = this;
-
-                foreach (var @namespace in module.Namespaces) {
-                    @namespace.Module = module;
-
-                    foreach (var group in @namespace.Groups) {
-                        group.Namespace = @namespace;
-
-                        foreach (var type in group.Types) {
-                            type.Group = group;
-                        }
-                    }
-                }
-            }
+            Initialize( this );
         }
 
 
@@ -78,6 +67,27 @@ namespace ProjectArchitecture.Model {
         // Utils
         public override string ToString() {
             return "Project: " + Name;
+        }
+
+
+        // Helpers
+        protected static void Initialize(ProjectArchNode project) {
+            // Project
+            foreach (var module in project.Modules) {
+                module.Project = project;
+                // Namespace
+                foreach (var @namespace in module.Namespaces) {
+                    @namespace.Module = module;
+                    // Group
+                    foreach (var group in @namespace.Groups) {
+                        group.Namespace = @namespace;
+                        // Type
+                        foreach (var type in group.Types) {
+                            type.Group = group;
+                        }
+                    }
+                }
+            }
         }
 
 

@@ -28,6 +28,7 @@ namespace ProjectArchitecture.Model {
 
     // Modules/ProjectArchitecture
     public sealed partial class Module_ProjectArchitecture : ModuleArchNode {
+        public override System.Reflection.Assembly? Assembly => typeof( ArchNode ).Assembly;
         protected override void Initialize() => SetChildren(
             "ProjectArchitecture.Model",
             /// Group: ArchNode
@@ -39,13 +40,15 @@ namespace ProjectArchitecture.Model {
             typeof( GroupArchNode ),
             typeof( TypeArchNode ),
             "ProjectArchitecture.Renderers",
-            typeof( ProjectTextRenderer ),
+            typeof( ProjectAlignedTextRenderer ),
+            typeof( ProjectHierarchicalTextRenderer ),
             typeof( ProjectMarkdownRenderer )
         );
     }
 
     // Modules/ProjectArchitecture.Analyzer
     public sealed partial class Module_ProjectArchitecture_Analyzer : ModuleArchNode {
+        public override System.Reflection.Assembly? Assembly => typeof( SourceGenerator ).Assembly;
         protected override void Initialize() => SetChildren(
             "ProjectArchitecture.Model",
             typeof( SourceGenerator ),
@@ -69,6 +72,7 @@ namespace ProjectArchitecture.Model {
 
     // Modules/ProjectArchitecture.Internal
     public sealed partial class Module_ProjectArchitecture_Internal : ModuleArchNode {
+        public override System.Reflection.Assembly? Assembly => typeof( Option ).Assembly;
         protected override void Initialize() => SetChildren(
             "System",
             typeof( StringExtensions ),

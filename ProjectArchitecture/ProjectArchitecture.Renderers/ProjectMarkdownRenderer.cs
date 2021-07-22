@@ -4,46 +4,86 @@
 namespace ProjectArchitecture.Renderers {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
+    using System.Text;
     using System.Text.Markdown;
     using ProjectArchitecture.Model;
 
     public static class ProjectMarkdownRenderer {
 
 
-        // Render/Markdown
-        public static string RenderToMarkdown(this ProjectArchNode project) {
+        // Render
+        public static string RenderToMarkdown(this ProjectArchNode project, Func<TypeArchNode, bool> predicate) {
             var builder = new MarkdownBuilder();
-            builder.AppendTableOfContents( project );
+            builder.AppendTableOfContents( project, predicate );
             builder.AppendLine();
-            builder.AppendBody( project );
+            builder.AppendBody( project, predicate );
             return builder.ToString();
         }
-        private static void AppendTableOfContents(this MarkdownBuilder builder, ProjectArchNode project) {
+        private static void AppendTableOfContents(this MarkdownBuilder builder, ProjectArchNode project, Func<TypeArchNode, bool> predicate) {
             var prevs = new List<string>();
             builder.AppendHeader( "Table of Contents", 1 );
-            foreach (var header in project.DescendantNodesAndSelf.Where( IsHeader )) {
-                builder.AppendItemLink( header.GetString(), header.GetLevel(), prevs );
+            // Project
+            builder.AppendProject( project, prevs );
+            foreach (var module in project.GetModules( predicate )) {
+                // Module
+                builder.AppendModule( module, prevs );
+                foreach (var @namespace in module.GetNamespaces( predicate )) {
+                    // Namespace
+                    builder.AppendNamespace( @namespace, prevs );
+                }
             }
         }
-        private static void AppendBody(this MarkdownBuilder builder, ProjectArchNode project) {
-            foreach (var node in project.DescendantNodesAndSelf.WhereNot( IsDefaultGroup )) {
-                if (node.IsHeader()) {
-                    builder.AppendHeader( node.GetString(), node.GetLevel() );
-                } else {
-                    builder.AppendItem( node.GetString(), 1 );
+        private static void AppendBody(this MarkdownBuilder builder, ProjectArchNode project, Func<TypeArchNode, bool> predicate) {
+            // Project
+            builder.AppendProject( project );
+            foreach (var module in project.GetModules( predicate )) {
+                // Module
+                builder.AppendModule( module );
+                foreach (var @namespace in module.GetNamespaces( predicate )) {
+                    // Namespace
+                    builder.AppendNamespace( @namespace );
+                    foreach (var group in @namespace.GetGroup( predicate )) {
+                        // Group
+                        builder.AppendGroup( group );
+                        foreach (var type in group.GetTypes( predicate )) {
+                            // Type
+                            builder.AppendType( type );
+                        }
+                    }
                 }
             }
         }
 
 
-        // Helpers
-        private static bool IsDefaultGroup(this ArchNode node) {
-            return node is GroupArchNode group && group.IsDefault;
+        // AppendObject
+        private static void AppendProject(this MarkdownBuilder builder, ProjectArchNode project, IList<string> prevs) {
+            builder.AppendItemLink( project.GetString(), 1, prevs );
         }
-        private static bool IsHeader(this ArchNode node) {
-            return node is ProjectArchNode or ModuleArchNode or NamespaceArchNode;
+        private static void AppendModule(this MarkdownBuilder builder, ModuleArchNode module, IList<string> prevs) {
+            builder.AppendItemLink( module.GetString(), 2, prevs );
         }
+        private static void AppendNamespace(this MarkdownBuilder builder, NamespaceArchNode @namespace, IList<string> prevs) {
+            builder.AppendItemLink( @namespace.GetString(), 3, prevs );
+        }
+        // AppendObject
+        private static void AppendProject(this MarkdownBuilder builder, ProjectArchNode project) {
+            builder.AppendHeader( project.GetString(), 1 );
+        }
+        private static void AppendModule(this MarkdownBuilder builder, ModuleArchNode module) {
+            builder.AppendHeader( module.GetString(), 2 );
+        }
+        private static void AppendNamespace(this MarkdownBuilder builder, NamespaceArchNode @namespace) {
+            builder.AppendHeader( @namespace.GetString(), 3 );
+        }
+        private static void AppendGroup(this MarkdownBuilder builder, GroupArchNode group) {
+            if (group.IsDefault) return;
+            builder.AppendItem( group.GetString(), 1 );
+        }
+        private static void AppendType(this MarkdownBuilder builder, TypeArchNode type) {
+            builder.AppendItem( type.GetString(), 1 );
+        }
+
+
         // Helpers/GetString
         private static string GetString(this ArchNode node) {
             return node switch {
@@ -57,23 +97,6 @@ namespace ProjectArchitecture.Renderers {
                 => node.Name.Italic(),
                 TypeArchNode
                 => node.Name.Bold(),
-                { } => throw new ArgumentException( "Node is invalid: " + node ),
-                null => throw new ArgumentNullException( nameof( node ), "Node is null" ),
-            };
-        }
-        // Helpers/GetLevel
-        private static int GetLevel(this ArchNode node) {
-            return node switch {
-                ProjectArchNode
-                => 1,
-                ModuleArchNode
-                => 2,
-                NamespaceArchNode
-                => 3,
-                GroupArchNode
-                => 4,
-                TypeArchNode
-                => 5,
                 { } => throw new ArgumentException( "Node is invalid: " + node ),
                 null => throw new ArgumentNullException( nameof( node ), "Node is null" ),
             };

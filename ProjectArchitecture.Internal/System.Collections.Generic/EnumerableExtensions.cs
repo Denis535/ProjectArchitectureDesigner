@@ -107,7 +107,7 @@ namespace System.Collections.Generic {
         }
 
         // WhereNot
-        public static IEnumerable<T> WhereNot<T>(this IEnumerable<T> source, Predicate<T> predicate) {
+        public static IEnumerable<T> WhereNot<T>(this IEnumerable<T> source, Func<T, bool> predicate) {
             return source.Where( i => !predicate( i ) );
         }
 

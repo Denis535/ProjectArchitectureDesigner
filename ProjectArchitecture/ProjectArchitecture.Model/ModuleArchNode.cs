@@ -5,14 +5,18 @@ namespace ProjectArchitecture.Model {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
 
     public abstract class ModuleArchNode : ArchNode {
 
+        public abstract Assembly? Assembly { get; }
         // Parent
         public ProjectArchNode Project { get; internal set; } = default!;
         // Children
         public abstract NamespaceArchNode[] Namespaces { get; }
+        public GroupArchNode[] Groups => Namespaces.SelectMany( i => i.Groups ).ToArray();
+        public TypeArchNode[] Types => Namespaces.SelectMany( i => i.Groups ).SelectMany( i => i.Types ).ToArray();
         public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
         public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
 

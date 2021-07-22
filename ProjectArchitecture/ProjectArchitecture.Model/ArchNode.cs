@@ -20,20 +20,20 @@ namespace ProjectArchitecture.Model {
 
 
         // Helpers/GetName
-        protected static string GetName(ProjectArchNode node) {
-            return WithoutPrefix( node.GetType().Name, "Project_" ).Replace( '_', '.' );
+        protected static string GetName(ProjectArchNode project) {
+            return WithoutPrefix( project.GetType().Name, "Project_" ).Replace( '_', '.' );
         }
-        protected static string GetName(ModuleArchNode node) {
-            return WithoutPrefix( node.GetType().Name, "Module_" ).Replace( '_', '.' );
+        protected static string GetName(ModuleArchNode module) {
+            return WithoutPrefix( module.GetType().Name, "Module_" ).Replace( '_', '.' );
         }
-        protected static string GetName(NamespaceArchNode node) {
-            return WithoutPrefix( node.GetType().Name, "Namespace_" ).Replace( '_', '.' );
+        protected static string GetName(NamespaceArchNode @namespace) {
+            return WithoutPrefix( @namespace.GetType().Name, "Namespace_" ).Replace( '_', '.' );
         }
-        protected static string GetName(GroupArchNode node) {
-            return WithoutPrefix( node.GetType().Name, "Group_" ).Replace( '_', ' ' );
+        protected static string GetName(GroupArchNode group) {
+            return WithoutPrefix( group.GetType().Name, "Group_" ).Replace( '_', ' ' );
         }
         // Helpers/GetChildren
-        protected static IEnumerable<T> GetChildren<T>(ArchNode node) {
+        protected static IEnumerable<T> GetChildren<T>(ArchNode node) where T : ArchNode {
             return
                 node
                 .GetType()
