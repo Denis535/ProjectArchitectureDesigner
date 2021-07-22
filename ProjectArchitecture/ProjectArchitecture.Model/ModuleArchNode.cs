@@ -10,7 +10,7 @@ namespace ProjectArchitecture.Model {
 
     public abstract class ModuleArchNode : ArchNode {
 
-        public abstract Assembly? Assembly { get; }
+        public virtual Assembly? Assembly { get; }
         // Parent
         public ProjectArchNode Project { get; internal set; } = default!;
         // Children

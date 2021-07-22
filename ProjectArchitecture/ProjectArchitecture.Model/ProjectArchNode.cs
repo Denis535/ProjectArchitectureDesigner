@@ -10,7 +10,7 @@ namespace ProjectArchitecture.Model {
 
     public abstract class ProjectArchNode : ArchNode {
 
-        public Assembly[] Assemblies => Modules.Select( i => i.Assembly ).OfType<Assembly>().ToArray();
+        public virtual Assembly[] Assemblies => Modules.Select( i => i.Assembly ).OfType<Assembly>().ToArray();
         // Children
         public abstract ModuleArchNode[] Modules { get; }
         public NamespaceArchNode[] Namespaces => Modules.SelectMany( i => i.Namespaces ).ToArray();

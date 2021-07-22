@@ -91,8 +91,10 @@ namespace ProjectArchitecture.Model {
             typeof( TypeSyntaxFactory ),
             typeof( MemberSyntaxFactory ),
             typeof( CSharpSyntaxFactory ),
-            typeof( TypeSyntaxUtils ),
-            typeof( MemberSyntaxUtils ),
+            typeof( CSharpSyntaxHelper ),
+            typeof( CSharpSyntaxHelper_Type ),
+            typeof( CSharpSyntaxHelper_Member ),
+            typeof( AccessLevel ),
             "System.Text.Markdown",
             typeof( MarkdownBuilder ),
             typeof( MarkdownSyntaxFactory )

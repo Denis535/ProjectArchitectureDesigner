@@ -9,30 +9,25 @@ namespace System.Text.CSharp {
     using System.Linq;
     using System.Text;
 
-    // public interface Interface<in/out T> : IInterface<T> where T : class
-    // public class     Class<T>            : Base<T>, IInterface<T> where T : class
-    // public struct    Struct<T>           : IInterface<T> where T : class
-    // public enum      Enum                : int
-    // public delegate  T Delegate<in/out T>(T value) where T : class
     public static class TypeSyntaxFactory {
 
 
         public static string GetTypeSyntax(this Type type) {
             if (type.IsInterface()) {
-                return CSharpSyntaxFactory.GetTypeSyntax( type.GetKeywords(), type, type.GetGenericArguments(), null, type.GetInterfaces() );
+                return CSharpSyntaxFactory.GetTypeSyntax( type.GetModifiers(), type, type.GetGenericArguments(), null, type.GetInterfaces() );
             }
             if (type.IsClass()) {
-                return CSharpSyntaxFactory.GetTypeSyntax( type.GetKeywords(), type, type.GetGenericArguments(), type.BaseType, type.GetInterfaces() );
+                return CSharpSyntaxFactory.GetTypeSyntax( type.GetModifiers(), type, type.GetGenericArguments(), type.BaseType, type.GetInterfaces() );
             }
             if (type.IsStruct()) {
-                return CSharpSyntaxFactory.GetTypeSyntax( type.GetKeywords(), type, type.GetGenericArguments(), null, type.GetInterfaces() );
+                return CSharpSyntaxFactory.GetTypeSyntax( type.GetModifiers(), type, type.GetGenericArguments(), null, type.GetInterfaces() );
             }
             if (type.IsEnum()) {
-                return CSharpSyntaxFactory.GetTypeSyntax( type.GetKeywords(), type, type.GetGenericArguments(), Enum.GetUnderlyingType( type ), null );
+                return CSharpSyntaxFactory.GetTypeSyntax( type.GetModifiers(), type, type.GetGenericArguments(), Enum.GetUnderlyingType( type ), null );
             }
             if (type.IsDelegate()) {
                 var method = type.GetMethod( "Invoke" );
-                return CSharpSyntaxFactory.GetDelegateSyntax( type.GetKeywords(), method.ReturnParameter, type, type.GetGenericArguments(), method.GetParameters() );
+                return CSharpSyntaxFactory.GetDelegateSyntax( type.GetModifiers(), method.ReturnParameter, type, type.GetGenericArguments(), method.GetParameters() );
             }
             throw new ArgumentException( "Type is unsupported: " + type );
         }
@@ -91,10 +86,25 @@ namespace System.Text.CSharp {
         }
 
 
-        // Helpers/IsNullable
+        // Helpers/IsType
+        private static bool IsInterface(this Type type) {
+            return type.IsInterface;
+        }
+        private static bool IsClass(this Type type) {
+            return type.IsClass && !type.IsSubclassOf( typeof( Delegate ) );
+        }
+        private static bool IsStruct(this Type type) {
+            return type.IsValueType && !type.IsEnum;
+        }
         private static bool IsNullable(this Type type, [MaybeNullWhen( false )] out Type underlying) {
             underlying = Nullable.GetUnderlyingType( type );
             return underlying != null;
+        }
+        private static bool IsEnum(this Type type) {
+            return type.IsEnum;
+        }
+        private static bool IsDelegate(this Type type) {
+            return type.IsClass && type.IsSubclassOf( typeof( Delegate ) );
         }
 
 

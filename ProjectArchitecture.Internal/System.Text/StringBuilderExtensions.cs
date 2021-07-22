@@ -13,12 +13,12 @@ namespace System.Text {
             foreach (var value in values) builder.Append( value );
             return builder;
         }
-        public static StringBuilder AppendRange<T>(this StringBuilder builder, IEnumerable<T> values, Func<T, string> render) {
-            foreach (var value in values) builder.Append( render( value ) );
+        public static StringBuilder AppendRange<T>(this StringBuilder builder, IEnumerable<T> values, Func<T, string> selector) {
+            foreach (var value in values) builder.Append( selector( value ) );
             return builder;
         }
-        public static StringBuilder AppendRange<T>(this StringBuilder builder, IEnumerable<T> values, Action<StringBuilder, T> render) {
-            foreach (var value in values) render( builder, value );
+        public static StringBuilder AppendRange<T>(this StringBuilder builder, IEnumerable<T> values, Action<StringBuilder, T> action) {
+            foreach (var value in values) action( builder, value );
             return builder;
         }
 
@@ -31,16 +31,16 @@ namespace System.Text {
             }
             return builder;
         }
-        public static StringBuilder AppendJoin<T>(this StringBuilder builder, string separator, IEnumerable<T> values, Func<T, string> render) {
+        public static StringBuilder AppendJoin<T>(this StringBuilder builder, string separator, IEnumerable<T> values, Func<T, string> selector) {
             foreach (var (value, isLast) in values.TagLast()) {
-                builder.Append( render( value ) );
+                builder.Append( selector( value ) );
                 if (!isLast) builder.Append( separator );
             }
             return builder;
         }
-        public static StringBuilder AppendJoin<T>(this StringBuilder builder, string separator, IEnumerable<T> values, Action<StringBuilder, T> render) {
+        public static StringBuilder AppendJoin<T>(this StringBuilder builder, string separator, IEnumerable<T> values, Action<StringBuilder, T> action) {
             foreach (var (value, isLast) in values.TagLast()) {
-                render( builder, value );
+                action( builder, value );
                 if (!isLast) builder.Append( separator );
             }
             return builder;

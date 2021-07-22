@@ -8,32 +8,24 @@ namespace System.Text.CSharp {
     using System.Reflection;
     using System.Text;
 
-    internal static class TypeSyntaxUtils {
+    internal enum AccessLevel {
+        Public,
+        Internal,
+        Protected,
+        ProtectedInternal,
+        PrivateProtected,
+        Private,
+    }
+    internal static class CSharpSyntaxHelper_Type {
 
 
-        // IsType
-        public static bool IsInterface(this Type type) {
-            return type.IsInterface;
-        }
-        public static bool IsClass(this Type type) {
-            return type.IsClass && !type.IsSubclassOf( typeof( Delegate ) );
-        }
-        public static bool IsStruct(this Type type) {
-            return type.IsValueType && !type.IsEnum;
-        }
-        public static bool IsEnum(this Type type) {
-            return type.IsEnum;
-        }
-        public static bool IsDelegate(this Type type) {
-            return type.IsClass && type.IsSubclassOf( typeof( Delegate ) );
-        }
-        // GetKeywords
-        public static IEnumerable<string> GetKeywords(this Type type) {
+        // GetModifiers
+        public static IEnumerable<string> GetModifiers(this Type type) {
             if (type.IsGenericParameter) {
                 if (type.IsContravariant()) yield return "in";
                 if (type.IsCovariant()) yield return "out";
             } else {
-                yield return type.GetAccessModifier();
+                yield return type.GetAccessLevel().GetModifier();
 
                 if (type.IsClass()) {
                     if (type.IsStatic()) yield return "static";
@@ -47,6 +39,17 @@ namespace System.Text.CSharp {
                 if (type.IsEnum()) yield return "enum";
                 if (type.IsDelegate()) yield return "delegate";
             }
+        }
+        public static string GetModifier(this AccessLevel level) {
+            return level switch {
+                AccessLevel.Public => "public",
+                AccessLevel.Internal => "internal",
+                AccessLevel.Protected => "protected",
+                AccessLevel.ProtectedInternal => "protected internal",
+                AccessLevel.PrivateProtected => "private protected",
+                AccessLevel.Private => "private",
+                _ => throw new ArgumentException( "Access level is invalid: " + level ),
+            };
         }
         // GetConstraints
         public static IEnumerable<string> GetConstraints(this Type type) {
@@ -67,21 +70,21 @@ namespace System.Text.CSharp {
         }
 
 
-        // Helpers/GetAccessModifier
-        private static string GetAccessModifier(this Type type) {
+        // Helpers/GetAccessLevel
+        private static AccessLevel GetAccessLevel(this Type type) {
             if (!type.IsNested) {
-                return type.IsPublic ? "public" : "internal";
+                return type.IsPublic ? AccessLevel.Public : AccessLevel.Internal;
             } else {
-                if (type.IsNestedPublic) return "public";
-                if (type.IsNestedAssembly) return "internal";
-                if (type.IsNestedFamily) return "protected";
-                if (type.IsNestedFamORAssem) return "protected internal"; // protected or internal
-                if (type.IsNestedFamANDAssem) return "private protected"; // protected but only internal
-                if (type.IsNestedPrivate) return "private";
+                if (type.IsNestedPublic) return AccessLevel.Public;
+                if (type.IsNestedAssembly) return AccessLevel.Internal;
+                if (type.IsNestedFamily) return AccessLevel.Protected;
+                if (type.IsNestedFamORAssem) return AccessLevel.ProtectedInternal; // protected or internal
+                if (type.IsNestedFamANDAssem) return AccessLevel.PrivateProtected; // protected but only internal
+                if (type.IsNestedPrivate) return AccessLevel.Private;
             }
-            throw new Exception( "Access modifier is unknown: " + type );
+            throw new Exception( "Access level is unknown: " + type );
         }
-        // Helpers/IsKeyword
+        // Helpers/IsModifier
         private static bool IsStatic(this Type type) {
             return type.IsAbstract && type.IsSealed;
         }
@@ -96,6 +99,22 @@ namespace System.Text.CSharp {
         }
         private static bool IsCovariant(this Type type) { // out
             return type.GenericParameterAttributes.HasFlag( GenericParameterAttributes.Covariant );
+        }
+        // Helpers/IsType
+        private static bool IsInterface(this Type type) {
+            return type.IsInterface;
+        }
+        private static bool IsClass(this Type type) {
+            return type.IsClass && !type.IsSubclassOf( typeof( Delegate ) );
+        }
+        private static bool IsStruct(this Type type) {
+            return type.IsValueType && !type.IsEnum;
+        }
+        private static bool IsEnum(this Type type) {
+            return type.IsEnum;
+        }
+        private static bool IsDelegate(this Type type) {
+            return type.IsClass && type.IsSubclassOf( typeof( Delegate ) );
         }
         // Helpers/HasConstraint
         private static bool HasReferenceTypeConstraint(this Type type) {
