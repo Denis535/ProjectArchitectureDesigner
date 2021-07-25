@@ -10,7 +10,7 @@ namespace ProjectArchitecture.Model {
     using NUnit.Framework;
     using ProjectArchitecture.Renderers;
 
-    public class Tests_Project {
+    public class Tests_00_Project {
 
         private Project_ProjectArchitecture Project { get; set; } = default!;
 
@@ -122,7 +122,10 @@ namespace ProjectArchitecture.Model {
         }
         // Helpers/Type
         private static bool IsVisible(TypeArchNode type) {
-            return type.Value.IsVisible && !type.Value.Assembly.GetName().Name!.EndsWith( ".Internal" );
+            return
+                type.Value.IsVisible &&
+                !type.Value.Assembly.GetName().Name!.EndsWith( ".Internal" ) &&
+                !type.Value.Assembly.GetName().Name!.EndsWith( ".Analyzer" );
         }
 
 

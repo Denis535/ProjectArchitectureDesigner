@@ -5,113 +5,186 @@ namespace System.Text.CSharp {
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using System.Text;
 
-    // public interface Interface<in/out T> : IInterface<T> where T : class
-    // public class     Class<T>            : Base<T>, IInterface<T> where T : class
-    // public struct    Struct<T>           : IInterface<T> where T : class
-    // public enum      Enum                : int
-    // public delegate  T Delegate<in/out T>(T value) where T : class
-
-    // public object Field;
-    // public event Action Event;
-    // public object Property { get; set; }
-    // public event Action Event { add; remove; raise; }
-    // public T Func<T>(T Arg1, T Arg2);
-    internal static class CSharpSyntaxFactory {
+    public static class CSharpSyntaxFactory {
 
 
-        // GetTypeSyntax
-        public static string GetTypeSyntax(IEnumerable<string> modifiers, Type type, Type[] generics, Type? @base, Type[]? interfaces) {
-            var tokens = new List<string>();
-            tokens.AddRange( modifiers );
-            tokens.AddType_SimpleIdentifier( type );
-            tokens.AddType_GenericParameters( generics );
-            tokens.AddType_BaseTypeAndInterfaces( @base, interfaces );
-            tokens.AddType_GenericParametersConstraints( generics );
-            return tokens.Build();
-        }
-        // GetDelegateSyntax
-        public static string GetDelegateSyntax(IEnumerable<string> modifiers, ParameterInfo result, Type type, Type[] generics, ParameterInfo[] parameters) {
-            var tokens = new List<string>();
-            tokens.AddRange( modifiers );
-            tokens.AddMethod_Result( result );
-            tokens.AddType_SimpleIdentifier( type );
-            tokens.AddType_GenericParameters( generics );
-            tokens.AddMethod_Parameters( parameters );
-            tokens.AddType_GenericParametersConstraints( generics );
-            tokens.Add( ";" );
-            return tokens.Build();
-        }
-        // GetMemberSyntax
-        public static string GetFieldSyntax(IEnumerable<string> modifiers, Type type, string name, bool isLiteral, object? value) {
-            var tokens = new List<string>();
-            tokens.AddRange( modifiers );
-            tokens.AddType_Identifier( type );
-            tokens.Add( name );
-            if (isLiteral) {
-                tokens.Add( "=" );
-                tokens.Add( value?.ToString() ?? "null" );
+        // Type
+        public static string GetTypeSyntax(this Type type) {
+            if (type.IsInterface()) {
+                return CSharpSyntaxFactoryHelper.GetTypeSyntax( type.GetModifiers(), type.GetSimpleIdentifier(), type.GetGenericArguments(), null, type.GetInterfaces() );
             }
-            tokens.Add( ";" );
-            return tokens.Build();
+            if (type.IsClass()) {
+                return CSharpSyntaxFactoryHelper.GetTypeSyntax( type.GetModifiers(), type.GetSimpleIdentifier(), type.GetGenericArguments(), type.BaseType, type.GetInterfaces() );
+            }
+            if (type.IsStruct()) {
+                return CSharpSyntaxFactoryHelper.GetTypeSyntax( type.GetModifiers(), type.GetSimpleIdentifier(), type.GetGenericArguments(), null, type.GetInterfaces() );
+            }
+            if (type.IsEnum()) {
+                return CSharpSyntaxFactoryHelper.GetTypeSyntax( type.GetModifiers(), type.GetSimpleIdentifier(), type.GetGenericArguments(), Enum.GetUnderlyingType( type ), null );
+            }
+            if (type.IsDelegate()) {
+                var method = type.GetMethod( "Invoke" );
+                return CSharpSyntaxFactoryHelper.GetDelegateSyntax( type.GetModifiers(), method.ReturnParameter, type.GetSimpleIdentifier(), type.GetGenericArguments(), method.GetParameters() );
+            }
+            throw new ArgumentException( "Type is unsupported: " + type );
         }
-        public static string GetPropertySyntax(IEnumerable<string> modifiers, Type type, string name, MethodInfo? getter, MethodInfo? setter) {
-            var tokens = new List<string>();
-            tokens.AddRange( modifiers );
-            tokens.AddType_Identifier( type );
-            tokens.Add( name );
-            tokens.AddProperty_Accessors( getter, setter );
-            return tokens.Build();
+        public static string GetIdentifier(this Type type) {
+            if (type.IsByRef) {
+                return "ref " + type.GetElementType().GetIdentifier();
+            }
+            if (type.IsNullable( out var underlying )) {
+                return underlying.GetIdentifier() + "?";
+            }
+            if (type.IsGenericTypeDefinition) {
+                var builder = new StringBuilder();
+                builder.Append( type.GetSimpleIdentifier() );
+                builder.Append( '<' ).AppendJoin( ", ", type.GetGenericArguments().Select( GetIdentifier ) ).Append( '>' );
+                return builder.ToString();
+            }
+            if (type.IsConstructedGenericType) {
+                var builder = new StringBuilder();
+                builder.Append( type.GetSimpleIdentifier() );
+                builder.Append( '<' ).AppendJoin( ", ", type.GetGenericArguments().Select( GetIdentifier ) ).Append( '>' );
+                return builder.ToString();
+            }
+            if (type.IsGenericParameter) {
+                return type.Name;
+            }
+            return type.GetSimpleIdentifier();
         }
-        public static string GetIndexerSyntax(IEnumerable<string> modifiers, Type type, ParameterInfo[] indices, MethodInfo? getter, MethodInfo? setter) {
-            var tokens = new List<string>();
-            tokens.AddRange( modifiers );
-            tokens.AddType_Identifier( type );
-            tokens.Add( "this" );
-            tokens.AddProperty_Indices( indices );
-            tokens.AddProperty_Accessors( getter, setter );
-            return tokens.Build();
+        internal static string GetSimpleIdentifier(this Type type) {
+            if (type == typeof( void )) return "void";
+            if (type == typeof( object )) return "object";
+            if (type == typeof( string )) return "string";
+
+            if (type == typeof( bool )) return "bool";
+            if (type == typeof( char )) return "char";
+
+            if (type == typeof( byte )) return "byte";
+            if (type == typeof( short )) return "short";
+            if (type == typeof( int )) return "int";
+            if (type == typeof( long )) return "long";
+
+            if (type == typeof( sbyte )) return "sbyte";
+            if (type == typeof( ushort )) return "ushort";
+            if (type == typeof( uint )) return "uint";
+            if (type == typeof( ulong )) return "ulong";
+
+            if (type == typeof( float )) return "float";
+            if (type == typeof( double )) return "double";
+
+            if (type == typeof( decimal )) return "decimal";
+
+            if (type.IsGenericType) {
+                var name = type.Name;
+                return name.Remove( name.IndexOf( '`' ) );
+            }
+            return type.Name;
         }
-        public static string GetEventSyntax(IEnumerable<string> modifiers, Type type, string name, MethodInfo? adder, MethodInfo? remover, MethodInfo? raiser) {
-            var tokens = new List<string>();
-            tokens.AddRange( modifiers );
-            tokens.AddType_Identifier( type );
-            tokens.Add( name );
-            tokens.AddEvent_Accessors( adder, remover, raiser );
-            return tokens.Build();
+        // Member
+        public static string GetMemberSyntax(this MemberInfo member) {
+            if (member is FieldInfo field) {
+                return GetFieldSyntax( field );
+            }
+            if (member is PropertyInfo property) {
+                return GetPropertySyntax( property );
+            }
+            if (member is EventInfo @event) {
+                return GetEventSyntax( @event );
+            }
+            if (member is ConstructorInfo constructor) {
+                return GetConstructorSyntax( constructor );
+            }
+            if (member is MethodInfo method) {
+                return GetMethodSyntax( method );
+            }
+            throw new ArgumentException( "Member is unsupported: " + member );
         }
-        public static string GetConstructorSyntax(IEnumerable<string> modifiers, Type type, ParameterInfo[] parameters) {
-            var tokens = new List<string>();
-            tokens.AddRange( modifiers );
-            tokens.AddType_SimpleIdentifier( type );
-            tokens.AddMethod_Parameters( parameters );
-            tokens.Add( ";" );
-            return tokens.Build();
+        // Field
+        public static string GetFieldSyntax(this FieldInfo field) {
+            if (field.IsLiteral) {
+                return CSharpSyntaxFactoryHelper.GetFieldSyntax( field.GetModifiers(), field.FieldType, field.Name, field.IsLiteral, field.GetRawConstantValue() );
+            } else {
+                return CSharpSyntaxFactoryHelper.GetFieldSyntax( field.GetModifiers(), field.FieldType, field.Name, field.IsLiteral, null );
+            }
         }
-        public static string GetMethodSyntax(IEnumerable<string> modifiers, ParameterInfo result, string name, Type[] generics, ParameterInfo[] parameters) {
-            var tokens = new List<string>();
-            tokens.AddRange( modifiers );
-            tokens.AddMethod_Result( result );
-            tokens.Add( name );
-            tokens.AddType_GenericParameters( generics );
-            tokens.AddMethod_Parameters( parameters );
-            tokens.AddType_GenericParametersConstraints( generics );
-            tokens.Add( ";" );
-            return tokens.Build();
+        // Property
+        public static string GetPropertySyntax(this PropertyInfo property) {
+            if (property.IsIndexer()) {
+                return CSharpSyntaxFactoryHelper.GetIndexerSyntax( property.GetModifiers(), property.PropertyType, property.GetIndexParameters(), property.GetMethod, property.SetMethod );
+            } else {
+                return CSharpSyntaxFactoryHelper.GetPropertySyntax( property.GetModifiers(), property.PropertyType, property.Name, property.GetMethod, property.SetMethod );
+            }
         }
-        public static string GetOperatorSyntax(IEnumerable<string> modifiers, ParameterInfo result, string name, Type[] generics, ParameterInfo[] parameters) {
-            // todo:
-            var tokens = new List<string>();
-            tokens.AddRange( modifiers );
-            tokens.AddMethod_Result( result );
-            tokens.Add( name );
-            tokens.AddType_GenericParameters( generics );
-            tokens.AddMethod_Parameters( parameters );
-            tokens.AddType_GenericParametersConstraints( generics );
-            tokens.Add( ";" );
-            return tokens.Build();
+        // Event
+        public static string GetEventSyntax(this EventInfo @event) {
+            return CSharpSyntaxFactoryHelper.GetEventSyntax( @event.GetModifiers(), @event.EventHandlerType, @event.Name, @event.AddMethod, @event.RemoveMethod, @event.RaiseMethod );
+        }
+        // Constructor
+        public static string GetConstructorSyntax(this ConstructorInfo constructor) {
+            return CSharpSyntaxFactoryHelper.GetConstructorSyntax( constructor.GetModifiers(), constructor.DeclaringType.GetSimpleIdentifier(), constructor.GetParameters() );
+        }
+        // Method
+        public static string GetMethodSyntax(this MethodInfo method) {
+            if (method.IsOperator()) {
+                return CSharpSyntaxFactoryHelper.GetOperatorSyntax( method.GetModifiers(), method.ReturnParameter, method.Name, method.GetGenericArguments(), method.GetParameters() );
+            } else {
+                return CSharpSyntaxFactoryHelper.GetMethodSyntax( method.GetModifiers(), method.ReturnParameter, method.Name, method.GetGenericArguments(), method.GetParameters() );
+            }
+        }
+
+
+        // Helpers/GetModifiers
+        private static IEnumerable<string> GetModifiers(this Type type) {
+            yield return type.GetAccessLevel().GetModifier();
+            if (type.IsClass()) {
+                if (type.IsStatic()) yield return "static";
+                if (type.IsAbstract()) yield return "abstract";
+                if (type.IsSealed()) yield return "sealed";
+            }
+            if (type.IsInterface()) yield return "interface";
+            if (type.IsClass()) yield return "class";
+            if (type.IsStruct()) yield return "struct";
+            if (type.IsEnum()) yield return "enum";
+            if (type.IsDelegate()) yield return "delegate";
+        }
+        private static IEnumerable<string> GetModifiers(this FieldInfo field) {
+            yield return field.GetAccessLevel().GetModifier();
+            if (field.IsLiteral) yield return "const";
+            if (field.IsStatic && !field.IsLiteral) yield return "static";
+            if (field.IsInitOnly) yield return "readonly";
+        }
+        private static IEnumerable<string> GetModifiers(this PropertyInfo property) {
+            yield return property.GetAccessLevel().GetModifier();
+            if (property.GetAccessors( true ).Any( CSharpSyntaxFactoryHelper3.IsStatic )) yield return "static";
+            if (property.GetAccessors( true ).Any( CSharpSyntaxFactoryHelper3.IsAbstract )) yield return "abstract";
+            if (property.GetAccessors( true ).Any( CSharpSyntaxFactoryHelper3.IsVirtual )) yield return "virtual";
+            if (property.GetAccessors( true ).Any( CSharpSyntaxFactoryHelper3.IsOverride )) yield return "override";
+            if (property.GetAccessors( true ).Any( CSharpSyntaxFactoryHelper3.IsSealed )) yield return "sealed";
+        }
+        private static IEnumerable<string> GetModifiers(this EventInfo @event) {
+            yield return @event.GetAccessLevel().GetModifier();
+            if (@event.GetAccessors( true ).Any( CSharpSyntaxFactoryHelper3.IsStatic )) yield return "static";
+            if (@event.GetAccessors( true ).Any( CSharpSyntaxFactoryHelper3.IsAbstract )) yield return "abstract";
+            if (@event.GetAccessors( true ).Any( CSharpSyntaxFactoryHelper3.IsVirtual )) yield return "virtual";
+            if (@event.GetAccessors( true ).Any( CSharpSyntaxFactoryHelper3.IsOverride )) yield return "override";
+            if (@event.GetAccessors( true ).Any( CSharpSyntaxFactoryHelper3.IsSealed )) yield return "sealed";
+        }
+        private static IEnumerable<string> GetModifiers(this ConstructorInfo constructor) {
+            yield return constructor.GetAccessLevel().GetModifier();
+            if (constructor.IsStatic) yield return "static";
+        }
+        private static IEnumerable<string> GetModifiers(this MethodInfo method) {
+            yield return method.GetAccessLevel().GetModifier();
+            if (method.IsStatic()) yield return "static";
+            if (method.IsAbstract()) yield return "abstract";
+            if (method.IsVirtual()) yield return "virtual";
+            if (method.IsOverride()) yield return "override";
+            if (method.IsSealed()) yield return "sealed";
         }
 
 

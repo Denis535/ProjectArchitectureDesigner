@@ -48,6 +48,25 @@ namespace System.Collections.Generic {
                 }
             }
         }
+        public static IEnumerable<T> WithPrefix<T>(this IEnumerable<T> source, T prefix) {
+            foreach (var item in source) {
+                yield return prefix;
+                yield return item;
+            }
+        }
+        public static IEnumerable<T> WithSuffix<T>(this IEnumerable<T> source, T suffix) {
+            foreach (var item in source) {
+                yield return item;
+                yield return suffix;
+            }
+        }
+        public static IEnumerable<T> WithPrefixSuffix<T>(this IEnumerable<T> source, T prefix, T suffix) {
+            foreach (var item in source) {
+                yield return prefix;
+                yield return item;
+                yield return suffix;
+            }
+        }
         public static IEnumerable<T> WithSeparator<T>(this IEnumerable<T> source, T separator) {
             using var source_enumerator = source.GetPeekableEnumerator();
             while (source_enumerator.MoveNext( out var current )) {
