@@ -1,24 +1,24 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-namespace ProjectArchitecture.Model {
+namespace ProjectArchitectureDesigner.Model {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
     using System.Linq;
     using System.Text;
     using NUnit.Framework;
-    using ProjectArchitecture.Renderers;
+    using ProjectArchitectureDesigner.Renderers;
 
     public class Tests_00_Project {
 
-        private Project_ProjectArchitecture Project { get; set; } = default!;
+        private Project_ProjectArchitectureDesigner Project { get; set; } = default!;
 
 
         [SetUp]
         public void Setup() {
             Trace.Listeners.Add( new TextWriterTraceListener( TestContext.Out ) );
-            Project = new Project_ProjectArchitecture();
+            Project = new Project_ProjectArchitectureDesigner();
         }
 
 
@@ -34,17 +34,17 @@ namespace ProjectArchitecture.Model {
                 Assert.NotNull( module.Project );
                 Assert.NotNull( module.Namespaces );
             }
-            foreach (var @namespace in Project.Modules.SelectMany( i => i.Namespaces )) {
+            foreach (var @namespace in Project.Namespaces) {
                 Assert.NotNull( @namespace.Name );
                 Assert.NotNull( @namespace.Module );
                 Assert.NotNull( @namespace.Groups );
             }
-            foreach (var group in Project.Modules.SelectMany( i => i.Namespaces ).SelectMany( i => i.Groups )) {
+            foreach (var group in Project.Groups) {
                 Assert.NotNull( group.Name );
                 Assert.NotNull( group.Namespace );
                 Assert.NotNull( group.Types );
             }
-            foreach (var type in Project.Modules.SelectMany( i => i.Namespaces ).SelectMany( i => i.Groups ).SelectMany( i => i.Types )) {
+            foreach (var type in Project.Types) {
                 Assert.NotNull( type.Value );
                 Assert.NotNull( type.Name );
                 Assert.NotNull( type.Group );
@@ -52,25 +52,21 @@ namespace ProjectArchitecture.Model {
         }
         [Test]
         public void Test_01_Project_Modules_AreValid() {
-            foreach (var type in Project.DescendantNodes.OfType<TypeArchNode>()) {
+            foreach (var type in Project.Types) {
                 Assert.That( type.Module.Name, Is.EqualTo( type.Value.Assembly.GetName().Name ) );
             }
         }
         [Test]
         public void Test_02_Project_Namespaces_AreValid() {
-            foreach (var type in Project.DescendantNodes.OfType<TypeArchNode>()) {
+            foreach (var type in Project.Types) {
                 Assert.That( type.Namespace.Name, Is.EqualTo( type.Value.Namespace ) );
             }
         }
         [Test]
         public void Test_03_Project_Types_AreComplete() {
             Project.Compare( Project.Assemblies, out _, out var missing, out var extra );
-            if (missing.Any()) {
-                Assert.Warn( GetMessage_Missing( missing ) );
-            }
-            if (extra.Any()) {
-                Assert.Warn( GetMessage_Extra( extra ) );
-            }
+            if (missing.Any()) Assert.Warn( GetMessage_Missing( missing ) );
+            if (extra.Any()) Assert.Warn( GetMessage_Extra( extra ) );
         }
 
 
@@ -93,7 +89,7 @@ namespace ProjectArchitecture.Model {
         private static string GetMessage_Missing(IEnumerable<Type> types) {
             var builder = new StringBuilder();
             builder.AppendLine( "Missing:" );
-            foreach (var item in GetHierarchy( types )) {
+            foreach (var item in GetAssembliesNamespacesTypes( types )) {
                 builder.AppendLine( item );
             }
             return builder.ToString();
@@ -101,12 +97,12 @@ namespace ProjectArchitecture.Model {
         private static string GetMessage_Extra(IEnumerable<Type> types) {
             var builder = new StringBuilder();
             builder.AppendLine( "Extra:" );
-            foreach (var item in GetHierarchy( types )) {
+            foreach (var item in GetAssembliesNamespacesTypes( types )) {
                 builder.AppendLine( item );
             }
             return builder.ToString();
         }
-        private static IEnumerable<string> GetHierarchy(IEnumerable<Type> types) {
+        private static IEnumerable<string> GetAssembliesNamespacesTypes(IEnumerable<Type> types) {
             // Assembly
             foreach (var assembly in types.GroupBy( i => i.Assembly )) {
                 yield return string.Format( "Assembly: {0}", assembly.Key.GetName().Name );

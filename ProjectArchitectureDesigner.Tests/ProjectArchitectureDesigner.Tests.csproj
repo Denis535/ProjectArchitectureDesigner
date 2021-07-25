@@ -11,9 +11,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ProjectArchitecture\ProjectArchitecture.csproj" />
-        <ProjectReference Include="..\ProjectArchitecture.Analyzer\ProjectArchitecture.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
-        <ProjectReference Include="..\ProjectArchitecture.Internal\ProjectArchitecture.Internal.csproj" />
+        <ProjectReference Include="..\ProjectArchitectureDesigner\ProjectArchitectureDesigner.csproj" />
+        <ProjectReference Include="..\ProjectArchitectureDesigner.Analyzer\ProjectArchitectureDesigner.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
+        <ProjectReference Include="..\ProjectArchitectureDesigner.Internal\ProjectArchitectureDesigner.Internal.csproj" />
     </ItemGroup>
 
 </Project>

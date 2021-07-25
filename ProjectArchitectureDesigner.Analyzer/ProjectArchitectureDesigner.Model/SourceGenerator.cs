@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
 #pragma warning disable RS2008 // Enable analyzer release tracking
-namespace ProjectArchitecture.Model {
+namespace ProjectArchitectureDesigner.Model {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;

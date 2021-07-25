@@ -8,29 +8,29 @@ It will give you:
  - The ability to render the project structure into any convenient format.
  - The ability to validate dependencies between groups of types (third-party library is needed).
 
-# The Api overview
+# The api overview
 
-    Project: ProjectArchitecture
-    | - Module: ProjectArchitecture
-    |   | - Namespace: ProjectArchitecture.Model
-    |   |   | - ArchNode
-    |   |   |   ArchNode
-    |   |   | - ArchNode/Children
-    |   |   |   ProjectArchNode
-    |   |   |   ModuleArchNode
-    |   |   |   NamespaceArchNode
-    |   |   |   GroupArchNode
-    |   |   |   TypeArchNode
-    |   | - Namespace: ProjectArchitecture.Renderers
-    |       |   ProjectTextRenderer
-    |       |   ProjectMarkdownRenderer
-    | - Module: ProjectArchitecture.Analyzer
-        | - Namespace: ProjectArchitecture.Model
-            |   SourceGenerator
+```
+    Project: ——— ProjectArchitectureDesigner
+    Module: ———— ProjectArchitectureDesigner
+    Namespace: — ProjectArchitectureDesigner.Model
+    Group: ————— ArchNode
+    Type: —————— ArchNode
+    Group: ————— ArchNode/Children
+    Type: —————— ProjectArchNode
+    Type: —————— ModuleArchNode
+    Type: —————— NamespaceArchNode
+    Type: —————— GroupArchNode
+    Type: —————— TypeArchNode
+    Namespace: — ProjectArchitectureDesigner.Renderers
+    Type: —————— ProjectAlignedTextRenderer
+    Type: —————— ProjectHierarchicalTextRenderer
+    Type: —————— ProjectMarkdownRenderer
+```
 
 # The getting started
 
-In order to describe your project you just need to write the `ProjectArchNode` and the `ModuleArcNode` classes with the list of modules, namespaces, groups and types.
+In order to describe your project you just need to write the `ProjectArchNode` and the `ModuleArcNode` classes with the list of modules, namespaces, groups and types entries.
 
 # The examples
 
@@ -38,43 +38,92 @@ In order to describe your project you just need to write the `ProjectArchNode` a
 
 ```csharp
     // Project/ProjectArchitecture
-    public sealed partial class Project_ProjectArchitecture : ProjectArchNode {
+    public sealed partial class Project_ProjectArchitectureDesigner : ProjectArchNode {
         protected override void Initialize() => SetChildren(
-            typeof( Module_ProjectArchitecture ),
-            typeof( Module_ProjectArchitecture_Analyzer )
+            typeof( Module_ProjectArchitectureDesigner ),
+            typeof( Module_ProjectArchitectureDesigner_Analyzer ),
+            typeof( Module_ProjectArchitectureDesigner_Internal )
         );
         protected override bool IsSupported(Type type) {
             return
                 base.IsSupported( type ) &&
-                type.IsVisible &&
-                !type.Namespace!.StartsWith( "System" ) &&
-                !type.Namespace!.StartsWith( "Microsoft" );
+                !type.IsNestedPrivate &&
+                type.Namespace != "System.Runtime.CompilerServices" &&
+                type.Namespace != "System.Diagnostics.CodeAnalysis";
         }
     }
 
-    // Modules/ProjectArchitecture
-    public sealed partial class Module_ProjectArchitecture : ModuleArchNode {
+    // Modules/ProjectArchitectureDesigner
+    public sealed partial class Module_ProjectArchitectureDesigner : ModuleArchNode {
+        public override System.Reflection.Assembly? Assembly => typeof( ArchNode ).Assembly;
         protected override void Initialize() => SetChildren(
             "ProjectArchitecture.Model",
-            // ArchNode
+            /// Group: ArchNode
             typeof( ArchNode ),
-            // ArchNode/Children
+            /// Group: ArchNode/Children
             typeof( ProjectArchNode ),
             typeof( ModuleArchNode ),
             typeof( NamespaceArchNode ),
             typeof( GroupArchNode ),
             typeof( TypeArchNode ),
             "ProjectArchitecture.Renderers",
-            typeof( ProjectTextRenderer ),
+            typeof( ProjectAlignedTextRenderer ),
+            typeof( ProjectHierarchicalTextRenderer ),
             typeof( ProjectMarkdownRenderer )
         );
     }
 
-    // Modules/ProjectArchitecture.Analyzer
-    public sealed partial class Module_ProjectArchitecture_Analyzer : ModuleArchNode {
+    // Modules/ProjectArchitectureDesigner.Analyzer
+    public sealed partial class Module_ProjectArchitectureDesigner_Analyzer : ModuleArchNode {
+        public override System.Reflection.Assembly? Assembly => typeof( SourceGenerator ).Assembly;
         protected override void Initialize() => SetChildren(
             "ProjectArchitecture.Model",
-            typeof( SourceGenerator )
+            typeof( SourceGenerator ),
+            typeof( SyntaxAnalyzer ),
+            typeof( SyntaxGenerator ),
+            /// Group: ClassInfo
+            typeof( ProjectInfo ),
+            typeof( ModuleInfo ),
+            /// Group: ClassInfo/Entries
+            typeof( ModuleEntry ),
+            typeof( NamespaceEntry ),
+            typeof( GroupEntry ),
+            typeof( TypeEntry ),
+            "Microsoft.CodeAnalysis.CSharp.Syntax",
+            typeof( SyntaxFormatter ),
+            typeof( SyntaxFormatterRewriter ),
+            typeof( SyntaxFactory2 ),
+            typeof( SyntaxUtils )
+        );
+    }
+
+    // Modules/ProjectArchitectureDesigner.Internal
+    public sealed partial class Module_ProjectArchitectureDesigner_Internal : ModuleArchNode {
+        public override System.Reflection.Assembly? Assembly => typeof( Option ).Assembly;
+        protected override void Initialize() => SetChildren(
+            "System",
+            typeof( Option ),
+            typeof( Option<> ),
+            typeof( CSharpExtensions ),
+            typeof( StringExtensions ),
+            typeof( TypeExtensions ),
+            "System.Collections.Generic",
+            typeof( EnumerableExtensions ),
+            typeof( PeekableEnumeratorExtensions ),
+            typeof( PeekableEnumerator<> ),
+            "System.Text",
+            typeof( StringBuilderExtensions ),
+            typeof( HierarchicalStringBuilder ),
+            "System.Text.CSharp",
+            typeof( CSharpSyntaxFactory ),
+            typeof( CSharpSyntaxFactoryHelper ),
+            typeof( CSharpSyntaxFactoryHelper2 ),
+            typeof( CSharpSyntaxFactoryHelper3 ),
+            typeof( AccessLevelExtensions ),
+            typeof( AccessLevel ),
+            "System.Text.Markdown",
+            typeof( MarkdownBuilder ),
+            typeof( MarkdownSyntaxFactory )
         );
     }
 ```
@@ -82,63 +131,143 @@ In order to describe your project you just need to write the `ProjectArchNode` a
 ## The generated source
 
 ```csharp
-    // Project: ProjectArchitecture
-    public sealed partial class Project_ProjectArchitecture : ProjectArchNode {
-        public override string Name { get; } = "ProjectArchitecture";
-        public Module_ProjectArchitecture ProjectArchitecture { get; } = new Module_ProjectArchitecture(); // Module: Module_ProjectArchitecture
-        public Module_ProjectArchitecture_Analyzer ProjectArchitecture_Analyzer { get; } = new Module_ProjectArchitecture_Analyzer(); // Module: Module_ProjectArchitecture_Analyzer
+    // Project: ProjectArchitectureDesigner
+    public sealed partial class Project_ProjectArchitectureDesigner : ProjectArchNode {
+        public override string Name => "ProjectArchitectureDesigner";
+        public override ModuleArchNode[] Modules => new ModuleArchNode[] { ProjectArchitectureDesigner, ProjectArchitectureDesigner_Analyzer, ProjectArchitectureDesigner_Internal };
+        public Module_ProjectArchitectureDesigner ProjectArchitectureDesigner { get; } = new Module_ProjectArchitectureDesigner();
+        public Module_ProjectArchitectureDesigner_Analyzer ProjectArchitectureDesigner_Analyzer { get; } = new Module_ProjectArchitectureDesigner_Analyzer();
+        public Module_ProjectArchitectureDesigner_Internal ProjectArchitectureDesigner_Internal { get; } = new Module_ProjectArchitectureDesigner_Internal();
     }
 
-    // Module: ProjectArchitecture
-    public sealed partial class Module_ProjectArchitecture : ModuleArchNode {
-        public override string Name { get; } = "ProjectArchitecture";
-        public Namespace_ProjectArchitecture_Model ProjectArchitecture_Model { get; } = new Namespace_ProjectArchitecture_Model(); // Namespace: ProjectArchitecture.Model
-        public Namespace_ProjectArchitecture_Renderers ProjectArchitecture_Renderers { get; } = new Namespace_ProjectArchitecture_Renderers(); // Namespace: ProjectArchitecture.Renderers
+    // Module: ProjectArchitectureDesigner
+    public sealed partial class Module_ProjectArchitectureDesigner : ModuleArchNode {
+        public override string Name => "ProjectArchitectureDesigner";
+        public override NamespaceArchNode[] Namespaces => new NamespaceArchNode[] { ProjectArchitecture_Model, ProjectArchitecture_Renderers };
+        public Namespace_ProjectArchitecture_Model ProjectArchitecture_Model { get; } = new Namespace_ProjectArchitecture_Model();
+        public Namespace_ProjectArchitecture_Renderers ProjectArchitecture_Renderers { get; } = new Namespace_ProjectArchitecture_Renderers();
         // Namespace: ProjectArchitecture.Model
         public class Namespace_ProjectArchitecture_Model : NamespaceArchNode {
-            public override string Name { get; } = "ProjectArchitecture.Model";
-            public Group_ArchNode ArchNode { get; } = new Group_ArchNode(); // Group: ArchNode
-            public Group_ArchNode_Children ArchNode_Children { get; } = new Group_ArchNode_Children(); // Group: ArchNode/Children
-            // Group: ArchNode
+            public override string Name => "ProjectArchitecture.Model";
+            public override GroupArchNode[] Groups => new GroupArchNode[] { ArchNode, ArchNode_Children };
+            public Group_ArchNode ArchNode { get; } = new Group_ArchNode();
+            public Group_ArchNode_Children ArchNode_Children { get; } = new Group_ArchNode_Children();
             public class Group_ArchNode : GroupArchNode {
-                public override string Name { get; } = "ArchNode";
-                public TypeArchNode ArchNode { get; } = typeof(ArchNode); // Type: ArchNode
+                public override string Name => "ArchNode";
+                public override TypeArchNode[] Types { get; } = new TypeArchNode[] { typeof(ArchNode) };
             }
-            // Group: ArchNode/Children
             public class Group_ArchNode_Children : GroupArchNode {
-                public override string Name { get; } = "ArchNode/Children";
-                public TypeArchNode ProjectArchNode { get; } = typeof(ProjectArchNode); // Type: ProjectArchNode
-                public TypeArchNode ModuleArchNode { get; } = typeof(ModuleArchNode); // Type: ModuleArchNode
-                public TypeArchNode NamespaceArchNode { get; } = typeof(NamespaceArchNode); // Type: NamespaceArchNode
-                public TypeArchNode GroupArchNode { get; } = typeof(GroupArchNode); // Type: GroupArchNode
-                public TypeArchNode TypeArchNode { get; } = typeof(TypeArchNode); // Type: TypeArchNode
+                public override string Name => "ArchNode/Children";
+                public override TypeArchNode[] Types { get; } = new TypeArchNode[] { typeof(ProjectArchNode), typeof(ModuleArchNode), typeof(NamespaceArchNode), typeof(GroupArchNode), typeof(TypeArchNode) };
             }
         }
         // Namespace: ProjectArchitecture.Renderers
         public class Namespace_ProjectArchitecture_Renderers : NamespaceArchNode {
-            public override string Name { get; } = "ProjectArchitecture.Renderers";
-            public Group_Default Default { get; } = new Group_Default(); // Group: Default
-            // Group: Default
+            public override string Name => "ProjectArchitecture.Renderers";
+            public override GroupArchNode[] Groups => new GroupArchNode[] { Default };
+            public Group_Default Default { get; } = new Group_Default();
             public class Group_Default : GroupArchNode {
-                public override string Name { get; } = "Default";
-                public TypeArchNode ProjectTextRenderer { get; } = typeof(ProjectTextRenderer); // Type: ProjectTextRenderer
-                public TypeArchNode ProjectMarkdownRenderer { get; } = typeof(ProjectMarkdownRenderer); // Type: ProjectMarkdownRenderer
+                public override string Name => "Default";
+                public override TypeArchNode[] Types { get; } = new TypeArchNode[] { typeof(ProjectAlignedTextRenderer), typeof(ProjectHierarchicalTextRenderer), typeof(ProjectMarkdownRenderer) };
             }
         }
     }
 
-    // Module: ProjectArchitecture.Analyzer
-    public sealed partial class Module_ProjectArchitecture_Analyzer : ModuleArchNode {
-        public override string Name { get; } = "ProjectArchitecture.Analyzer";
-        public Namespace_ProjectArchitecture_Model ProjectArchitecture_Model { get; } = new Namespace_ProjectArchitecture_Model(); // Namespace: ProjectArchitecture.Model
+    // Module: ProjectArchitectureDesigner.Analyzer
+    public sealed partial class Module_ProjectArchitectureDesigner_Analyzer : ModuleArchNode {
+        public override string Name => "ProjectArchitectureDesigner.Analyzer";
+        public override NamespaceArchNode[] Namespaces => new NamespaceArchNode[] { ProjectArchitecture_Model, Microsoft_CodeAnalysis_CSharp_Syntax };
+        public Namespace_ProjectArchitecture_Model ProjectArchitecture_Model { get; } = new Namespace_ProjectArchitecture_Model();
+        public Namespace_Microsoft_CodeAnalysis_CSharp_Syntax Microsoft_CodeAnalysis_CSharp_Syntax { get; } = new Namespace_Microsoft_CodeAnalysis_CSharp_Syntax();
         // Namespace: ProjectArchitecture.Model
         public class Namespace_ProjectArchitecture_Model : NamespaceArchNode {
-            public override string Name { get; } = "ProjectArchitecture.Model";
-            public Group_Default Default { get; } = new Group_Default(); // Group: Default
-            // Group: Default
+            public override string Name => "ProjectArchitecture.Model";
+            public override GroupArchNode[] Groups => new GroupArchNode[] { Default, ClassInfo, ClassInfo_Entries };
+            public Group_Default Default { get; } = new Group_Default();
+            public Group_ClassInfo ClassInfo { get; } = new Group_ClassInfo();
+            public Group_ClassInfo_Entries ClassInfo_Entries { get; } = new Group_ClassInfo_Entries();
             public class Group_Default : GroupArchNode {
-                public override string Name { get; } = "Default";
-                public TypeArchNode SourceGenerator { get; } = typeof(SourceGenerator); // Type: SourceGenerator
+                public override string Name => "Default";
+                public override TypeArchNode[] Types { get; } = new TypeArchNode[] { typeof(SourceGenerator), typeof(SyntaxAnalyzer), typeof(SyntaxGenerator) };
+            }
+            public class Group_ClassInfo : GroupArchNode {
+                public override string Name => "ClassInfo";
+                public override TypeArchNode[] Types { get; } = new TypeArchNode[] { typeof(ProjectInfo), typeof(ModuleInfo) };
+            }
+            public class Group_ClassInfo_Entries : GroupArchNode {
+                public override string Name => "ClassInfo/Entries";
+                public override TypeArchNode[] Types { get; } = new TypeArchNode[] { typeof(ModuleEntry), typeof(NamespaceEntry), typeof(GroupEntry), typeof(TypeEntry) };
+            }
+        }
+        // Namespace: Microsoft.CodeAnalysis.CSharp.Syntax
+        public class Namespace_Microsoft_CodeAnalysis_CSharp_Syntax : NamespaceArchNode {
+            public override string Name => "Microsoft.CodeAnalysis.CSharp.Syntax";
+            public override GroupArchNode[] Groups => new GroupArchNode[] { Default };
+            public Group_Default Default { get; } = new Group_Default();
+            public class Group_Default : GroupArchNode {
+                public override string Name => "Default";
+                public override TypeArchNode[] Types { get; } = new TypeArchNode[] { typeof(SyntaxFormatter), typeof(SyntaxFormatterRewriter), typeof(SyntaxFactory2), typeof(SyntaxUtils) };
+            }
+        }
+    }
+
+    // Module: ProjectArchitectureDesigner.Internal
+    public sealed partial class Module_ProjectArchitectureDesigner_Internal : ModuleArchNode {
+        public override string Name => "ProjectArchitectureDesigner.Internal";
+        public override NamespaceArchNode[] Namespaces => new NamespaceArchNode[] { System, System_Collections_Generic, System_Text, System_Text_CSharp, System_Text_Markdown };
+        public Namespace_System System { get; } = new Namespace_System();
+        public Namespace_System_Collections_Generic System_Collections_Generic { get; } = new Namespace_System_Collections_Generic();
+        public Namespace_System_Text System_Text { get; } = new Namespace_System_Text();
+        public Namespace_System_Text_CSharp System_Text_CSharp { get; } = new Namespace_System_Text_CSharp();
+        public Namespace_System_Text_Markdown System_Text_Markdown { get; } = new Namespace_System_Text_Markdown();
+        // Namespace: System
+        public class Namespace_System : NamespaceArchNode {
+            public override string Name => "System";
+            public override GroupArchNode[] Groups => new GroupArchNode[] { Default };
+            public Group_Default Default { get; } = new Group_Default();
+            public class Group_Default : GroupArchNode {
+                public override string Name => "Default";
+                public override TypeArchNode[] Types { get; } = new TypeArchNode[] { typeof(Option), typeof(Option<>), typeof(CSharpExtensions), typeof(StringExtensions), typeof(TypeExtensions) };
+            }
+        }
+        // Namespace: System.Collections.Generic
+        public class Namespace_System_Collections_Generic : NamespaceArchNode {
+            public override string Name => "System.Collections.Generic";
+            public override GroupArchNode[] Groups => new GroupArchNode[] { Default };
+            public Group_Default Default { get; } = new Group_Default();
+            public class Group_Default : GroupArchNode {
+                public override string Name => "Default";
+                public override TypeArchNode[] Types { get; } = new TypeArchNode[] { typeof(EnumerableExtensions), typeof(PeekableEnumeratorExtensions), typeof(PeekableEnumerator<>) };
+            }
+        }
+        // Namespace: System.Text
+        public class Namespace_System_Text : NamespaceArchNode {
+            public override string Name => "System.Text";
+            public override GroupArchNode[] Groups => new GroupArchNode[] { Default };
+            public Group_Default Default { get; } = new Group_Default();
+            public class Group_Default : GroupArchNode {
+                public override string Name => "Default";
+                public override TypeArchNode[] Types { get; } = new TypeArchNode[] { typeof(StringBuilderExtensions), typeof(HierarchicalStringBuilder) };
+            }
+        }
+        // Namespace: System.Text.CSharp
+        public class Namespace_System_Text_CSharp : NamespaceArchNode {
+            public override string Name => "System.Text.CSharp";
+            public override GroupArchNode[] Groups => new GroupArchNode[] { Default };
+            public Group_Default Default { get; } = new Group_Default();
+            public class Group_Default : GroupArchNode {
+                public override string Name => "Default";
+                public override TypeArchNode[] Types { get; } = new TypeArchNode[] { typeof(CSharpSyntaxFactory), typeof(CSharpSyntaxFactoryHelper), typeof(CSharpSyntaxFactoryHelper2), typeof(CSharpSyntaxFactoryHelper3), typeof(AccessLevelExtensions), typeof(AccessLevel) };
+            }
+        }
+        // Namespace: System.Text.Markdown
+        public class Namespace_System_Text_Markdown : NamespaceArchNode {
+            public override string Name => "System.Text.Markdown";
+            public override GroupArchNode[] Groups => new GroupArchNode[] { Default };
+            public Group_Default Default { get; } = new Group_Default();
+            public class Group_Default : GroupArchNode {
+                public override string Name => "Default";
+                public override TypeArchNode[] Types { get; } = new TypeArchNode[] { typeof(MarkdownBuilder), typeof(MarkdownSyntaxFactory) };
             }
         }
     }
@@ -150,20 +279,19 @@ In order to describe your project you just need to write the `ProjectArchNode` a
  - Put all your code into folders reflecting the namespaces containing those code.
  - Put your low-level code into existing namespaces: System, Microsoft, MyProject, ThirdPartyProject instead of special namespaces: MyProject.Internal, MyProject.Helpers.
  - Understand the semantic of your types. I can distinguish the following semantic categories:
-    * `Attribute` - ideally only data.
-    * `Service` - only logic without any data or state.
-    * `Entity` - data and state.
-    * `Component` - in component-oriented programming entities can consist of components.
-    * `Utility, helper`
-    * `Object, data structure`
+    * `Attribute` - Set of constants.
+    * `Service` - Logic.
+    * `Entity` - Data, state and logic.
+    * `Utility` - Set of useful methods.
+    * `Object` - Low-level data structure.
 - Understand the semantic of your type's members. [I can distinguish the following semantic categories](https://softwareengineering.stackexchange.com/a/404752/352915):
-    * `Property`: Name, Background, Color, Data, Content, Value, Children, Parent.
-    * `Query` (`question`): IsInitialized, IsRunning, HasValue, CanRun, DoesEqual(value), Equals(value), AreEqual(v1, v2), GetValue().
-    * `Directive`: IgnoreXml, RunOnLoad, CloseWhenError.
-    * `Event`: OnChange, OnChanged.
-    * `Command`: Initialize(), Run(), Stop(), SetValue(value).
-    * `Event handler`: OnChange(value), OnChanged(value).
-    * `Utility function`: Sqrt(value), Cos(value), Sin(value), ToString(), GetHashCode().
+    * `Property` - Name, Background, Color, Data, Content, Value, Children, Parent.
+    * `Query` (`question`) - IsInitialized, IsRunning, HasValue, CanRun, DoesEqual(value), Equals(value), AreEqual(v1, v2), GetValue().
+    * `Directive` - IgnoreXml, RunOnLoad, CloseWhenError.
+    * `Event` - OnChange, OnChanged.
+    * `Command` - Initialize(), Run(), Stop(), SetValue(value).
+    * `Handler` - OnChange(value), OnChanged(value).
+    * `Utility` - Sqrt(value), Cos(value), Sin(value), ToString(), GetHashCode().
 
 # The links
 

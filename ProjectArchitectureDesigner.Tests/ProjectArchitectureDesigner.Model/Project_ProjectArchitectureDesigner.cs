@@ -1,21 +1,21 @@
 ﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-namespace ProjectArchitecture.Model {
+namespace ProjectArchitectureDesigner.Model {
     using System;
     using System.Collections.Generic;
     using System.Text;
     using System.Text.CSharp;
     using System.Text.Markdown;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using ProjectArchitecture.Renderers;
+    using ProjectArchitectureDesigner.Renderers;
 
     // Project/ProjectArchitecture
-    public sealed partial class Project_ProjectArchitecture : ProjectArchNode {
+    public sealed partial class Project_ProjectArchitectureDesigner : ProjectArchNode {
         protected override void Initialize() => SetChildren(
-            typeof( Module_ProjectArchitecture ),
-            typeof( Module_ProjectArchitecture_Analyzer ),
-            typeof( Module_ProjectArchitecture_Internal )
+            typeof( Module_ProjectArchitectureDesigner ),
+            typeof( Module_ProjectArchitectureDesigner_Analyzer ),
+            typeof( Module_ProjectArchitectureDesigner_Internal )
         );
         protected override bool IsSupported(Type type) {
             return
@@ -26,11 +26,11 @@ namespace ProjectArchitecture.Model {
         }
     }
 
-    // Modules/ProjectArchitecture
-    public sealed partial class Module_ProjectArchitecture : ModuleArchNode {
+    // Modules/ProjectArchitectureDesigner
+    public sealed partial class Module_ProjectArchitectureDesigner : ModuleArchNode {
         public override System.Reflection.Assembly? Assembly => typeof( ArchNode ).Assembly;
         protected override void Initialize() => SetChildren(
-            "ProjectArchitecture.Model",
+            "ProjectArchitectureDesigner.Model",
             /// Group: ArchNode
             typeof( ArchNode ),
             /// Group: ArchNode/Children
@@ -39,18 +39,18 @@ namespace ProjectArchitecture.Model {
             typeof( NamespaceArchNode ),
             typeof( GroupArchNode ),
             typeof( TypeArchNode ),
-            "ProjectArchitecture.Renderers",
+            "ProjectArchitectureDesigner.Renderers",
             typeof( ProjectAlignedTextRenderer ),
             typeof( ProjectHierarchicalTextRenderer ),
             typeof( ProjectMarkdownRenderer )
         );
     }
 
-    // Modules/ProjectArchitecture.Analyzer
-    public sealed partial class Module_ProjectArchitecture_Analyzer : ModuleArchNode {
+    // Modules/ProjectArchitectureDesigner.Analyzer
+    public sealed partial class Module_ProjectArchitectureDesigner_Analyzer : ModuleArchNode {
         public override System.Reflection.Assembly? Assembly => typeof( SourceGenerator ).Assembly;
         protected override void Initialize() => SetChildren(
-            "ProjectArchitecture.Model",
+            "ProjectArchitectureDesigner.Model",
             typeof( SourceGenerator ),
             typeof( SyntaxAnalyzer ),
             typeof( SyntaxGenerator ),
@@ -70,8 +70,8 @@ namespace ProjectArchitecture.Model {
         );
     }
 
-    // Modules/ProjectArchitecture.Internal
-    public sealed partial class Module_ProjectArchitecture_Internal : ModuleArchNode {
+    // Modules/ProjectArchitectureDesigner.Internal
+    public sealed partial class Module_ProjectArchitectureDesigner_Internal : ModuleArchNode {
         public override System.Reflection.Assembly? Assembly => typeof( Option ).Assembly;
         protected override void Initialize() => SetChildren(
             "System",

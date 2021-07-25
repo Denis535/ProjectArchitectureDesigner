@@ -9,7 +9,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ProjectArchitecture.Internal\ProjectArchitecture.Internal.csproj" OutputItemType="Analyzer" PrivateAssets="All" />
+        <ProjectReference Include="..\ProjectArchitectureDesigner.Internal\ProjectArchitectureDesigner.Internal.csproj" OutputItemType="Analyzer" PrivateAssets="All" />
     </ItemGroup>
 
 </Project>
