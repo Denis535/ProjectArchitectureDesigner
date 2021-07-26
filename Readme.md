@@ -34,7 +34,7 @@ In order to describe your project you just need to write the `ProjectArchNode` a
 
 # The examples
 
-## The original source
+## The original source code
 
 ```csharp
 // Project/ProjectArchitecture
@@ -128,7 +128,7 @@ public sealed partial class Module_ProjectArchitectureDesigner_Internal : Module
 }
 ```
 
-## The generated source
+## The generated source code
 
 ```csharp
 // Project: ProjectArchitectureDesigner

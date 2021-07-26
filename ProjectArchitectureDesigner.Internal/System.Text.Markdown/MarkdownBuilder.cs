@@ -24,6 +24,10 @@ namespace System.Text.Markdown {
             Builder.AppendLine( text.Link( text.GetUri( prevs ) ).Item( level ) );
             return this;
         }
+        public MarkdownBuilder AppendItemLink(string text, string url, int level, IList<string> prevs) {
+            Builder.AppendLine( text.Link( url.GetUri( prevs ) ).Item( level ) );
+            return this;
+        }
 
         // Append/Span
         public MarkdownBuilder Append(string text) {

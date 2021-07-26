@@ -40,9 +40,12 @@ namespace ProjectArchitectureDesigner.Model {
             typeof( GroupArchNode ),
             typeof( TypeArchNode ),
             "ProjectArchitectureDesigner.Renderers",
-            typeof( ProjectAlignedTextRenderer ),
-            typeof( ProjectHierarchicalTextRenderer ),
-            typeof( ProjectMarkdownRenderer )
+            typeof( TextProjectRenderer ),
+            typeof( HierarchicalTextProjectRenderer ),
+            typeof( MarkdownProjectRenderer ),
+            typeof( INodeRenderer ),
+            typeof( TextRenderer ),
+            typeof( AlignedTextRenderer )
         );
     }
 

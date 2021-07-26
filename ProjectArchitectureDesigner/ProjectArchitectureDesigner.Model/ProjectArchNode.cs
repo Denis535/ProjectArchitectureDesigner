@@ -21,7 +21,7 @@ namespace ProjectArchitectureDesigner.Model {
 
 
         public ProjectArchNode() {
-            Initialize( this );
+            SetUp( this );
         }
 
 
@@ -71,7 +71,7 @@ namespace ProjectArchitectureDesigner.Model {
 
 
         // Helpers
-        protected static void Initialize(ProjectArchNode project) {
+        protected static void SetUp(ProjectArchNode project) {
             // Project
             foreach (var module in project.Modules) {
                 module.Project = project;
