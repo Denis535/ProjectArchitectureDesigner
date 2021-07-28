@@ -7,11 +7,34 @@ namespace System.Text.CSharp {
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
     using System.Text;
 
     public static class CSharpSyntaxFactory {
 
 
+        // Member
+        public static string GetMemberSyntax(this MemberInfo member) {
+            if (member is TypeInfo type) {
+                return GetTypeSyntax( type );
+            }
+            if (member is FieldInfo field) {
+                return GetFieldSyntax( field );
+            }
+            if (member is PropertyInfo property) {
+                return GetPropertySyntax( property );
+            }
+            if (member is EventInfo @event) {
+                return GetEventSyntax( @event );
+            }
+            if (member is ConstructorInfo constructor) {
+                return GetConstructorSyntax( constructor );
+            }
+            if (member is MethodInfo method) {
+                return GetMethodSyntax( method );
+            }
+            throw new ArgumentException( "Member is unsupported: " + member );
+        }
         // Type
         public static string GetTypeSyntax(this Type type) {
             if (type.IsInterface()) {
@@ -85,25 +108,6 @@ namespace System.Text.CSharp {
             }
             return type.Name;
         }
-        // Member
-        public static string GetMemberSyntax(this MemberInfo member) {
-            if (member is FieldInfo field) {
-                return GetFieldSyntax( field );
-            }
-            if (member is PropertyInfo property) {
-                return GetPropertySyntax( property );
-            }
-            if (member is EventInfo @event) {
-                return GetEventSyntax( @event );
-            }
-            if (member is ConstructorInfo constructor) {
-                return GetConstructorSyntax( constructor );
-            }
-            if (member is MethodInfo method) {
-                return GetMethodSyntax( method );
-            }
-            throw new ArgumentException( "Member is unsupported: " + member );
-        }
         // Field
         public static string GetFieldSyntax(this FieldInfo field) {
             if (field.IsLiteral) {
@@ -133,7 +137,8 @@ namespace System.Text.CSharp {
             if (method.IsOperator()) {
                 return CSharpSyntaxFactoryHelper.GetOperatorSyntax( method.GetModifiers(), method.ReturnParameter, method.Name, method.GetGenericArguments(), method.GetParameters() );
             } else {
-                return CSharpSyntaxFactoryHelper.GetMethodSyntax( method.GetModifiers(), method.ReturnParameter, method.Name, method.GetGenericArguments(), method.GetParameters() );
+                var isExtension = method.IsDefined( typeof( ExtensionAttribute ) );
+                return CSharpSyntaxFactoryHelper.GetMethodSyntax( method.GetModifiers(), method.ReturnParameter, method.Name, method.GetGenericArguments(), method.GetParameters(), isExtension );
             }
         }
 
@@ -153,7 +158,7 @@ namespace System.Text.CSharp {
             if (type.IsDelegate()) yield return "delegate";
         }
         private static IEnumerable<string> GetModifiers(this FieldInfo field) {
-            yield return field.GetAccessLevel().GetModifier();
+            if (!field.DeclaringType.IsEnum) yield return field.GetAccessLevel().GetModifier();
             if (field.IsLiteral) yield return "const";
             if (field.IsStatic && !field.IsLiteral) yield return "static";
             if (field.IsInitOnly) yield return "readonly";

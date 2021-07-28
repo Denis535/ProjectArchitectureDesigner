@@ -8,7 +8,7 @@ namespace System.Text.CSharp {
     using System.Reflection;
     using System.Text;
 
-    // public interface Interface<in/out T> : IInterface<T> where T : class
+    // public interface IInterface<in/out T> : IInterface<T> where T : class
     // public class     Class<T>            : Base<T>, IInterface<T> where T : class
     // public struct    Struct<T>           : IInterface<T> where T : class
     // public enum      Enum                : int
@@ -22,33 +22,33 @@ namespace System.Text.CSharp {
     internal static class CSharpSyntaxFactoryHelper {
 
 
-        // GetTypeSyntax
-        public static string GetTypeSyntax(IEnumerable<string> modifiers, string name, Type[] parameters, Type? @base, Type[]? interfaces) {
+        // Type
+        public static string GetTypeSyntax(IEnumerable<string> modifiers, string name, Type[] parameters_generic, Type? @base, Type[]? interfaces) {
             var tokens = new List<string>();
             tokens.AddRange( modifiers );
             tokens.Add( name );
-            tokens.AddSyntax_Parameters( parameters );
+            tokens.AddSyntax_Generic_Parameters( parameters_generic );
             tokens.AddSyntax_BaseTypeAndInterfaces( @base, interfaces );
-            tokens.AddSyntax_ParametersConstraints( parameters );
+            tokens.AddSyntax_Generic_Constraints( parameters_generic );
             return tokens.Build();
         }
-        // GetDelegateSyntax
-        public static string GetDelegateSyntax(IEnumerable<string> modifiers, ParameterInfo result, string name, Type[] parameters, ParameterInfo[] parameters2) {
+        // Delegate
+        public static string GetDelegateSyntax(IEnumerable<string> modifiers, ParameterInfo result, string name, Type[] parameters_generic, ParameterInfo[] parameters) {
             var tokens = new List<string>();
             tokens.AddRange( modifiers );
-            tokens.AddSyntax_Result( result );
+            tokens.AddSyntax_Method_Result( result );
             tokens.Add( name );
-            tokens.AddSyntax_Parameters( parameters );
-            tokens.AddSyntax_Parameters( parameters2 );
-            tokens.AddSyntax_ParametersConstraints( parameters );
+            tokens.AddSyntax_Generic_Parameters( parameters_generic );
+            tokens.AddSyntax_Method_Parameters( parameters );
+            tokens.AddSyntax_Generic_Constraints( parameters_generic );
             tokens.Add( ";" );
             return tokens.Build();
         }
-        // GetMemberSyntax
+        // Field
         public static string GetFieldSyntax(IEnumerable<string> modifiers, Type type, string name, bool isLiteral, object? value) {
             var tokens = new List<string>();
             tokens.AddRange( modifiers );
-            tokens.AddIdentifier( type );
+            tokens.AddSyntax_Type( type );
             tokens.Add( name );
             if (isLiteral) {
                 tokens.Add( "=" );
@@ -57,59 +57,65 @@ namespace System.Text.CSharp {
             tokens.Add( ";" );
             return tokens.Build();
         }
+        // Property
         public static string GetPropertySyntax(IEnumerable<string> modifiers, Type type, string name, MethodInfo? getter, MethodInfo? setter) {
             var tokens = new List<string>();
             tokens.AddRange( modifiers );
-            tokens.AddIdentifier( type );
+            tokens.AddSyntax_Type( type );
             tokens.Add( name );
-            tokens.AddSyntax_Accessors_Getter_Setter( getter, setter );
+            tokens.AddSyntax_Property_Accessors( getter, setter );
             return tokens.Build();
         }
+        // Indexer
         public static string GetIndexerSyntax(IEnumerable<string> modifiers, Type type, ParameterInfo[] indices, MethodInfo? getter, MethodInfo? setter) {
             var tokens = new List<string>();
             tokens.AddRange( modifiers );
-            tokens.AddIdentifier( type );
+            tokens.AddSyntax_Type( type );
             tokens.Add( "this" );
-            tokens.AddSyntax_Indices( indices );
-            tokens.AddSyntax_Accessors_Getter_Setter( getter, setter );
+            tokens.AddSyntax_Property_Indices( indices );
+            tokens.AddSyntax_Property_Accessors( getter, setter );
             return tokens.Build();
         }
+        // Event
         public static string GetEventSyntax(IEnumerable<string> modifiers, Type type, string name, MethodInfo? adder, MethodInfo? remover, MethodInfo? raiser) {
             var tokens = new List<string>();
             tokens.AddRange( modifiers );
-            tokens.AddIdentifier( type );
+            tokens.AddSyntax_Type( type );
             tokens.Add( name );
-            tokens.AddSyntax_Accessors_Adder_Remover_Raiser( adder, remover, raiser );
+            tokens.AddSyntax_Event_Accessors( adder, remover, raiser );
             return tokens.Build();
         }
+        // Constructor
         public static string GetConstructorSyntax(IEnumerable<string> modifiers, string name, ParameterInfo[] parameters) {
             var tokens = new List<string>();
             tokens.AddRange( modifiers );
             tokens.Add( name );
-            tokens.AddSyntax_Parameters( parameters );
+            tokens.AddSyntax_Method_Parameters( parameters );
             tokens.Add( ";" );
             return tokens.Build();
         }
-        public static string GetMethodSyntax(IEnumerable<string> modifiers, ParameterInfo result, string name, Type[] parameters, ParameterInfo[] parameters2) {
+        // Method
+        public static string GetMethodSyntax(IEnumerable<string> modifiers, ParameterInfo result, string name, Type[] parameters_generic, ParameterInfo[] parameters, bool isExtension) {
             var tokens = new List<string>();
             tokens.AddRange( modifiers );
-            tokens.AddSyntax_Result( result );
+            tokens.AddSyntax_Method_Result( result );
             tokens.Add( name );
-            tokens.AddSyntax_Parameters( parameters );
-            tokens.AddSyntax_Parameters( parameters2 );
-            tokens.AddSyntax_ParametersConstraints( parameters );
+            tokens.AddSyntax_Generic_Parameters( parameters_generic );
+            tokens.AddSyntax_Method_Parameters( parameters, isExtension );
+            tokens.AddSyntax_Generic_Constraints( parameters_generic );
             tokens.Add( ";" );
             return tokens.Build();
         }
-        public static string GetOperatorSyntax(IEnumerable<string> modifiers, ParameterInfo result, string name, Type[] parameters, ParameterInfo[] parameters2) {
+        // Operator
+        public static string GetOperatorSyntax(IEnumerable<string> modifiers, ParameterInfo result, string name, Type[] parameters_generic, ParameterInfo[] parameters) {
             // todo:
             var tokens = new List<string>();
             tokens.AddRange( modifiers );
-            tokens.AddSyntax_Result( result );
+            tokens.AddSyntax_Method_Result( result );
             tokens.Add( name );
-            tokens.AddSyntax_Parameters( parameters );
-            tokens.AddSyntax_Parameters( parameters2 );
-            tokens.AddSyntax_ParametersConstraints( parameters );
+            tokens.AddSyntax_Generic_Parameters( parameters_generic );
+            tokens.AddSyntax_Method_Parameters( parameters );
+            tokens.AddSyntax_Generic_Constraints( parameters_generic );
             tokens.Add( ";" );
             return tokens.Build();
         }
@@ -127,7 +133,7 @@ namespace System.Text.CSharp {
         private static bool IsExtra(string value, string? next) {
             if (value is ",") {
                 if (next is ">" or ")" or "]") return true;
-                if (next is "where" or ";" or null) return true;
+                if (next is "where" or "{" or ";" or null) return true;
             }
             return false;
         }

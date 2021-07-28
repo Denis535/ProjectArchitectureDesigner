@@ -12,7 +12,7 @@ namespace System.Collections.Generic {
 
 
         // Compare
-        public static void Compare<T>(IEnumerable<T> actual, IEnumerable<T> expected, out IList<T> intersected, out IList<T> missing, out IList<T> extra) {
+        public static void Compare<T>(this IEnumerable<T> actual, IEnumerable<T> expected, out IList<T> intersected, out IList<T> missing, out IList<T> extra) {
             intersected = new List<T>();
             missing = new List<T>();
             extra = new List<T>();
@@ -130,13 +130,18 @@ namespace System.Collections.Generic {
             return source.Where( i => !predicate( i ) );
         }
 
+        // Concat
+        public static IEnumerable<T> Concat<T>(this T first, T second) {
+            return new[] { first, second };
+        }
         // Append
-        public static IEnumerable<T> Append<T>(this T source, T element) {
-            return Enumerable.Empty<T>().Append( source ).Append( element );
-        }
+        //public static IEnumerable<T> Append<T>(this IEnumerable<T> source, T element) {
+        //    return Enumerable.Append( source, element );
+        //}
         public static IEnumerable<T> Append<T>(this T source, IEnumerable<T> elements) {
-            return Enumerable.Empty<T>().Append( source ).Concat( elements );
+            return elements.Prepend( source );
         }
+        // AsEnumerable
         public static IEnumerable<T> AsEnumerable<T>(this T source) {
             return Enumerable.Empty<T>().Append( source );
         }

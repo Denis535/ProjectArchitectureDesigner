@@ -3,7 +3,10 @@
 
 namespace ProjectArchitectureDesigner.Model {
     using System;
+    using System.CodeDom.Compiler;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
     using System.Text;
     using System.Text.CSharp;
 
@@ -11,6 +14,14 @@ namespace ProjectArchitectureDesigner.Model {
 
         public Type Value { get; }
         public override string Name => Value.GetIdentifier();
+        public TypeInfo TypeInfo => Value.GetTypeInfo();
+        public IEnumerable<MemberInfo> DeclaredMembers => Value.GetTypeInfo().DeclaredMembers.Where( IsUserDefined );
+        public IEnumerable<TypeInfo> DeclaredNestedTypes => Value.GetTypeInfo().DeclaredNestedTypes.Where( IsUserDefined );
+        public IEnumerable<FieldInfo> DeclaredFields => Value.GetTypeInfo().DeclaredFields.Where( IsUserDefined );
+        public IEnumerable<PropertyInfo> DeclaredProperties => Value.GetTypeInfo().DeclaredProperties.Where( IsUserDefined );
+        public IEnumerable<EventInfo> DeclaredEvents => Value.GetTypeInfo().DeclaredEvents.Where( IsUserDefined );
+        public IEnumerable<ConstructorInfo> DeclaredConstructors => Value.GetTypeInfo().DeclaredConstructors.Where( IsUserDefined );
+        public IEnumerable<MethodInfo> DeclaredMethods => Value.GetTypeInfo().DeclaredMethods.Where( IsUserDefined );
         // Parent
         public ProjectArchNode Project => Group.Namespace.Module.Project;
         public ModuleArchNode Module => Group.Namespace.Module;
@@ -32,6 +43,18 @@ namespace ProjectArchitectureDesigner.Model {
         // Conversions
         public static implicit operator TypeArchNode(Type value) => new TypeArchNode( value );
         public static implicit operator Type(TypeArchNode type) => type.Value;
+
+
+        // Helpers
+        private static bool IsUserDefined(MemberInfo member) {
+            if (member is FieldInfo field && field.IsSpecialName) return false;
+            if (member is PropertyInfo prop && prop.IsSpecialName) return false;
+            if (member is EventInfo @event && @event.IsSpecialName) return false;
+            if (member is MethodBase method && method.IsSpecialName) return false;
+            if (member.IsDefined( typeof( GeneratedCodeAttribute ) )) return false;
+            if (member.Name.StartsWith( "<" )) return false;
+            return true;
+        }
 
 
     }

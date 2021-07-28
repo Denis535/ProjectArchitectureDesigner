@@ -29,6 +29,10 @@ namespace System.Text.Markdown {
         }
 
 
+        public static string CodeBlock() => "```";
+        public static string CSharpCodeBlock() => "```csharp";
+
+
         public static string Italic(this string text) => "*{0}*".Format( text );
         public static string Bold(this string text) => "**{0}**".Format( text );
         public static string Code(this string text) => "`{0}`".Format( text );

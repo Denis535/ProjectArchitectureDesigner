@@ -10,7 +10,7 @@ namespace ProjectArchitectureDesigner.Model {
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using ProjectArchitectureDesigner.Renderers;
 
-    // Project/ProjectArchitecture
+    // Project/ProjectArchitectureDesigner
     public sealed partial class Project_ProjectArchitectureDesigner : ProjectArchNode {
         protected override void Initialize() => SetChildren(
             typeof( Module_ProjectArchitectureDesigner ),
@@ -40,12 +40,16 @@ namespace ProjectArchitectureDesigner.Model {
             typeof( GroupArchNode ),
             typeof( TypeArchNode ),
             "ProjectArchitectureDesigner.Renderers",
+            /// Group: ProjectRenderer
             typeof( TextProjectRenderer ),
             typeof( HierarchicalTextProjectRenderer ),
-            typeof( MarkdownProjectRenderer ),
+            typeof( MarkdownDocumentProjectRenderer ),
+            /// Group: NodeRenderer
             typeof( INodeRenderer ),
-            typeof( TextRenderer ),
-            typeof( AlignedTextRenderer )
+            typeof( DelegateNodeRenderer ),
+            typeof( TextNodeRenderer ),
+            typeof( LeftAlignedTextNodeRenderer ),
+            typeof( RightAlignedTextNodeRenderer )
         );
     }
 
@@ -60,7 +64,7 @@ namespace ProjectArchitectureDesigner.Model {
             /// Group: ClassInfo
             typeof( ProjectInfo ),
             typeof( ModuleInfo ),
-            /// Group: ClassInfo/Entries
+            /// Group: ClassInfo/Entry
             typeof( ModuleEntry ),
             typeof( NamespaceEntry ),
             typeof( GroupEntry ),

@@ -76,16 +76,20 @@ namespace ProjectArchitectureDesigner.Model {
             TestContext.WriteLine( Project.RenderToText( INodeRenderer.TextRenderer, IsVisible ) );
         }
         [Test]
-        public void Test_11_RenderToText_Aligned() {
-            TestContext.WriteLine( Project.RenderToText( INodeRenderer.AlignedTextRenderer, IsVisible ) );
+        public void Test_11_RenderToText_LeftAligned() {
+            TestContext.WriteLine( Project.RenderToText( INodeRenderer.LeftAlignedTextRenderer, IsVisible ) );
         }
         [Test]
-        public void Test_12_RenderToHierarchicalText() {
+        public void Test_12_RenderToText_RightAligned() {
+            TestContext.WriteLine( Project.RenderToText( INodeRenderer.RightAlignedTextRenderer, IsVisible ) );
+        }
+        [Test]
+        public void Test_13_RenderToHierarchicalText() {
             TestContext.WriteLine( Project.RenderToHierarchicalText( INodeRenderer.TextRenderer, IsVisible ) );
         }
         [Test]
-        public void Test_13_RenderToMarkdown() {
-            TestContext.WriteLine( Project.RenderToMarkdown( INodeRenderer.TextRenderer, IsVisible ) );
+        public void Test_14_RenderToMarkdownDocument() {
+            TestContext.WriteLine( Project.RenderToMarkdownDocument( INodeRenderer.TextRenderer, IsVisible ) );
         }
 
 

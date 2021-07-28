@@ -12,7 +12,7 @@ namespace System {
     public static class TypeExtensions {
 
 
-        // IsInState
+        // HasAttribute
         public static bool IsObsolete(this Type? type) {
             while (type != null) {
                 if (type.IsDefined( typeof( ObsoleteAttribute ) )) return true;

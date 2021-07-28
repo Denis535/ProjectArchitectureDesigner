@@ -33,19 +33,19 @@ namespace ProjectArchitectureDesigner.Model {
 
         // Compare
         public void Compare(Assembly assembly, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = GetDescendantNodes( this ).OfType<TypeArchNode>().Select( i => i.Value );
+            var actual = Types.Select( i => i.Value );
             var expected = assembly.DefinedTypes.Where( IsSupported );
-            EnumerableExtensions.Compare( actual, expected, out intersected, out missing, out extra );
+            actual.Compare( expected, out intersected, out missing, out extra );
         }
         public void Compare(Assembly[] assemblies, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = GetDescendantNodes( this ).OfType<TypeArchNode>().Select( i => i.Value );
+            var actual = Types.Select( i => i.Value );
             var expected = assemblies.SelectMany( i => i.DefinedTypes ).Where( IsSupported );
-            EnumerableExtensions.Compare( actual, expected, out intersected, out missing, out extra );
+            actual.Compare( expected, out intersected, out missing, out extra );
         }
         public void Compare(IEnumerable<Type> types, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = GetDescendantNodes( this ).OfType<TypeArchNode>().Select( i => i.Value );
+            var actual = Types.Select( i => i.Value );
             var expected = types.Where( IsSupported );
-            EnumerableExtensions.Compare( actual, expected, out intersected, out missing, out extra );
+            actual.Compare( expected, out intersected, out missing, out extra );
         }
 
 

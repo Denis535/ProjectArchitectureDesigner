@@ -28,6 +28,18 @@ namespace System.Text.Markdown {
             Builder.AppendLine( text.Link( url.GetUri( prevs ) ).Item( level ) );
             return this;
         }
+        public MarkdownBuilder AppendCodeBlockStart() {
+            Builder.AppendLine( MarkdownSyntaxFactory.CodeBlock() );
+            return this;
+        }
+        public MarkdownBuilder AppendCSharpCodeBlockStart() {
+            Builder.AppendLine( MarkdownSyntaxFactory.CSharpCodeBlock() );
+            return this;
+        }
+        public MarkdownBuilder AppendCodeBlockEnd() {
+            Builder.AppendLine( MarkdownSyntaxFactory.CodeBlock() );
+            return this;
+        }
 
         // Append/Span
         public MarkdownBuilder Append(string text) {

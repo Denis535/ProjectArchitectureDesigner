@@ -4,15 +4,18 @@
 namespace ProjectArchitectureDesigner.Renderers {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
     using System.Text;
+    using System.Text.CSharp;
     using System.Text.Markdown;
     using ProjectArchitectureDesigner.Model;
 
-    public static class MarkdownProjectRenderer {
+    public static class MarkdownDocumentProjectRenderer {
 
 
         // Render
-        public static string RenderToMarkdown(this ProjectArchNode project, INodeRenderer renderer, Func<TypeArchNode, bool> predicate) {
+        public static string RenderToMarkdownDocument(this ProjectArchNode project, INodeRenderer renderer, Func<TypeArchNode, bool> predicate) {
             var builder = new MarkdownBuilder();
             builder.AppendTableOfContents( project, renderer, predicate );
             builder.AppendBody( project, renderer, predicate );
@@ -76,11 +79,25 @@ namespace ProjectArchitectureDesigner.Renderers {
         }
         private static void AppendGroup(this MarkdownBuilder builder, GroupArchNode group, INodeRenderer renderer) {
             if (group.IsDefault) return;
-            builder.AppendItem( renderer.Render( group ).Italic(), 1 );
+            builder.AppendItem( renderer.Render( group ).Bold(), 1 );
         }
         private static void AppendType(this MarkdownBuilder builder, TypeArchNode type, INodeRenderer renderer) {
-            builder.AppendItem( renderer.Render( type ).Bold(), 1 );
+            builder.AppendItem( renderer.Render( type ), 1 );
+            //builder.AppendCSharpCodeBlockStart();
+            //builder.AppendLine( type.TypeInfo.GetTypeSyntax() );
+            //builder.AppendMembersInfo( "Fields", type.DeclaredFields );
+            //builder.AppendMembersInfo( "Properties", type.DeclaredProperties );
+            //builder.AppendMembersInfo( "Events", type.DeclaredEvents );
+            //builder.AppendMembersInfo( "Constructors", type.DeclaredConstructors );
+            //builder.AppendMembersInfo( "Methods", type.DeclaredMethods );
+            //builder.AppendCodeBlockEnd();
         }
+        //private static void AppendMembersInfo(this MarkdownBuilder builder, string title, IEnumerable<MemberInfo> members) {
+        //    if (members.Any()) builder.Append( "// " ).AppendLine( title );
+        //    foreach (var member in members.OrderBy( i => i.MetadataToken )) {
+        //        builder.AppendLine( member.GetMemberSyntax() );
+        //    }
+        //}
 
 
     }

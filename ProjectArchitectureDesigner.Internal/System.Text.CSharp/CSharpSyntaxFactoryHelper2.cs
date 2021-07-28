@@ -11,132 +11,110 @@ namespace System.Text.CSharp {
     internal static class CSharpSyntaxFactoryHelper2 {
 
 
-        // Add
-        public static void AddIdentifier(this List<string> tokens, Type type) {
-            tokens.Add( type );
+        // Type
+        public static void AddSyntax_Type(this List<string> tokens, Type type) {
+            tokens.AddToken( type );
         }
 
-        // AddSyntax
-        public static void AddSyntax_Result(this List<string> tokens, ParameterInfo result) {
-            tokens.Add( result.ParameterType );
-        }
-
-        // AddSyntax
-        public static void AddSyntax_Parameters(this List<string> tokens, Type[] parameters) {
+        // Generic
+        public static void AddSyntax_Generic_Parameters(this List<string> tokens, Type[] parameters) {
             if (!parameters.Any()) return;
-            tokens.Add( "<" );
+            tokens.AddToken( "<" );
             foreach (var parameter in parameters) {
-                tokens.Add( "in", parameter.IsContravariant() );
-                tokens.Add( "out", parameter.IsCovariant() );
-                tokens.Add( parameter.Name );
-                tokens.Add( "," );
+                tokens.AddToken( "in", parameter.IsContravariant() ).AddToken( "out", parameter.IsCovariant() ).AddToken( parameter.Name ).AddToken( "," );
             }
-            tokens.Add( ">" );
+            tokens.AddToken( ">" );
         }
-        public static void AddSyntax_Parameters(this List<string> tokens, ParameterInfo[] parameters) {
-            tokens.Add( "(" );
-            foreach (var parameter in parameters) {
-                tokens.Add( parameter.ParameterType );
-                tokens.Add( parameter.Name );
-                if (parameter.HasDefaultValue) {
-                    tokens.Add( "=" );
-                    tokens.Add( parameter.DefaultValue?.ToString() ?? "null" );
-                }
-                tokens.Add( "," );
-            }
-            tokens.Add( ")" );
-        }
-        public static void AddSyntax_Indices(this List<string> tokens, ParameterInfo[] indices) {
-            tokens.Add( "[" );
-            foreach (var index in indices) {
-                tokens.Add( index.ParameterType );
-                tokens.Add( index.Name );
-                if (index.HasDefaultValue) {
-                    tokens.Add( "=" );
-                    tokens.Add( index.DefaultValue?.ToString() ?? "null" );
-                }
-                tokens.Add( "," );
-            }
-            tokens.Add( "]" );
-        }
-
-        // AddSyntax
-        public static void AddSyntax_Accessors_Getter_Setter(this List<string> tokens, MethodInfo? getter, MethodInfo? setter) {
-            var @default = GetDefaultAccessLevel( getter?.GetAccessLevel(), setter?.GetAccessLevel() );
-            tokens.Add( "{" );
-            if (getter != null) {
-                tokens.Add( getter.GetAccessLevel(), @default );
-                tokens.Add( "get" );
-                tokens.Add( ";" );
-            }
-            if (setter != null) {
-                tokens.Add( setter.GetAccessLevel(), @default );
-                tokens.Add( "set" );
-                tokens.Add( ";" );
-            }
-            tokens.Add( "}" );
-        }
-        public static void AddSyntax_Accessors_Adder_Remover_Raiser(this List<string> tokens, MethodInfo? adder, MethodInfo? remover, MethodInfo? raiser) {
-            var @default = GetDefaultAccessLevel( adder?.GetAccessLevel(), remover?.GetAccessLevel(), raiser?.GetAccessLevel() );
-            tokens.Add( "{" );
-            if (adder != null) {
-                tokens.Add( adder.GetAccessLevel(), @default );
-                tokens.Add( "add" );
-                tokens.Add( ";" );
-            }
-            if (remover != null) {
-                tokens.Add( remover.GetAccessLevel(), @default );
-                tokens.Add( "remove" );
-                tokens.Add( ";" );
-            }
-            if (raiser != null) {
-                tokens.Add( raiser.GetAccessLevel(), @default );
-                tokens.Add( "raise" );
-                tokens.Add( ";" );
-            }
-            tokens.Add( "}" );
-        }
-
-        // AddSyntax
-        public static void AddSyntax_BaseTypeAndInterfaces(this List<string> tokens, Type? @base, Type[]? interfaces) {
-            if (Concat( @base, interfaces ).Any()) {
-                tokens.Add( ":" );
-                tokens.Add( ",", Concat( @base, interfaces ) );
-            }
-        }
-        public static void AddSyntax_ParametersConstraints(this List<string> tokens, Type[] parameters) {
+        public static void AddSyntax_Generic_Constraints(this List<string> tokens, Type[] parameters) {
             foreach (var parameter in parameters) {
                 if (parameter.HasAnyConstraints()) {
-                    tokens.Add( "where" );
-                    tokens.Add( parameter.Name );
-                    tokens.Add( ":" );
+                    tokens.AddToken( "where" ).AddToken( parameter.Name ).AddToken( ":" );
                     if (parameter.HasReferenceTypeConstraint()) {
-                        tokens.Add( "class" );
-                        tokens.Add( "," );
-                        tokens.Add( ",", parameter.GetGenericParameterConstraints() );
-                        tokens.Add( "new()", parameter.HasDefaultConstructorConstraint() );
-                    } else if (parameter.HasValueTypeConstraint()) {
-                        tokens.Add( "struct" );
-                        tokens.Add( "," );
-                        tokens.Add( ",", parameter.GetGenericParameterConstraints().WhereNot( IsValueType ) );
+                        tokens.AddTokens( "class" ).AddTokens( parameter.GetGenericParameterConstraints() ).AddTokens( "new()", parameter.HasDefaultConstructorConstraint() );
+                    } else
+                    if (parameter.HasValueTypeConstraint()) {
+                        tokens.AddTokens( "struct" ).AddTokens( parameter.GetGenericParameterConstraints().WhereNot( IsValueType ) );
                     } else {
-                        tokens.Add( ",", parameter.GetGenericParameterConstraints() );
-                        tokens.Add( "new()", parameter.HasDefaultConstructorConstraint() );
+                        tokens.AddTokens( parameter.GetGenericParameterConstraints() ).AddTokens( "new()", parameter.HasDefaultConstructorConstraint() );
                     }
                 }
+            }
+        }
+
+        // Property
+        public static void AddSyntax_Property_Indices(this List<string> tokens, ParameterInfo[] indices) {
+            tokens.AddToken( "[" );
+            foreach (var index in indices) {
+                if (!index.HasDefaultValue) {
+                    tokens.AddToken( index.ParameterType ).AddToken( index.Name ).AddToken( "," );
+                } else {
+                    tokens.AddToken( index.ParameterType ).AddToken( index.Name ).AddToken( "=" ).AddToken( index.DefaultValue?.ToString() ?? "null" ).AddToken( "," );
+                }
+            }
+            tokens.AddToken( "]" );
+        }
+        public static void AddSyntax_Property_Accessors(this List<string> tokens, MethodInfo? getter, MethodInfo? setter) {
+            var @default = GetDefaultAccessLevel( getter?.GetAccessLevel(), setter?.GetAccessLevel() );
+            tokens.AddToken( "{" );
+            if (getter != null) {
+                tokens.AddToken( getter.GetAccessLevel(), @default ).AddToken( "get" ).AddToken( ";" );
+            }
+            if (setter != null) {
+                tokens.AddToken( setter.GetAccessLevel(), @default ).AddToken( "set" ).AddToken( ";" );
+            }
+            tokens.AddToken( "}" );
+        }
+
+        // Event
+        public static void AddSyntax_Event_Accessors(this List<string> tokens, MethodInfo? adder, MethodInfo? remover, MethodInfo? raiser) {
+            var @default = GetDefaultAccessLevel( adder?.GetAccessLevel(), remover?.GetAccessLevel(), raiser?.GetAccessLevel() );
+            tokens.AddToken( "{" );
+            if (adder != null) {
+                tokens.AddToken( adder.GetAccessLevel(), @default ).AddToken( "add" ).AddToken( ";" );
+            }
+            if (remover != null) {
+                tokens.AddToken( remover.GetAccessLevel(), @default ).AddToken( "remove" ).AddToken( ";" );
+            }
+            if (raiser != null) {
+                tokens.AddToken( raiser.GetAccessLevel(), @default ).AddToken( "raise" ).AddToken( ";" );
+            }
+            tokens.AddToken( "}" );
+        }
+
+        // Method
+        public static void AddSyntax_Method_Result(this List<string> tokens, ParameterInfo result) {
+            tokens.AddToken( result.ParameterType );
+        }
+        public static void AddSyntax_Method_Parameters(this List<string> tokens, ParameterInfo[] parameters, bool isExtension = false) {
+            tokens.AddToken( "(" );
+            tokens.AddToken( "this", isExtension );
+            foreach (var parameter in parameters) {
+                if (!parameter.HasDefaultValue) {
+                    tokens.AddToken( parameter.ParameterType ).AddToken( parameter.Name ).AddToken( "," );
+                } else {
+                    tokens.AddToken( parameter.ParameterType ).AddToken( parameter.Name ).AddToken( "=" ).AddToken( parameter.DefaultValue?.ToString() ?? "null" ).AddToken( "," );
+                }
+            }
+            tokens.AddToken( ")" );
+        }
+
+        // Misc
+        public static void AddSyntax_BaseTypeAndInterfaces(this List<string> tokens, Type? @base, Type[]? interfaces) {
+            if (Concat( @base, interfaces ).Any()) {
+                tokens.AddToken( ":" ).AddTokens( Concat( @base, interfaces ) );
             }
         }
 
 
         // Helpers
         private static IEnumerable<Type> Concat(Type? @base, Type[]? interfaces) {
-            if (@base != null && interfaces?.Any() == true) {
+            if (@base != null && interfaces != null) {
                 return @base.Append( interfaces );
             }
             if (@base != null) {
                 return @base.AsEnumerable();
             }
-            if (interfaces?.Any() == true) {
+            if (interfaces != null) {
                 return interfaces;
             }
             return Enumerable.Empty<Type>();
@@ -155,18 +133,43 @@ namespace System.Text.CSharp {
             if (result == null || level3 < result) result = level3;
             return result;
         }
-        // Helpers/List
-        private static void Add(this List<string> tokens, string value, bool condition) {
-            if (condition) tokens.Add( value );
+        // Helpers/List/AddToken
+        private static List<string> AddToken(this List<string> tokens, string value) {
+            tokens.Add( value );
+            return tokens;
         }
-        private static void Add(this List<string> tokens, Type value) {
+        private static List<string> AddToken(this List<string> tokens, string value, bool condition) {
+            if (!condition) return tokens;
+            tokens.Add( value );
+            return tokens;
+        }
+        private static List<string> AddToken(this List<string> tokens, Type value) {
             tokens.Add( value.GetIdentifier() );
+            return tokens;
         }
-        private static void Add(this List<string> tokens, string separator, IEnumerable<Type> values) {
-            tokens.AddRange( values.Select( i => i.GetIdentifier() ).WithSuffix( separator ) );
+        private static List<string> AddToken(this List<string> tokens, AccessLevel value, AccessLevel? @default) {
+            if (value == @default) return tokens;
+            tokens.Add( value.GetModifier() );
+            return tokens;
         }
-        private static void Add(this List<string> tokens, AccessLevel value, AccessLevel? @default) {
-            if (value != @default) tokens.Add( value.GetModifier() );
+        // Helpers/List/AddTokens
+        private static List<string> AddTokens(this List<string> tokens, string value) {
+            tokens.Add( value );
+            tokens.Add( "," );
+            return tokens;
+        }
+        private static List<string> AddTokens(this List<string> tokens, string value, bool condition) {
+            if (!condition) return tokens;
+            tokens.Add( value );
+            tokens.Add( "," );
+            return tokens;
+        }
+        private static List<string> AddTokens(this List<string> tokens, IEnumerable<Type> values) {
+            foreach (var value in values) {
+                tokens.Add( value.GetIdentifier() );
+                tokens.Add( "," );
+            }
+            return tokens;
         }
         // Helpers/Type
         private static bool IsValueType(this Type type) {
