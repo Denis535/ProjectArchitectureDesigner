@@ -51,20 +51,20 @@ namespace ProjectArchitectureDesigner.Model {
             }
         }
         [Test]
-        public void Test_01_Project_Modules_AreValid() {
-            foreach (var type in Project.Types) {
-                Assert.That( type.Module.Name, Is.EqualTo( type.Value.Assembly.GetName().Name ) );
+        public void Test_01_Modules_AreValid() {
+            foreach (var type in Project.GetTypesWithInvalidModule()) {
+                Assert.Fail( "Type '{0}' has invalid module: {1}", type.Name, type.Module.Name );
             }
         }
         [Test]
-        public void Test_02_Project_Namespaces_AreValid() {
-            foreach (var type in Project.Types) {
-                Assert.That( type.Namespace.Name, Is.EqualTo( type.Value.Namespace ) );
+        public void Test_02_Namespaces_AreValid() {
+            foreach (var type in Project.GetTypesWithInvalidNamespace()) {
+                Assert.Fail( "Type '{0}' has invalid namespace: {1}", type.Name, type.Namespace.Name );
             }
         }
         [Test]
-        public void Test_03_Project_Types_AreComplete() {
-            Project.Compare( Project.Assemblies, out _, out var missing, out var extra );
+        public void Test_03_Types_AreComplete() {
+            Project.GetMissingAndExtraTypes( out var missing, out var extra );
             if (missing.Any()) Assert.Warn( GetMessage_Missing( missing ) );
             if (extra.Any()) Assert.Warn( GetMessage_Extra( extra ) );
         }
@@ -102,10 +102,10 @@ namespace ProjectArchitectureDesigner.Model {
             }
             return builder.ToString();
         }
-        private static string GetMessage_Extra(IEnumerable<Type> types) {
+        private static string GetMessage_Extra(IEnumerable<TypeArchNode> types) {
             var builder = new StringBuilder();
             builder.AppendLine( "Extra:" );
-            foreach (var item in GetAssembliesNamespacesTypes( types )) {
+            foreach (var item in GetAssembliesNamespacesTypes( types.Select( i => i.Value ) )) {
                 builder.AppendLine( item );
             }
             return builder.ToString();

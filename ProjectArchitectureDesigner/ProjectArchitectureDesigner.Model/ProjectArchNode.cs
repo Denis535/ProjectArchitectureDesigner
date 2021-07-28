@@ -21,46 +21,50 @@ namespace ProjectArchitectureDesigner.Model {
 
 
         public ProjectArchNode() {
-            SetUp( this );
+            SetUpHierarchy( this );
         }
 
 
         // Initialize
-        protected abstract void Initialize(); // Used by source generator
+        protected virtual void Initialize() { // Used by source generator
+        }
         protected virtual void SetChildren(params Type[] children) { // Used by source generator
         }
 
 
-        // Compare
-        public void Compare(Assembly assembly, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = Types.Select( i => i.Value );
-            var expected = assembly.DefinedTypes.Where( IsSupported );
-            actual.Compare( expected, out intersected, out missing, out extra );
+        // GetTypesWithInvalidModule
+        public IEnumerable<TypeArchNode> GetTypesWithInvalidModule() {
+            foreach (var type in Types) {
+                if (type.Module.Name != type.Value.Assembly.GetName().Name) {
+                    yield return type;
+                }
+            }
         }
-        public void Compare(Assembly[] assemblies, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = Types.Select( i => i.Value );
-            var expected = assemblies.SelectMany( i => i.DefinedTypes ).Where( IsSupported );
-            actual.Compare( expected, out intersected, out missing, out extra );
+        // GetTypesWithInvalidNamespace
+        public IEnumerable<TypeArchNode> GetTypesWithInvalidNamespace() {
+            foreach (var type in Types) {
+                if (type.Namespace.Name != type.Value.Namespace) {
+                    yield return type;
+                }
+            }
         }
-        public void Compare(IEnumerable<Type> types, out IList<Type> intersected, out IList<Type> missing, out IList<Type> extra) {
-            var actual = Types.Select( i => i.Value );
-            var expected = types.Where( IsSupported );
-            actual.Compare( expected, out intersected, out missing, out extra );
-        }
-
-
-        // GetSupportedTypes
-        public Type[] GetSupportedTypes(Assembly assembly) {
-            return assembly.DefinedTypes.Where( IsSupported ).ToArray();
-        }
-        public Type[] GetSupportedTypes(params Assembly[] assemblies) {
-            return assemblies.SelectMany( i => i.DefinedTypes ).Where( IsSupported ).ToArray();
+        // GetMissingAndExtraTypes
+        public void GetMissingAndExtraTypes(out List<Type> missing, out List<TypeArchNode> extra) {
+            var actual = Types;
+            var expected = Assemblies.SelectMany( i => i.DefinedTypes ).Where( IsSupported );
+            var expected_ = new LinkedList<Type>( expected );
+            extra = actual.Where( i => !expected_.Remove( i.Value ) ).ToList();
+            missing = expected_.ToList();
         }
 
 
         // IsSupported
-        protected virtual bool IsSupported(Type type) {
+        public virtual bool IsSupported(Type type) {
             return !type.IsObsolete() && !type.IsCompilerGenerated();
+        }
+        // IsVisible
+        public virtual bool IsVisible(Type type) {
+            return type.IsVisible;
         }
 
 
@@ -71,7 +75,7 @@ namespace ProjectArchitectureDesigner.Model {
 
 
         // Helpers
-        protected static void SetUp(ProjectArchNode project) {
+        protected static void SetUpHierarchy(ProjectArchNode project) {
             // Project
             foreach (var module in project.Modules) {
                 module.Project = project;

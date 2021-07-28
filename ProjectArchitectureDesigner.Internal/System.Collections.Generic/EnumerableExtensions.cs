@@ -12,21 +12,10 @@ namespace System.Collections.Generic {
 
 
         // Compare
-        public static void Compare<T>(this IEnumerable<T> actual, IEnumerable<T> expected, out IList<T> intersected, out IList<T> missing, out IList<T> extra) {
-            intersected = new List<T>();
-            missing = new List<T>();
-            extra = new List<T>();
+        public static void Compare<T>(this IEnumerable<T> actual, IEnumerable<T> expected, out List<T> missing, out List<T> extra) {
             var expected_ = new LinkedList<T>( expected );
-            foreach (var item in actual) {
-                if (expected_.Remove( item )) {
-                    intersected.Add( item );
-                } else {
-                    extra.Add( item );
-                }
-            }
-            foreach (var item in expected_) {
-                missing.Add( item );
-            }
+            extra = actual.Where( i => !expected_.Remove( i ) ).ToList();
+            missing = expected_.ToList();
         }
 
         // With

@@ -17,12 +17,18 @@ namespace ProjectArchitectureDesigner.Model {
             typeof( Module_ProjectArchitectureDesigner_Analyzer ),
             typeof( Module_ProjectArchitectureDesigner_Internal )
         );
-        protected override bool IsSupported(Type type) {
+        public override bool IsSupported(Type type) {
             return
                 base.IsSupported( type ) &&
                 !type.IsNestedPrivate &&
                 type.Namespace != "System.Runtime.CompilerServices" &&
                 type.Namespace != "System.Diagnostics.CodeAnalysis";
+        }
+        public override bool IsVisible(Type type) {
+            return
+                type.IsVisible &&
+                !type.Assembly.GetName().Name!.EndsWith( ".Internal" ) &&
+                !type.Assembly.GetName().Name!.EndsWith( ".Analyzer" );
         }
     }
 
