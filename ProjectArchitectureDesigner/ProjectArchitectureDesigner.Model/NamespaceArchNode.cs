@@ -10,7 +10,7 @@ namespace ProjectArchitectureDesigner.Model {
     public abstract class NamespaceArchNode : ArchNode {
 
         public bool IsGlobal => Name is (null or "" or "Global");
-        // Parent
+        // Ancestors
         public ProjectArchNode Project => Module.Project;
         public ModuleArchNode Module { get; internal set; } = default!;
         // Children

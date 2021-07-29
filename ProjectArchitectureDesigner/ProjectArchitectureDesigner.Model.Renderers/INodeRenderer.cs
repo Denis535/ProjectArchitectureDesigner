@@ -1,20 +1,14 @@
 ﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-namespace ProjectArchitectureDesigner.Renderers {
+namespace ProjectArchitectureDesigner.Model.Renderers {
     using System;
     using System.Collections.Generic;
     using System.Text;
     using ProjectArchitectureDesigner.Model;
 
     public interface INodeRenderer {
-        public static TextNodeRenderer TextRenderer => new TextNodeRenderer();
-        public static LeftAlignedTextNodeRenderer LeftAlignedTextRenderer => new LeftAlignedTextNodeRenderer();
-        public static RightAlignedTextNodeRenderer RightAlignedTextRenderer => new RightAlignedTextNodeRenderer();
         string Render(ArchNode node);
-        public static DelegateNodeRenderer FromDelegate(Func<ArchNode, string> @delegate) {
-            return new DelegateNodeRenderer( @delegate );
-        }
     }
     public class DelegateNodeRenderer : INodeRenderer {
         private readonly Func<ArchNode, string> @delegate;

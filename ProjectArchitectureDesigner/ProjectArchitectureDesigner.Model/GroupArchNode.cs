@@ -10,7 +10,7 @@ namespace ProjectArchitectureDesigner.Model {
     public abstract class GroupArchNode : ArchNode {
 
         public bool IsDefault => Name is (null or "" or "Default");
-        // Parent
+        // Ancestors
         public ProjectArchNode Project => Namespace.Module.Project;
         public ModuleArchNode Module => Namespace.Module;
         public NamespaceArchNode Namespace { get; internal set; } = default!;

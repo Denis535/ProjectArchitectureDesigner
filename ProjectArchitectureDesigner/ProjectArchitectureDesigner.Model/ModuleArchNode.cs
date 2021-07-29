@@ -11,7 +11,7 @@ namespace ProjectArchitectureDesigner.Model {
     public abstract class ModuleArchNode : ArchNode {
 
         public virtual Assembly? Assembly { get; }
-        // Parent
+        // Ancestors
         public ProjectArchNode Project { get; internal set; } = default!;
         // Children
         public abstract NamespaceArchNode[] Namespaces { get; }

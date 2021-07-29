@@ -8,7 +8,7 @@ namespace ProjectArchitectureDesigner.Model {
     using System.Text.CSharp;
     using System.Text.Markdown;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
-    using ProjectArchitectureDesigner.Renderers;
+    using ProjectArchitectureDesigner.Model.Renderers;
 
     // Project/ProjectArchitectureDesigner
     public sealed partial class Project_ProjectArchitectureDesigner : ProjectArchNode {
@@ -24,11 +24,11 @@ namespace ProjectArchitectureDesigner.Model {
                 type.Namespace != "System.Runtime.CompilerServices" &&
                 type.Namespace != "System.Diagnostics.CodeAnalysis";
         }
-        public override bool IsVisible(Type type) {
+        public override bool IsVisible(TypeArchNode type) {
             return
-                type.IsVisible &&
-                !type.Assembly.GetName().Name!.EndsWith( ".Internal" ) &&
-                !type.Assembly.GetName().Name!.EndsWith( ".Analyzer" );
+                base.IsVisible( type ) &&
+                !type.Module.Name.EndsWith( ".Internal" ) &&
+                !type.Module.Name.EndsWith( ".Analyzer" );
         }
     }
 
@@ -45,8 +45,9 @@ namespace ProjectArchitectureDesigner.Model {
             typeof( NamespaceArchNode ),
             typeof( GroupArchNode ),
             typeof( TypeArchNode ),
-            "ProjectArchitectureDesigner.Renderers",
+            "ProjectArchitectureDesigner.Model.Renderers",
             /// Group: ProjectRenderer
+            typeof( ProjectRenderer ),
             typeof( TextProjectRenderer ),
             typeof( HierarchicalTextProjectRenderer ),
             typeof( MarkdownDocumentProjectRenderer ),

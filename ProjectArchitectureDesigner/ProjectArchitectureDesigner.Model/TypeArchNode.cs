@@ -22,7 +22,7 @@ namespace ProjectArchitectureDesigner.Model {
         public IEnumerable<EventInfo> DeclaredEvents => Value.GetTypeInfo().DeclaredEvents.Where( IsUserDefined );
         public IEnumerable<ConstructorInfo> DeclaredConstructors => Value.GetTypeInfo().DeclaredConstructors.Where( IsUserDefined );
         public IEnumerable<MethodInfo> DeclaredMethods => Value.GetTypeInfo().DeclaredMethods.Where( IsUserDefined );
-        // Parent
+        // Ancestors
         public ProjectArchNode Project => Group.Namespace.Module.Project;
         public ModuleArchNode Module => Group.Namespace.Module;
         public NamespaceArchNode Namespace => Group.Namespace;

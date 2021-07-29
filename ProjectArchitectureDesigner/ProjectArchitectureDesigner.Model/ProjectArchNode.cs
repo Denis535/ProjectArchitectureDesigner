@@ -32,7 +32,7 @@ namespace ProjectArchitectureDesigner.Model {
         }
 
 
-        // GetTypesWithInvalidModule
+        // Testing
         public IEnumerable<TypeArchNode> GetTypesWithInvalidModule() {
             foreach (var type in Types) {
                 if (type.Module.Name != type.Value.Assembly.GetName().Name) {
@@ -40,7 +40,6 @@ namespace ProjectArchitectureDesigner.Model {
                 }
             }
         }
-        // GetTypesWithInvalidNamespace
         public IEnumerable<TypeArchNode> GetTypesWithInvalidNamespace() {
             foreach (var type in Types) {
                 if (type.Namespace.Name != type.Value.Namespace) {
@@ -48,13 +47,12 @@ namespace ProjectArchitectureDesigner.Model {
                 }
             }
         }
-        // GetMissingAndExtraTypes
-        public void GetMissingAndExtraTypes(out List<Type> missing, out List<TypeArchNode> extra) {
+        public void GetMissingAndExtraTypes(out Type[] missing, out TypeArchNode[] extra) {
             var actual = Types;
             var expected = Assemblies.SelectMany( i => i.DefinedTypes ).Where( IsSupported );
             var expected_ = new LinkedList<Type>( expected );
-            extra = actual.Where( i => !expected_.Remove( i.Value ) ).ToList();
-            missing = expected_.ToList();
+            extra = actual.Where( i => !expected_.Remove( i.Value ) ).ToArray();
+            missing = expected_.ToArray();
         }
 
 
@@ -63,8 +61,8 @@ namespace ProjectArchitectureDesigner.Model {
             return !type.IsObsolete() && !type.IsCompilerGenerated();
         }
         // IsVisible
-        public virtual bool IsVisible(Type type) {
-            return type.IsVisible;
+        public virtual bool IsVisible(TypeArchNode type) {
+            return type.Value.IsVisible;
         }
 
 

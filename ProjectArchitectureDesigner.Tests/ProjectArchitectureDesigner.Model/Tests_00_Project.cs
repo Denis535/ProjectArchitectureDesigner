@@ -8,7 +8,7 @@ namespace ProjectArchitectureDesigner.Model {
     using System.Linq;
     using System.Text;
     using NUnit.Framework;
-    using ProjectArchitectureDesigner.Renderers;
+    using ProjectArchitectureDesigner.Model.Renderers;
 
     public class Tests_00_Project {
 
@@ -72,24 +72,29 @@ namespace ProjectArchitectureDesigner.Model {
 
         // Render
         [Test]
-        public void Test_10_RenderToText() {
-            TestContext.WriteLine( Project.RenderToText( INodeRenderer.TextRenderer, IsVisible ) );
+        public void Test_10_Render_Text() {
+            var renderer = new TextProjectRenderer( new TextNodeRenderer() );
+            TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
         }
         [Test]
-        public void Test_11_RenderToText_LeftAligned() {
-            TestContext.WriteLine( Project.RenderToText( INodeRenderer.LeftAlignedTextRenderer, IsVisible ) );
+        public void Test_11_Render_Text_LeftAligned() {
+            var renderer = new TextProjectRenderer( new LeftAlignedTextNodeRenderer() );
+            TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
         }
         [Test]
-        public void Test_12_RenderToText_RightAligned() {
-            TestContext.WriteLine( Project.RenderToText( INodeRenderer.RightAlignedTextRenderer, IsVisible ) );
+        public void Test_12_Render_Text_RightAligned() {
+            var renderer = new TextProjectRenderer( new RightAlignedTextNodeRenderer() );
+            TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
         }
         [Test]
-        public void Test_13_RenderToHierarchicalText() {
-            TestContext.WriteLine( Project.RenderToHierarchicalText( INodeRenderer.TextRenderer, IsVisible ) );
+        public void Test_13_Render_HierarchicalText() {
+            var renderer = new HierarchicalTextProjectRenderer( new TextNodeRenderer() );
+            TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
         }
         [Test]
-        public void Test_14_RenderToMarkdownDocument() {
-            TestContext.WriteLine( Project.RenderToMarkdownDocument( INodeRenderer.TextRenderer, IsVisible ) );
+        public void Test_14_Render_MarkdownDocument() {
+            var renderer = new MarkdownDocumentProjectRenderer( new TextNodeRenderer() );
+            TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
         }
 
 
@@ -123,13 +128,6 @@ namespace ProjectArchitectureDesigner.Model {
                     }
                 }
             }
-        }
-        // Helpers/Type
-        private static bool IsVisible(TypeArchNode type) {
-            return
-                type.Value.IsVisible &&
-                !type.Value.Assembly.GetName().Name!.EndsWith( ".Internal" ) &&
-                !type.Value.Assembly.GetName().Name!.EndsWith( ".Analyzer" );
         }
 
 
