@@ -73,14 +73,18 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
 
         // String
         public static string Format2(this string value, params object?[] args) {
+            if (args.Any()) return value.WithArguments( args );
+            return value;
+        }
+        private static string WithArguments(this string value, object?[] args) {
             var builder = new StringBuilder( value.Length * 2 );
             for (int i = 0, j = 0; i < value.Length;) {
                 if (value.IsPlaceholder( ref i )) {
                     builder.AppendArgument( args, ref j );
-                    continue;
+                } else {
+                    builder.Append( value[ i ] );
+                    i++;
                 }
-                builder.Append( value[ i ] );
-                i++;
             }
             return builder.ToString();
         }

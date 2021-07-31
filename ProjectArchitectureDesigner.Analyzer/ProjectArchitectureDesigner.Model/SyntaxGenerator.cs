@@ -16,51 +16,51 @@ namespace ProjectArchitectureDesigner.Model {
         public static ClassDeclarationSyntax CreateClassDeclaration_Project(ClassDeclarationSyntax @class, ProjectInfo project) {
             var comment = SyntaxFactory2.Comment( "// Project: {0}", project.Name );
             var name = PropertyDeclaration_Name( project.Name );
-            var modules = PropertyDeclaration_Modules( project.Modules );
+            var modules_array = PropertyDeclaration_Modules( project.Modules );
             var modules_properties = project.Modules.Select( PropertyDeclaration_Module ).ToArray();
             return
                 SyntaxFactory2.ClassDeclaration( @class )
                 .WithLeadingTrivia( SyntaxFactory2.EndOfLine(), comment )
                 .AddMembers( name )
-                .AddMembers( modules )
+                .AddMembers( modules_array )
                 .AddMembers( modules_properties );
         }
         // Module
         public static ClassDeclarationSyntax CreateClassDeclaration_Module(ClassDeclarationSyntax @class, ModuleInfo module) {
             var comment = SyntaxFactory2.Comment( "// Module: {0}", module.Name );
             var name = PropertyDeclaration_Name( module.Name );
-            var namespaces = PropertyDeclaration_Namespaces( module.Namespaces );
+            var namespaces_array = PropertyDeclaration_Namespaces( module.Namespaces );
             var namespaces_properties = module.Namespaces.Select( PropertyDeclaration_Namespace ).ToArray();
             var namespaces_classes = module.Namespaces.Select( CreateClassDeclaration_Namespace ).ToArray();
             return
                 SyntaxFactory2.ClassDeclaration( @class )
                 .WithLeadingTrivia( SyntaxFactory2.EndOfLine(), comment )
                 .AddMembers( name )
-                .AddMembers( namespaces )
+                .AddMembers( namespaces_array )
                 .AddMembers( namespaces_properties )
                 .AddMembers( namespaces_classes );
         }
         private static ClassDeclarationSyntax CreateClassDeclaration_Namespace(NamespaceEntry @namespace) {
-            var comment = SyntaxFactory2.Comment( "// Namespace: {0}", @namespace.Name );
             var name = PropertyDeclaration_Name( @namespace.Name );
-            var groups = PropertyDeclaration_Groups( @namespace.Groups );
+            var groups_array = PropertyDeclaration_Groups( @namespace.Groups );
             var groups_properties = @namespace.Groups.Select( PropertyDeclaration_Group ).ToArray();
             var groups_classes = @namespace.Groups.Select( CreateClassDeclaration_Group ).ToArray();
-            return
-                SyntaxFactory2.ClassDeclaration( "public class $name : NamespaceArchNode {}", @namespace.Type )
-                .WithLeadingTrivia( comment )
+            return SyntaxFactory2.ClassDeclaration(
+                "\r\n" +
+                "// Namespace: $name\r\n" +
+                "public class $type : NamespaceArchNode {}", @namespace.Name, @namespace.Type )
                 .AddMembers( name )
-                .AddMembers( groups )
+                .AddMembers( groups_array )
                 .AddMembers( groups_properties )
                 .AddMembers( groups_classes );
         }
         private static ClassDeclarationSyntax CreateClassDeclaration_Group(GroupEntry group) {
             var name = PropertyDeclaration_Name( group.Name );
-            var types = PropertyDeclaration_Types( group.Types );
+            var types_array = PropertyDeclaration_Types( group.Types );
             return
-                SyntaxFactory2.ClassDeclaration( "public class $name : GroupArchNode {}", group.Type )
+                SyntaxFactory2.ClassDeclaration( "public class $type : GroupArchNode {}", group.Type )
                 .AddMembers( name )
-                .AddMembers( types );
+                .AddMembers( types_array );
         }
 
 
@@ -71,19 +71,19 @@ namespace ProjectArchitectureDesigner.Model {
         // Helpers/PropertyDeclaration
         private static PropertyDeclarationSyntax PropertyDeclaration_Modules(ModuleEntry[] modules) {
             var items = modules.Select( i => i.Property );
-            return SyntaxFactory2.PropertyDeclaration( "public override ModuleArchNode[] Modules => new ModuleArchNode[] { $items };", items );
+            return SyntaxFactory2.PropertyDeclaration( "public override ModuleArchNode[] Modules => new ModuleArchNode[] {\r\n$items\r\n};", items );
         }
         private static PropertyDeclarationSyntax PropertyDeclaration_Namespaces(NamespaceEntry[] namespaces) {
             var items = namespaces.Select( i => i.Property );
-            return SyntaxFactory2.PropertyDeclaration( "public override NamespaceArchNode[] Namespaces => new NamespaceArchNode[] { $items };", items );
+            return SyntaxFactory2.PropertyDeclaration( "public override NamespaceArchNode[] Namespaces => new NamespaceArchNode[] {\r\n$items\r\n};", items );
         }
         private static PropertyDeclarationSyntax PropertyDeclaration_Groups(GroupEntry[] groups) {
             var items = groups.Select( i => i.Property );
-            return SyntaxFactory2.PropertyDeclaration( "public override GroupArchNode[] Groups => new GroupArchNode[] { $items };", items );
+            return SyntaxFactory2.PropertyDeclaration( "public override GroupArchNode[] Groups => new GroupArchNode[] {\r\n$items\r\n};", items );
         }
         private static PropertyDeclarationSyntax PropertyDeclaration_Types(TypeEntry[] types) {
-            var items = types.Select( i => $"typeof( {i.Type} )" );
-            return SyntaxFactory2.PropertyDeclaration( "public override TypeArchNode[] Types { get; } = new TypeArchNode[] { $items };", items );
+            var items = types.Select( i => $"new TypeArchNode( typeof( {i.Type} ) )" );
+            return SyntaxFactory2.PropertyDeclaration( "public override TypeArchNode[] Types { get; } = new TypeArchNode[] {\r\n$items\r\n};", items );
         }
         // Helpers/PropertyDeclaration
         private static PropertyDeclarationSyntax PropertyDeclaration_Module(ModuleEntry module) {

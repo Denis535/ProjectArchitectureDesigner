@@ -78,7 +78,8 @@ namespace ProjectArchitectureDesigner.Model {
             typeof( TypeEntry ),
             "Microsoft.CodeAnalysis.CSharp.Syntax",
             typeof( SyntaxFormatter ),
-            typeof( SyntaxFormatterRewriter ),
+            typeof( SyntaxFormatterHelper ),
+            typeof( SyntaxFormatterHelper2 ),
             typeof( SyntaxFactory2 ),
             typeof( SyntaxUtils )
         );

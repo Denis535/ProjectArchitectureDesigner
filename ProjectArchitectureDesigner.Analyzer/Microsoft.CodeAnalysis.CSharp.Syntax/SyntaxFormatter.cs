@@ -12,102 +12,140 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
     internal static class SyntaxFormatter {
 
         public static CompilationUnitSyntax Format(this CompilationUnitSyntax unit) {
-            return (CompilationUnitSyntax) new SyntaxFormatterRewriter().Visit( unit );
+            // [indent] comment [eol]
+            // [indent] comment [eol]
+            // [indent] ... comment [eol]
+            unit = (CompilationUnitSyntax) new SyntaxFormatterHelper().Visit( unit );
+            unit = (CompilationUnitSyntax) new SyntaxFormatterHelper2().Visit( unit );
+            return unit;
         }
 
     }
-    internal class SyntaxFormatterRewriter : CSharpSyntaxRewriter {
+    internal class SyntaxFormatterHelper : CSharpSyntaxRewriter {
+
 
         public override SyntaxToken VisitToken(SyntaxToken token) {
-            if (token.Parent != null && token.Span.Length > 0) {
-                return token
-                    .WithLeadingTrivia( FormatLeadingTrivia( token ) )
-                    .WithTrailingTrivia( FormatTrailingTrivia( token ) );
+            if (token.Parent is null && token.Span.Length == 0) return token;
+
+            // LeadingTrivia
+            var leadingTrivia = token.LeadingTrivia.WhereNot( IsTrash );
+            leadingTrivia = WithEndOfLines( leadingTrivia );
+
+            // TrailingTrivia
+            var trailingTrivia = token.TrailingTrivia.WhereNot( IsTrash );
+            if (ShouldBeLast( token )) {
+                trailingTrivia = WithEndOfLine( trailingTrivia );
+            } else
+            if (ShouldHaveSpaceAfter( token ) && ShouldHaveSpaceBefore( token.GetNextToken() )) {
+                trailingTrivia = WithSpace( trailingTrivia );
+            }
+
+            return token.WithLeadingTrivia( leadingTrivia ).WithTrailingTrivia( trailingTrivia );
+        }
+
+
+        // Helpers/Token
+        private static bool ShouldBeLast(SyntaxToken token) {
+            if (token.Parent is CompilationUnitSyntax or MemberDeclarationSyntax or BlockSyntax) {
+                if (token.Kind() == SyntaxKind.OpenBraceToken) return true;  // { [eol]
+                if (token.Kind() == SyntaxKind.CloseBraceToken) return true; // } [eol]
+            }
+            if (token.Parent is CompilationUnitSyntax or UsingDirectiveSyntax or MemberDeclarationSyntax or StatementSyntax) {
+                if (token.Kind() == SyntaxKind.SemicolonToken) return true;  // ; [eol]
+            }
+            return false;
+        }
+        private static bool ShouldHaveSpaceAfter(SyntaxToken token) {
+            if (token.Kind() is SyntaxKind.OpenParenToken) return false;    // ( token
+            if (token.Kind() is SyntaxKind.OpenBracketToken) return false;  // [ token
+            if (token.Parent is TypeArgumentListSyntax) {
+                if (token.Kind() is SyntaxKind.LessThanToken) return false; // < token
+            }
+            if (token.Kind() is SyntaxKind.DotToken) return false;          // . token
+            return true;
+        }
+        private static bool ShouldHaveSpaceBefore(SyntaxToken next) {
+            if (next.Kind() is SyntaxKind.OpenParenToken) return false;       // token (
+            if (next.Kind() is SyntaxKind.OpenBracketToken) return false;     // token [
+            if (next.Parent is TypeArgumentListSyntax) {                      
+                if (next.Kind() is SyntaxKind.LessThanToken) return false;    // token <
+            }                                                                 
+            if (next.Kind() is SyntaxKind.CloseParenToken) return false;      // token )
+            if (next.Kind() is SyntaxKind.CloseBracketToken) return false;    // token ]
+            if (next.Parent is TypeArgumentListSyntax) {
+                if (next.Kind() is SyntaxKind.GreaterThanToken) return false; // token >
+            }
+            if (next.Kind() is SyntaxKind.DotToken) return false;             // token .
+            if (next.Kind() is SyntaxKind.CommaToken) return false;           // token ,
+            if (next.Kind() is SyntaxKind.SemicolonToken) return false;       // token ;
+            return true;
+        }
+        // Helpers/Trivia
+        private static IEnumerable<SyntaxTrivia> WithEndOfLines(IEnumerable<SyntaxTrivia> trivia) {
+            foreach (var (trivia_, next) in trivia.WithNext()) {
+                if (trivia_.Kind() is SyntaxKind.WhitespaceTrivia or SyntaxKind.EndOfLineTrivia) {
+                    yield return trivia_;
+                } else {
+                    yield return trivia_;
+                    if (next.ValueOrDefault.Kind() is not SyntaxKind.EndOfLineTrivia) yield return SyntaxFactory2.EndOfLine();
+                }
+            }
+        }
+        private static IEnumerable<SyntaxTrivia> WithEndOfLine(IEnumerable<SyntaxTrivia> trivia) {
+            var result = trivia.ToList();
+            if (result.LastOrDefault().Kind() is not SyntaxKind.EndOfLineTrivia) {
+                result.Add( SyntaxFactory2.EndOfLine() );
+            }
+            return result;
+        }
+        private static IEnumerable<SyntaxTrivia> WithSpace(IEnumerable<SyntaxTrivia> trivia) {
+            var result = trivia.ToList();
+            if (result.LastOrDefault().Kind() is not (SyntaxKind.WhitespaceTrivia or SyntaxKind.EndOfLineTrivia)) {
+                result.Add( SyntaxFactory.Space );
+            }
+            return result;
+        }
+        private static bool IsTrash(SyntaxTrivia trivia) {
+            return trivia.FullSpan.Length == 0;
+        }
+
+
+    }
+    internal class SyntaxFormatterHelper2 : CSharpSyntaxRewriter {
+
+
+        public override SyntaxToken VisitToken(SyntaxToken token) {
+            if (token.Parent is null && token.Span.Length == 0) return token;
+
+            // LeadingTrivia
+            if (IsLineStart( token )) {
+                var indent = GetIndent( token );
+                var trivia = token.LeadingTrivia.AsEnumerable();
+                trivia = Indent( trivia, indent );
+                token = token.WithLeadingTrivia( trivia );
             }
             return token;
         }
 
 
-        // Format/Leading
-        private static IEnumerable<SyntaxTrivia> FormatLeadingTrivia(SyntaxToken token) {
-            // comment [eol]
-            // token ...
-            if (ShouldBeFirst( token )) {
-                var indent = GetIndent( token );
-                var trivia = Format( token.LeadingTrivia, indent );
-                return trivia.Append( SyntaxFactory.Whitespace( indent ) );
-            }
-            return Enumerable.Empty<SyntaxTrivia>();
-        }
-        // Format/Trailing
-        private static IEnumerable<SyntaxTrivia> FormatTrailingTrivia(SyntaxToken token) {
-            // ... token [space] comment [eol]
-            // ... token [eol]
-            // ... token [space]
-            if (ShouldBeLast( token )) {
-                var indent = GetIndent( token );
-                var trivia = Format( token.TrailingTrivia, indent ).Skip( 1 );
-                if (trivia.Any()) {
-                    return SyntaxFactory.Space.Append( trivia );
-                } else {
-                    return SyntaxFactory2.EndOfLine().AsEnumerable();
-                }
-            }
-            if (ShouldHaveSpace( token, token.GetNextToken() )) {
-                return SyntaxFactory.Space.AsEnumerable();
-            }
-            return Enumerable.Empty<SyntaxTrivia>();
-        }
-
-
         // Helpers/Token
-        private static bool ShouldBeFirst(SyntaxToken token) {
-            var prevToken = token.GetPreviousToken();
-            return prevToken == default || ShouldBeLast( prevToken );
-        }
-        private static bool ShouldBeLast(SyntaxToken token) {
-            if (token.Kind() == SyntaxKind.OpenBraceToken && token.Parent is CompilationUnitSyntax or MemberDeclarationSyntax or BlockSyntax) return true; // { [eol]
-            if (token.Kind() == SyntaxKind.SemicolonToken && token.Parent is CompilationUnitSyntax or UsingDirectiveSyntax or MemberDeclarationSyntax or StatementSyntax) return true; // ; [eol]
-            if (token.Kind() == SyntaxKind.CloseBraceToken && token.Parent is CompilationUnitSyntax or MemberDeclarationSyntax or BlockSyntax) return true; // } [eol]
-            return false;
-        }
-        private static bool ShouldHaveSpace(SyntaxToken current, SyntaxToken next) {
-            if (current.Kind() is SyntaxKind.OpenParenToken) return false;   // ( [space]
-            if (current.Kind() is SyntaxKind.OpenBracketToken) return false; // [ [space]
-            if (current.Kind() is SyntaxKind.LessThanToken && current.Parent is TypeArgumentListSyntax) return false;  // < [space]
-            if (current.Kind() is SyntaxKind.DotToken) return false;         // . [space]
-
-            if (next.Kind() is SyntaxKind.OpenParenToken) return false;   // [space] (
-            if (next.Kind() is SyntaxKind.OpenBracketToken) return false; // [space] [
-            if (next.Kind() is SyntaxKind.LessThanToken && next.Parent is TypeArgumentListSyntax) return false;    // [space] <
-
-            if (next.Kind() is SyntaxKind.CloseParenToken) return false;   // [space] )
-            if (next.Kind() is SyntaxKind.CloseBracketToken) return false; // [space] ]
-            if (next.Kind() is SyntaxKind.GreaterThanToken && next.Parent is TypeArgumentListSyntax) return false;  // [space] >
-
-            if (next.Kind() is SyntaxKind.DotToken) return false;       // [space] .
-            if (next.Kind() is SyntaxKind.CommaToken) return false;     // [space] ,
-            if (next.Kind() is SyntaxKind.SemicolonToken) return false; // [space] ;
-            return true;
+        private static bool IsLineStart(SyntaxToken token) {
+            var prev = token.GetPreviousToken();
+            return
+                prev == default ||
+                prev.TrailingTrivia.LastOrDefault().Kind() is SyntaxKind.EndOfLineTrivia;
         }
         private static string GetIndent(SyntaxToken token) {
             var level = token.Parent!.Ancestors().Where( i => i is MemberDeclarationSyntax or BlockSyntax ).Count();
             return new string( ' ', 4 * level );
         }
         // Helpers/Trivia
-        private static IEnumerable<SyntaxTrivia> Format(IEnumerable<SyntaxTrivia> trivia, string indent) {
-            foreach (var trivia_ in trivia.Where( IsNotTrash )) {
-                if (trivia_.Kind() is not SyntaxKind.EndOfLineTrivia) {
-                    yield return SyntaxFactory.Whitespace( indent );
-                    yield return trivia_;
-                    yield return SyntaxFactory2.EndOfLine();
-                } else {
-                    yield return SyntaxFactory2.EndOfLine();
-                }
+        private static IEnumerable<SyntaxTrivia> Indent(IEnumerable<SyntaxTrivia> trivia, string indent) {
+            foreach (var slice in trivia.SplitByLast( i => i.Kind() is SyntaxKind.EndOfLineTrivia )) {
+                yield return SyntaxFactory.Whitespace( indent );
+                foreach (var i in slice) yield return i;
             }
-        }
-        private static bool IsNotTrash(SyntaxTrivia trivia) {
-            return trivia.FullSpan.Length > 0 && trivia.Kind() is not SyntaxKind.WhitespaceTrivia;
+            yield return SyntaxFactory.Whitespace( indent );
         }
 
 

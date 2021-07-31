@@ -124,15 +124,15 @@ namespace System.Collections.Generic {
             return new[] { first, second };
         }
         // Append
-        //public static IEnumerable<T> Append<T>(this IEnumerable<T> source, T element) {
-        //    return Enumerable.Append( source, element );
+        //public static IEnumerable<T> Append<T>(this IEnumerable<T> firsts, T second) {
+        //    return Enumerable.Append( firsts, second );
         //}
-        public static IEnumerable<T> Append<T>(this T source, IEnumerable<T> elements) {
-            return elements.Prepend( source );
+        public static IEnumerable<T> Append<T>(this T first, IEnumerable<T> seconds) {
+            return seconds.Prepend( first );
         }
-        // AsEnumerable
-        public static IEnumerable<T> AsEnumerable<T>(this T source) {
-            return Enumerable.Empty<T>().Append( source );
+        // ToEnumerable
+        public static IEnumerable<T> ToEnumerable<T>(this T element) {
+            return new[] { element };
         }
 
         // GetPeekableEnumerator

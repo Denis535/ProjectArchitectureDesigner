@@ -112,7 +112,7 @@ namespace System.Text.CSharp {
                 return @base.Append( interfaces );
             }
             if (@base != null) {
-                return @base.AsEnumerable();
+                return @base.ToEnumerable();
             }
             if (interfaces != null) {
                 return interfaces;
