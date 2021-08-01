@@ -55,10 +55,9 @@ namespace ProjectArchitectureDesigner.Model {
             }
         }
         private static void Execute(GeneratorExecutionContext context, CompilationUnitSyntax unit) {
-            var unit_generated = Generate( unit );
-            if (unit_generated != null) {
-                var name = GetGeneratedName( unit );
-                var source = unit_generated.Format().ToFullString();
+            var name = GetGeneratedName( unit );
+            var source = Generate( unit )?.Format().ToFullString();
+            if (source != null) {
                 Debug.WriteLine( "Generated source: " + name );
                 Debug.WriteLine( source );
                 context.AddSource( name, source );
@@ -84,10 +83,10 @@ namespace ProjectArchitectureDesigner.Model {
                 } else
                 if (member is ClassDeclarationSyntax @class) {
                     if (@class.IsPartial() && @class.IsProject()) {
-                        yield return SyntaxGenerator.CreateClassDeclaration_Project( @class, @class.GetProjectInfo() );
+                        yield return SyntaxGenerator.CreateSyntax_ProjectClass( @class, @class.GetProjectInfo() );
                     }
                     if (@class.IsPartial() && @class.IsModule()) {
-                        yield return SyntaxGenerator.CreateClassDeclaration_Module( @class, @class.GetModuleInfo() );
+                        yield return SyntaxGenerator.CreateSyntax_ModuleClass( @class, @class.GetModuleInfo() );
                     }
                 }
             }

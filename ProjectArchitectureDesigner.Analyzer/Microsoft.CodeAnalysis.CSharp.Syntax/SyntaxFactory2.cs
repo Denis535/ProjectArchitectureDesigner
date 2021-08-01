@@ -48,6 +48,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         public static PropertyDeclarationSyntax PropertyDeclaration(string syntax, params object[] args) {
             return (PropertyDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( syntax.Format2( args ) ) ?? throw new Exception( "Property declaration syntax is invalid" );
         }
+        public static ConstructorDeclarationSyntax ConstructorDeclaration(string syntax, params object[] args) {
+            return (ConstructorDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( syntax.Format2( args ) ) ?? throw new Exception( "Constructor declaration syntax is invalid" );
+        }
 
 
         // Trivia

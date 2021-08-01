@@ -67,9 +67,9 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         private static bool ShouldHaveSpaceBefore(SyntaxToken next) {
             if (next.Kind() is SyntaxKind.OpenParenToken) return false;       // token (
             if (next.Kind() is SyntaxKind.OpenBracketToken) return false;     // token [
-            if (next.Parent is TypeArgumentListSyntax) {                      
+            if (next.Parent is TypeArgumentListSyntax) {
                 if (next.Kind() is SyntaxKind.LessThanToken) return false;    // token <
-            }                                                                 
+            }
             if (next.Kind() is SyntaxKind.CloseParenToken) return false;      // token )
             if (next.Kind() is SyntaxKind.CloseBracketToken) return false;    // token ]
             if (next.Parent is TypeArgumentListSyntax) {
@@ -136,7 +136,7 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
                 prev.TrailingTrivia.LastOrDefault().Kind() is SyntaxKind.EndOfLineTrivia;
         }
         private static string GetIndent(SyntaxToken token) {
-            var level = token.Parent!.Ancestors().Where( i => i is MemberDeclarationSyntax or BlockSyntax ).Count();
+            var level = token.Parent!.Ancestors().Where( i => i is NamespaceDeclarationSyntax or BaseTypeDeclarationSyntax or InitializerExpressionSyntax or BlockSyntax ).Count();
             return new string( ' ', 4 * level );
         }
         // Helpers/Trivia
