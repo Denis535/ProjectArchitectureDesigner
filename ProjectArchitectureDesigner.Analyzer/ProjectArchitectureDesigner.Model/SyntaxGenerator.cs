@@ -4,99 +4,104 @@
 namespace ProjectArchitectureDesigner.Model {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text;
-    using Microsoft.CodeAnalysis;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
 
     internal static class SyntaxGenerator {
 
 
         // Project
-        public static ClassDeclarationSyntax CreateSyntax_ProjectClass(ClassDeclarationSyntax @class, ProjectInfo project) {
-            return SyntaxFactory2.ClassDeclaration( @class )
-                .WithLeadingTrivia( SyntaxFactory2.EndOfLine(), SyntaxFactory2.Comment( "// Project" ) )
-                .AddMembers( CreateSyntax_NameProperty( project.Name ) )
-                .AddMembers( CreateSyntax_ModuleArrayProperty( project.Modules ) )
-                .AddMembers( project.Modules.Select( CreateSyntax_ModuleProperty ).ToArray() );
+        public static ClassDeclarationSyntax CreateProjectClass(ClassDeclarationSyntax @class, ProjectInfo project) {
+            var builder = new StringBuilder();
+            builder.AppendLine();
+            builder.Comment( "// Project" );
+            builder.Class( "$modifiers class $type {", @class.Modifiers, @class.Identifier );
+            {
+                builder.Comment( "/// Properties" );
+                builder.Property( "public override string Name { get; } = \"$name\";", project.Name );
+                builder.Property( "public override ModuleArchNode[] Modules { get; }" );
+                builder.Property( project.Modules, "public $type $name { get; }", i => i.Type, i => i.Property );
+                builder.Comment( "/// Constructor" );
+                builder.Constructor( "public $type() {", project.Type );
+                {
+                    builder.Statement( "this.Modules = new ModuleArchNode[] {" );
+                    builder.Statement( project.Modules, "this.$name = new $type( this ),", i => i.Property, i => i.Type );
+                    builder.Statement( "};" );
+                }
+                builder.Constructor( "}" );
+            }
+            builder.Class( "}" );
+            return SyntaxFactory2.ClassDeclaration( builder.ToString() );
         }
         // Module
-        public static ClassDeclarationSyntax CreateSyntax_ModuleClass(ClassDeclarationSyntax @class, ModuleInfo module) {
-            return SyntaxFactory2.ClassDeclaration( @class )
-                .WithLeadingTrivia( SyntaxFactory2.EndOfLine(), SyntaxFactory2.Comment( "// Module" ) )
-                .AddMembers( CreateSyntax_NameProperty( module.Name ) )
-                .AddMembers( CreateSyntax_NamespaceArrayProperty( module.Namespaces ) )
-                .AddMembers( CreateSyntax_ModuleConstructor( module ) )
-                .AddMembers( module.Namespaces.Select( CreateSyntax_NamespaceProperty ).ToArray() )
-                .AddMembers( module.Namespaces.Select( CreateSyntax_NamespaceClass ).ToArray() );
-        }
-        private static ClassDeclarationSyntax CreateSyntax_NamespaceClass(NamespaceEntry @namespace) {
-            return SyntaxFactory2.ClassDeclaration( "public class $type : NamespaceArchNode {}", @namespace.Type )
-                .WithLeadingTrivia( SyntaxFactory2.Comment( "// Namespace" ) )
-                .AddMembers( CreateSyntax_NameProperty( @namespace.Name ) )
-                .AddMembers( CreateSyntax_GroupArrayProperty( @namespace.Groups ) )
-                .AddMembers( CreateSyntax_NamespaceConstructor( @namespace ) )
-                .AddMembers( @namespace.Groups.Select( CreateSyntax_GroupProperty ).ToArray() )
-                .AddMembers( @namespace.Groups.Select( CreateSyntax_GroupClass ).ToArray() );
-        }
-        private static ClassDeclarationSyntax CreateSyntax_GroupClass(GroupEntry group) {
-            return SyntaxFactory2.ClassDeclaration( "public class $type : GroupArchNode {}", group.Type )
-                .WithLeadingTrivia( SyntaxFactory2.Comment( "// Group" ) )
-                .AddMembers( CreateSyntax_NameProperty( group.Name ) )
-                .AddMembers( CreateSyntax_TypeArrayProperty( group.Types ) )
-                .AddMembers( CreateSyntax_GroupConstructor( group ) );
+        public static ClassDeclarationSyntax CreateModuleClass(ClassDeclarationSyntax @class, ModuleInfo module) {
+            var builder = new StringBuilder();
+            builder.AppendLine();
+            builder.Comment( "// Module" );
+            builder.Class( "$modifiers class $type {", @class.Modifiers, @class.Identifier );
+            {
+                builder.Comment( "/// Properties" );
+                builder.Property( "public override string Name { get; } = \"$name\";", module.Name );
+                builder.Property( "public override NamespaceArchNode[] Namespaces { get; }" );
+                builder.Property( module.Namespaces, "public $type $name { get; }", i => i.Type, i => i.Property );
+                builder.Comment( "/// Constructor" );
+                builder.Constructor( "public $type(ProjectArchNode project) : base( project ) {", module.Type );
+                {
+                    builder.Statement( "this.Namespaces = new NamespaceArchNode[] {" );
+                    builder.Statement( module.Namespaces, "this.$name = new $type( this ),", i => i.Property, i => i.Type );
+                    builder.Statement( "};" );
+                }
+                builder.Constructor( "}" );
+                foreach (var @namespace in module.Namespaces) {
+                    builder.AppendNamespaceClass( @namespace );
+                }
+            }
+            builder.Class( "}" );
+            return SyntaxFactory2.ClassDeclaration( builder.ToString() );
         }
 
 
-        // Helpers/CreateSyntax/Property/Name
-        private static PropertyDeclarationSyntax CreateSyntax_NameProperty(string name) {
-            return SyntaxFactory2.PropertyDeclaration( "public override string Name => \"$name\";", name );
+        // Helpers/Namespace
+        private static void AppendNamespaceClass(this StringBuilder builder, NamespaceEntry @namespace) {
+            builder.Comment( "// Namespace" );
+            builder.Class( "public class $type : NamespaceArchNode {", @namespace.Type );
+            {
+                builder.Comment( "/// Properties" );
+                builder.Property( "public override string Name { get; } = \"$name\";", @namespace.Name );
+                builder.Property( "public override GroupArchNode[] Groups { get; }" );
+                builder.Property( @namespace.Groups, "public $type $name { get; }", i => i.Type, i => i.Property );
+                builder.Comment( "/// Constructor" );
+                builder.Constructor( "public $type(ModuleArchNode module) : base( module ) {", @namespace.Type );
+                {
+                    builder.Statement( "this.Groups = new GroupArchNode[] {" );
+                    builder.Statement( @namespace.Groups, "this.$name = new $type( this ),", i => i.Property, i => i.Type );
+                    builder.Statement( "};" );
+                }
+                builder.Constructor( "}" );
+                foreach (var group in @namespace.Groups) {
+                    builder.AppendGroupClass( group );
+                }
+            }
+            builder.Class( "}" );
         }
-        // Helpers/CreateSyntax/Property/Array
-        private static PropertyDeclarationSyntax CreateSyntax_ModuleArrayProperty(ModuleEntry[] modules) {
-            var items = modules.Select( i => i.Property );
-            return SyntaxFactory2.PropertyDeclaration( "public override ModuleArchNode[] Modules => new ModuleArchNode[] { $items };", items );
-        }
-        private static PropertyDeclarationSyntax CreateSyntax_NamespaceArrayProperty(NamespaceEntry[] namespaces) {
-            var items = namespaces.Select( i => i.Property );
-            return SyntaxFactory2.PropertyDeclaration( "public override NamespaceArchNode[] Namespaces => new NamespaceArchNode[] { $items };", items );
-        }
-        private static PropertyDeclarationSyntax CreateSyntax_GroupArrayProperty(GroupEntry[] groups) {
-            var items = groups.Select( i => i.Property );
-            return SyntaxFactory2.PropertyDeclaration( "public override GroupArchNode[] Groups => new GroupArchNode[] { $items };", items );
-        }
-        private static PropertyDeclarationSyntax CreateSyntax_TypeArrayProperty(TypeEntry[] types) {
-            var items = types.Select( i => $"new TypeArchNode( typeof( {i.Type} ) )" );
-            return SyntaxFactory2.PropertyDeclaration( "public override TypeArchNode[] Types { get; } = new TypeArchNode[] { $items };", items );
-        }
-        // Helpers/CreateSyntax/Property
-        private static PropertyDeclarationSyntax CreateSyntax_ModuleProperty(ModuleEntry module) {
-            var type = module.Type;
-            var property = module.Property;
-            return SyntaxFactory2.PropertyDeclaration( "public $type $name { get; } = new $type();", type, property, type );
-        }
-        private static PropertyDeclarationSyntax CreateSyntax_NamespaceProperty(NamespaceEntry @namespace) {
-            var type = @namespace.Type;
-            var property = @namespace.Property;
-            return SyntaxFactory2.PropertyDeclaration( "public $type $name { get; } = new $type();", type, property, type );
-        }
-        private static PropertyDeclarationSyntax CreateSyntax_GroupProperty(GroupEntry group) {
-            var type = group.Type;
-            var property = group.Property;
-            return SyntaxFactory2.PropertyDeclaration( "public $type $name { get; } = new $type();", type, property, type );
-        }
-        // Helpers/CreateSyntax/Constructor
-        private static ConstructorDeclarationSyntax CreateSyntax_ModuleConstructor(ModuleInfo module) {
-            var type = module.Type;
-            return SyntaxFactory2.ConstructorDeclaration( "public $type() {}", type );
-        }
-        private static ConstructorDeclarationSyntax CreateSyntax_NamespaceConstructor(NamespaceEntry @namespace) {
-            var type = @namespace.Type;
-            return SyntaxFactory2.ConstructorDeclaration( "public $type() {}", type );
-        }
-        private static ConstructorDeclarationSyntax CreateSyntax_GroupConstructor(GroupEntry group) {
-            var type = group.Type;
-            return SyntaxFactory2.ConstructorDeclaration( "public $type() {}", type );
+        // Helpers/Group
+        private static void AppendGroupClass(this StringBuilder builder, GroupEntry group) {
+            builder.Comment( "// Group" );
+            builder.Class( "public class $type : GroupArchNode {", group.Type );
+            {
+                builder.Comment( "/// Properties" );
+                builder.Property( "public override string Name { get; } = \"$name\";", group.Name );
+                builder.Property( "public override TypeArchNode[] Types { get; }" );
+                builder.Comment( "/// Constructor" );
+                builder.Constructor( "public $type(NamespaceArchNode @namespace) : base( @namespace ) {", group.Type );
+                {
+                    builder.Statement( "this.Types = new TypeArchNode[] {" );
+                    builder.Statement( group.Types, "new TypeArchNode( typeof($type), this ),", i => i.Type );
+                    builder.Statement( "};" );
+                }
+                builder.Constructor( "}" );
+            }
+            builder.Class( "}" );
         }
 
 

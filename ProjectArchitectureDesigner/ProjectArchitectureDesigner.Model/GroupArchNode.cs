@@ -13,11 +13,16 @@ namespace ProjectArchitectureDesigner.Model {
         // Ancestors
         public ProjectArchNode Project => Namespace.Module.Project;
         public ModuleArchNode Module => Namespace.Module;
-        public NamespaceArchNode Namespace { get; internal set; } = default!;
-        // Children
-        public abstract TypeArchNode[] Types { get; }
+        public NamespaceArchNode Namespace { get; }
+        // Descendant
         public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
         public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
+        public abstract TypeArchNode[] Types { get; }
+
+
+        public GroupArchNode(NamespaceArchNode @namespace) {
+            Namespace = @namespace;
+        }
 
 
         // Utils

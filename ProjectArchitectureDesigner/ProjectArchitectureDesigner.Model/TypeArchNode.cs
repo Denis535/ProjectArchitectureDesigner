@@ -14,6 +14,12 @@ namespace ProjectArchitectureDesigner.Model {
 
         public Type Value { get; }
         public override string Name => Value.GetIdentifier();
+        // Ancestors
+        public ProjectArchNode Project => Group.Namespace.Module.Project;
+        public ModuleArchNode Module => Group.Namespace.Module;
+        public NamespaceArchNode Namespace => Group.Namespace;
+        public GroupArchNode Group { get; }
+        // TypeInfo
         public TypeInfo TypeInfo => Value.GetTypeInfo();
         public IEnumerable<MemberInfo> DeclaredMembers => Value.GetTypeInfo().DeclaredMembers.Where( IsUserDefined );
         public IEnumerable<TypeInfo> DeclaredNestedTypes => Value.GetTypeInfo().DeclaredNestedTypes.Where( IsUserDefined );
@@ -22,15 +28,11 @@ namespace ProjectArchitectureDesigner.Model {
         public IEnumerable<EventInfo> DeclaredEvents => Value.GetTypeInfo().DeclaredEvents.Where( IsUserDefined );
         public IEnumerable<ConstructorInfo> DeclaredConstructors => Value.GetTypeInfo().DeclaredConstructors.Where( IsUserDefined );
         public IEnumerable<MethodInfo> DeclaredMethods => Value.GetTypeInfo().DeclaredMethods.Where( IsUserDefined );
-        // Ancestors
-        public ProjectArchNode Project => Group.Namespace.Module.Project;
-        public ModuleArchNode Module => Group.Namespace.Module;
-        public NamespaceArchNode Namespace => Group.Namespace;
-        public GroupArchNode Group { get; internal set; } = default!;
 
 
-        public TypeArchNode(Type value) {
+        public TypeArchNode(Type value, GroupArchNode group) {
             Value = value;
+            Group = group;
         }
 
 
@@ -38,11 +40,6 @@ namespace ProjectArchitectureDesigner.Model {
         public override string ToString() {
             return "Type: " + Name;
         }
-
-
-        // Conversions
-        public static implicit operator TypeArchNode(Type value) => new TypeArchNode( value );
-        public static implicit operator Type(TypeArchNode type) => type.Value;
 
 
         // Helpers

@@ -21,16 +21,16 @@ namespace ProjectArchitectureDesigner.Model {
 
         // Helpers/GetName
         protected static string GetName(ProjectArchNode project) {
-            return WithoutPrefix( project.GetType().Name, "Project_" ).Replace( '_', '.' );
+            return project.GetType().Name.Replace( '_', '.' );
         }
         protected static string GetName(ModuleArchNode module) {
-            return WithoutPrefix( module.GetType().Name, "Module_" ).Replace( '_', '.' );
+            return module.GetType().Name.Replace( '_', '.' );
         }
         protected static string GetName(NamespaceArchNode @namespace) {
-            return WithoutPrefix( @namespace.GetType().Name, "Namespace_" ).Replace( '_', '.' );
+            return @namespace.GetType().Name.Replace( '_', '.' );
         }
         protected static string GetName(GroupArchNode group) {
-            return WithoutPrefix( group.GetType().Name, "Group_" ).Replace( '_', ' ' );
+            return group.GetType().Name.Replace( '_', ' ' );
         }
         // Helpers/GetChildren
         protected static IEnumerable<T> GetChildren<T>(ArchNode node) where T : ArchNode {
@@ -59,11 +59,6 @@ namespace ProjectArchitectureDesigner.Model {
         }
         private protected static IEnumerable<ArchNode> GetDescendantNodes(GroupArchNode group) {
             return group.Types;
-        }
-        // Helpers/String
-        private static string WithoutPrefix(string value, string prefix) {
-            if (value.StartsWith( prefix )) return value.Substring( prefix.Length );
-            return value;
         }
 
 

@@ -71,57 +71,5 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
         }
 
 
-        // String
-        public static string Format2(this string value, params object?[] args) {
-            if (args.Any()) return value.WithArguments( args );
-            return value;
-        }
-        private static string WithArguments(this string value, object?[] args) {
-            var builder = new StringBuilder( value.Length * 2 );
-            for (int i = 0, j = 0; i < value.Length;) {
-                if (value.IsPlaceholder( ref i )) {
-                    builder.AppendArgument( args, ref j );
-                } else {
-                    builder.Append( value[ i ] );
-                    i++;
-                }
-            }
-            return builder.ToString();
-        }
-        private static bool IsPlaceholder(this string value, ref int i) {
-            if (value[ i ] == '$') {
-                i++;
-                while (i < value.Length && char.IsLetterOrDigit( value[ i ] )) i++;
-                return true;
-            }
-            return false;
-        }
-        private static void AppendArgument(this StringBuilder builder, object?[] args, ref int i) {
-            var arg = args[ i++ ];
-            if (arg is string @string) {
-                builder.Append( @string );
-                return;
-            }
-            if (arg is IEnumerable enumerable) {
-                foreach (var item in enumerable) {
-                    builder.Append( item );
-                    builder.Append( ", " );
-                }
-                builder.Length -= 2;
-                return;
-            }
-            builder.Append( arg );
-        }
-        public static string WithoutPrefix(this string value, string prefix) {
-            if (value.StartsWith( prefix )) return value.Substring( prefix.Length );
-            return value;
-        }
-        public static string? GetStringAfter(this string value, string prefix) {
-            var i = value.IndexOf( prefix );
-            if (i != -1) return value.Substring( i + prefix.Length );
-            return null;
-        }
-
-
     }
 }

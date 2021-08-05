@@ -20,6 +20,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
             return unit;
         }
 
+        public static CompilationUnitSyntax FormatIndentation(this CompilationUnitSyntax unit) {
+            // [indent] comment [eol]
+            // [indent] comment [eol]
+            // [indent] ... comment [eol]
+            unit = (CompilationUnitSyntax) new SyntaxFormatterHelper2().Visit( unit );
+            return unit;
+        }
+
     }
     internal class SyntaxFormatterHelper : CSharpSyntaxRewriter {
 
@@ -28,16 +36,16 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
             if (token.Parent is null && token.Span.Length == 0) return token;
 
             // LeadingTrivia
-            var leadingTrivia = token.LeadingTrivia.WhereNot( IsTrash );
-            leadingTrivia = WithEndOfLines( leadingTrivia );
+            var leadingTrivia = token.LeadingTrivia.Where( IsNotEmpty );
+            leadingTrivia = leadingTrivia.WithEndOfLines();
 
             // TrailingTrivia
-            var trailingTrivia = token.TrailingTrivia.WhereNot( IsTrash );
-            if (ShouldBeLast( token )) {
-                trailingTrivia = WithEndOfLine( trailingTrivia );
+            var trailingTrivia = token.TrailingTrivia.Where( IsNotEmpty );
+            if (ShouldBeLast( token, token.GetNextToken() )) {
+                trailingTrivia = trailingTrivia.WithEndOfLine();
             } else
             if (ShouldHaveSpaceAfter( token ) && ShouldHaveSpaceBefore( token.GetNextToken() )) {
-                trailingTrivia = WithSpace( trailingTrivia );
+                trailingTrivia = trailingTrivia.WithSpace();
             }
 
             return token.WithLeadingTrivia( leadingTrivia ).WithTrailingTrivia( trailingTrivia );
@@ -45,14 +53,14 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
 
 
         // Helpers/Token
-        private static bool ShouldBeLast(SyntaxToken token) {
-            if (token.Parent is CompilationUnitSyntax or MemberDeclarationSyntax or BlockSyntax) {
-                if (token.Kind() == SyntaxKind.OpenBraceToken) return true;  // { [eol]
-                if (token.Kind() == SyntaxKind.CloseBraceToken) return true; // } [eol]
-            }
-            if (token.Parent is CompilationUnitSyntax or UsingDirectiveSyntax or MemberDeclarationSyntax or StatementSyntax) {
-                if (token.Kind() == SyntaxKind.SemicolonToken) return true;  // ; [eol]
-            }
+        private static bool ShouldBeLast(SyntaxToken token, SyntaxToken next) {
+            if (token.Parent is AccessorListSyntax) return false;
+            if (token.Parent is AccessorDeclarationSyntax) return false;
+            if (token.Parent is InitializerExpressionSyntax) return false;
+
+            if (token.Kind() is SyntaxKind.OpenBraceToken) return true;  // { [eol]
+            if (token.Kind() is SyntaxKind.CloseBraceToken) return true; // } [eol]
+            if (token.Kind() is SyntaxKind.SemicolonToken) return true;  // ; [eol]
             return false;
         }
         private static bool ShouldHaveSpaceAfter(SyntaxToken token) {
@@ -81,32 +89,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
             return true;
         }
         // Helpers/Trivia
-        private static IEnumerable<SyntaxTrivia> WithEndOfLines(IEnumerable<SyntaxTrivia> trivia) {
-            foreach (var (trivia_, next) in trivia.WithNext()) {
-                if (trivia_.Kind() is SyntaxKind.WhitespaceTrivia or SyntaxKind.EndOfLineTrivia) {
-                    yield return trivia_;
-                } else {
-                    yield return trivia_;
-                    if (next.ValueOrDefault.Kind() is not SyntaxKind.EndOfLineTrivia) yield return SyntaxFactory2.EndOfLine();
-                }
-            }
-        }
-        private static IEnumerable<SyntaxTrivia> WithEndOfLine(IEnumerable<SyntaxTrivia> trivia) {
-            var result = trivia.ToList();
-            if (result.LastOrDefault().Kind() is not SyntaxKind.EndOfLineTrivia) {
-                result.Add( SyntaxFactory2.EndOfLine() );
-            }
-            return result;
-        }
-        private static IEnumerable<SyntaxTrivia> WithSpace(IEnumerable<SyntaxTrivia> trivia) {
-            var result = trivia.ToList();
-            if (result.LastOrDefault().Kind() is not (SyntaxKind.WhitespaceTrivia or SyntaxKind.EndOfLineTrivia)) {
-                result.Add( SyntaxFactory.Space );
-            }
-            return result;
-        }
-        private static bool IsTrash(SyntaxTrivia trivia) {
-            return trivia.FullSpan.Length == 0;
+        private static bool IsNotEmpty(SyntaxTrivia trivia) {
+            return trivia.FullSpan.Length > 0;
         }
 
 
@@ -118,34 +102,74 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
             if (token.Parent is null && token.Span.Length == 0) return token;
 
             // LeadingTrivia
-            if (IsLineStart( token )) {
-                var indent = GetIndent( token );
-                var trivia = token.LeadingTrivia.AsEnumerable();
-                trivia = Indent( trivia, indent );
-                token = token.WithLeadingTrivia( trivia );
+            if (IsFirst( token )) {
+                var leadingTrivia = token.LeadingTrivia.AsEnumerable();
+                leadingTrivia = leadingTrivia.WithIndents( token.GetIndent() );
+                token = token.WithLeadingTrivia( leadingTrivia );
             }
             return token;
         }
 
 
         // Helpers/Token
-        private static bool IsLineStart(SyntaxToken token) {
+        private static bool IsFirst(SyntaxToken token) {
             var prev = token.GetPreviousToken();
             return
                 prev == default ||
                 prev.TrailingTrivia.LastOrDefault().Kind() is SyntaxKind.EndOfLineTrivia;
         }
-        private static string GetIndent(SyntaxToken token) {
-            var level = token.Parent!.Ancestors().Where( i => i is NamespaceDeclarationSyntax or BaseTypeDeclarationSyntax or InitializerExpressionSyntax or BlockSyntax ).Count();
-            return new string( ' ', 4 * level );
+
+
+    }
+    internal static class SyntaxFormatterHelper3 {
+
+
+        // LeadingTrivia
+        public static IEnumerable<SyntaxTrivia> WithEndOfLines(this IEnumerable<SyntaxTrivia> trivia) {
+            foreach (var (trivia_, next) in trivia.WithNext()) {
+                if (trivia_.ShouldHaveEndOfLine()) {
+                    yield return trivia_;
+                    if (!next.ValueOrDefault.IsEndOfLine()) yield return SyntaxFactory.EndOfLine( "\r\n" );
+                } else {
+                    yield return trivia_;
+                }
+            }
         }
-        // Helpers/Trivia
-        private static IEnumerable<SyntaxTrivia> Indent(IEnumerable<SyntaxTrivia> trivia, string indent) {
-            foreach (var slice in trivia.SplitByLast( i => i.Kind() is SyntaxKind.EndOfLineTrivia )) {
+        public static IEnumerable<SyntaxTrivia> WithIndents(this IEnumerable<SyntaxTrivia> trivia, string indent) {
+            foreach (var slice in trivia.SplitByLast( IsEndOfLine )) {
                 yield return SyntaxFactory.Whitespace( indent );
                 foreach (var i in slice) yield return i;
             }
             yield return SyntaxFactory.Whitespace( indent );
+        }
+        public static string GetIndent(this SyntaxToken token) {
+            var level = token.Parent!.Ancestors().Where( i => i is NamespaceDeclarationSyntax or BaseTypeDeclarationSyntax or InitializerExpressionSyntax or BlockSyntax ).Count();
+            return new string( ' ', 4 * level );
+        }
+
+
+        // TrailingTrivia
+        public static IEnumerable<SyntaxTrivia> WithEndOfLine(this IEnumerable<SyntaxTrivia> trivia) {
+            var result = trivia.ToList();
+            if (result.LastOrDefault().ShouldHaveEndOfLine()) result.Add( SyntaxFactory.EndOfLine( "\r\n" ) );
+            return result;
+        }
+        public static IEnumerable<SyntaxTrivia> WithSpace(this IEnumerable<SyntaxTrivia> trivia) {
+            var result = trivia.ToList();
+            if (result.LastOrDefault().ShouldHaveSpace()) result.Add( SyntaxFactory.Space );
+            return result;
+        }
+
+
+        // Helpers
+        private static bool IsEndOfLine(this SyntaxTrivia trivia) {
+            return trivia.Kind() is SyntaxKind.EndOfLineTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia;
+        }
+        private static bool ShouldHaveEndOfLine(this SyntaxTrivia trivia) {
+            return trivia.Kind() is not (SyntaxKind.EndOfLineTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia);
+        }
+        private static bool ShouldHaveSpace(this SyntaxTrivia trivia) {
+            return trivia.Kind() is not (SyntaxKind.EndOfLineTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia or SyntaxKind.WhitespaceTrivia);
         }
 
 

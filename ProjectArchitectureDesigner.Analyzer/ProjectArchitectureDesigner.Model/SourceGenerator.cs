@@ -83,10 +83,10 @@ namespace ProjectArchitectureDesigner.Model {
                 } else
                 if (member is ClassDeclarationSyntax @class) {
                     if (@class.IsPartial() && @class.IsProject()) {
-                        yield return SyntaxGenerator.CreateSyntax_ProjectClass( @class, @class.GetProjectInfo() );
+                        yield return SyntaxGenerator.CreateProjectClass( @class, @class.GetProjectInfo() );
                     }
                     if (@class.IsPartial() && @class.IsModule()) {
-                        yield return SyntaxGenerator.CreateSyntax_ModuleClass( @class, @class.GetModuleInfo() );
+                        yield return SyntaxGenerator.CreateModuleClass( @class, @class.GetModuleInfo() );
                     }
                 }
             }

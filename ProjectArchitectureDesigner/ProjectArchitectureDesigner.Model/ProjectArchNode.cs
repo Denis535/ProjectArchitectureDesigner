@@ -11,17 +11,16 @@ namespace ProjectArchitectureDesigner.Model {
     public abstract class ProjectArchNode : ArchNode {
 
         public virtual Assembly[] Assemblies => Modules.Select( i => i.Assembly ).OfType<Assembly>().ToArray();
-        // Children
+        // Descendant
+        public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
+        public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
         public abstract ModuleArchNode[] Modules { get; }
         public NamespaceArchNode[] Namespaces => Modules.SelectMany( i => i.Namespaces ).ToArray();
         public GroupArchNode[] Groups => Modules.SelectMany( i => i.Namespaces ).SelectMany( i => i.Groups ).ToArray();
         public TypeArchNode[] Types => Modules.SelectMany( i => i.Namespaces ).SelectMany( i => i.Groups ).SelectMany( i => i.Types ).ToArray();
-        public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
-        public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
 
 
         public ProjectArchNode() {
-            SetUpHierarchy( this );
         }
 
 
@@ -69,27 +68,6 @@ namespace ProjectArchitectureDesigner.Model {
         // Utils
         public override string ToString() {
             return "Project: " + Name;
-        }
-
-
-        // Helpers
-        protected static void SetUpHierarchy(ProjectArchNode project) {
-            // Project
-            foreach (var module in project.Modules) {
-                module.Project = project;
-                // Namespace
-                foreach (var @namespace in module.Namespaces) {
-                    @namespace.Module = module;
-                    // Group
-                    foreach (var group in @namespace.Groups) {
-                        group.Namespace = @namespace;
-                        // Type
-                        foreach (var type in group.Types) {
-                            type.Group = group;
-                        }
-                    }
-                }
-            }
         }
 
 

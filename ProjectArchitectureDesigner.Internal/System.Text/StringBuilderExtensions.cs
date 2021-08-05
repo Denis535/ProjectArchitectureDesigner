@@ -17,8 +17,8 @@ namespace System.Text {
             foreach (var value in values) builder.Append( selector( value ) );
             return builder;
         }
-        public static StringBuilder AppendRange<T>(this StringBuilder builder, IEnumerable<T> values, Action<StringBuilder, T> action) {
-            foreach (var value in values) action( builder, value );
+        public static StringBuilder AppendRange<T>(this StringBuilder builder, IEnumerable<T> values, Action<StringBuilder, T> renderer) {
+            foreach (var value in values) renderer( builder, value );
             return builder;
         }
 
@@ -38,9 +38,9 @@ namespace System.Text {
             }
             return builder;
         }
-        public static StringBuilder AppendJoin<T>(this StringBuilder builder, string separator, IEnumerable<T> values, Action<StringBuilder, T> action) {
+        public static StringBuilder AppendJoin<T>(this StringBuilder builder, string separator, IEnumerable<T> values, Action<StringBuilder, T> renderer) {
             foreach (var (value, isLast) in values.TagLast()) {
-                action( builder, value );
+                renderer( builder, value );
                 if (!isLast) builder.Append( separator );
             }
             return builder;

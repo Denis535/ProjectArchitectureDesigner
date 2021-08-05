@@ -42,23 +42,8 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
 
 
         // Syntax/Declarations
-        public static ClassDeclarationSyntax ClassDeclaration(string syntax, params object[] args) {
-            return (ClassDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( syntax.Format2( args ) ) ?? throw new Exception( "Class declaration syntax is invalid" );
-        }
-        public static PropertyDeclarationSyntax PropertyDeclaration(string syntax, params object[] args) {
-            return (PropertyDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( syntax.Format2( args ) ) ?? throw new Exception( "Property declaration syntax is invalid" );
-        }
-        public static ConstructorDeclarationSyntax ConstructorDeclaration(string syntax, params object[] args) {
-            return (ConstructorDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( syntax.Format2( args ) ) ?? throw new Exception( "Constructor declaration syntax is invalid" );
-        }
-
-
-        // Trivia
-        public static SyntaxTrivia Comment(string format, params object[] args) {
-            return SyntaxFactory.Comment( string.Format( format, args ) );
-        }
-        public static SyntaxTrivia EndOfLine() {
-            return SyntaxFactory.EndOfLine( "\r\n" );
+        public static ClassDeclarationSyntax ClassDeclaration(string text) {
+            return (ClassDeclarationSyntax?) SyntaxFactory.ParseMemberDeclaration( text ) ?? throw new Exception( "Class declaration syntax is invalid" );
         }
 
 
