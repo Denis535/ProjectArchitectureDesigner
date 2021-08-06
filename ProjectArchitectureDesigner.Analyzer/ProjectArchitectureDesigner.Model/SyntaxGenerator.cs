@@ -11,11 +11,10 @@ namespace ProjectArchitectureDesigner.Model {
 
 
         // Project
-        public static ClassDeclarationSyntax CreateProjectClass(ClassDeclarationSyntax @class, ProjectInfo project) {
-            var builder = new SyntaxBuilder();
+        public static void ProjectClass(this SyntaxBuilder builder, ClassDeclarationSyntax @class, ProjectInfo project) {
             builder.EndOfLine();
             builder.Comment( "// Project" );
-            builder.Class( "$modifiers class $identifier {", @class.Modifiers, @class.Identifier );
+            builder.Class( "$modifiers class $identifier : ProjectArchNode {", @class.Modifiers, @class.Identifier );
             {
                 builder.Comment( "/// Properties" );
                 builder.Property( "public override string Name { get; } = \"$name\";", project.Name );
@@ -31,14 +30,12 @@ namespace ProjectArchitectureDesigner.Model {
                 builder.Constructor( "}" );
             }
             builder.Class( "}" );
-            return SyntaxFactory2.ClassDeclaration( builder.ToString() );
         }
         // Module
-        public static ClassDeclarationSyntax CreateModuleClass(ClassDeclarationSyntax @class, ModuleInfo module) {
-            var builder = new SyntaxBuilder();
+        public static void ModuleClass(this SyntaxBuilder builder, ClassDeclarationSyntax @class, ModuleInfo module) {
             builder.EndOfLine();
             builder.Comment( "// Module" );
-            builder.Class( "$modifiers class $identifier {", @class.Modifiers, @class.Identifier );
+            builder.Class( "$modifiers class $identifier : ModuleArchNode {", @class.Modifiers, @class.Identifier );
             {
                 builder.Comment( "/// Properties" );
                 builder.Property( "public override string Name { get; } = \"$name\";", module.Name );
@@ -53,16 +50,15 @@ namespace ProjectArchitectureDesigner.Model {
                 }
                 builder.Constructor( "}" );
                 foreach (var @namespace in module.Namespaces) {
-                    builder.AppendNamespaceClass( @namespace );
+                    builder.NamespaceClass( @namespace );
                 }
             }
             builder.Class( "}" );
-            return SyntaxFactory2.ClassDeclaration( builder.ToString() );
         }
 
 
         // Helpers/Namespace
-        private static void AppendNamespaceClass(this SyntaxBuilder builder, NamespaceEntry @namespace) {
+        private static void NamespaceClass(this SyntaxBuilder builder, NamespaceEntry @namespace) {
             builder.Comment( "// Namespace" );
             builder.Class( "public class $identifier : NamespaceArchNode {", @namespace.Type );
             {
@@ -79,13 +75,13 @@ namespace ProjectArchitectureDesigner.Model {
                 }
                 builder.Constructor( "}" );
                 foreach (var group in @namespace.Groups) {
-                    builder.AppendGroupClass( group );
+                    builder.GroupClass( group );
                 }
             }
             builder.Class( "}" );
         }
         // Helpers/Group
-        private static void AppendGroupClass(this SyntaxBuilder builder, GroupEntry group) {
+        private static void GroupClass(this SyntaxBuilder builder, GroupEntry group) {
             builder.Comment( "// Group" );
             builder.Class( "public class $identifier : GroupArchNode {", group.Type );
             {

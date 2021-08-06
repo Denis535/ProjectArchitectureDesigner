@@ -10,72 +10,94 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
     internal class SyntaxBuilder {
 
         private StringBuilder Builder { get; } = new StringBuilder();
+        private int Level { get; set; } = 0;
 
+
+        // UsingDirective
+        public void UsingDirective(IEnumerable<UsingDirectiveSyntax> objects) {
+            foreach (var @object in objects) {
+                AppendSyntaxLine( @object.ToString() );
+            }
+        }
+
+        // ExternAliasDirective
+        public void ExternAliasDirective(IEnumerable<ExternAliasDirectiveSyntax> objects) {
+            foreach (var @object in objects) {
+                AppendSyntaxLine( @object.ToString() );
+            }
+        }
+
+        // Namespace
+        public void Namespace(string text, params object?[] args) {
+            AppendSyntaxLine( text, args );
+        }
 
         // Class
-        public SyntaxBuilder Class(string text, params object?[] args) {
-            AppendSyntax( Builder, text, args ).AppendLine();
-            return this;
+        public void Class(string text, params object?[] args) {
+            AppendSyntaxLine( text, args );
         }
 
         // Property
-        public SyntaxBuilder Property(string text, params object?[] args) {
-            AppendSyntax( Builder, text, args ).AppendLine();
-            return this;
+        public void Property(string text, params object?[] args) {
+            AppendSyntaxLine( text, args );
         }
-        public SyntaxBuilder Property<T>(T[] objects, string text, Func<T, (object, object)> arguments) {
+        public void Property<T>(T[] objects, string text, Func<T, (object, object)> arguments) {
             foreach (var @object in objects) {
                 var args = arguments( @object );
-                AppendSyntax( Builder, text, args.Item1, args.Item2 ).AppendLine();
+                AppendSyntaxLine( text, args.Item1, args.Item2 );
             }
-            return this;
         }
 
         // Constructor
-        public SyntaxBuilder Constructor(string text, params object?[] args) {
-            AppendSyntax( Builder, text, args ).AppendLine();
-            return this;
+        public void Constructor(string text, params object?[] args) {
+            AppendSyntaxLine( text, args );
         }
 
         // Statement
-        public SyntaxBuilder Statement(string text, params object?[] args) {
-            AppendSyntax( Builder, text, args ).AppendLine();
-            return this;
+        public void Statement(string text, params object?[] args) {
+            AppendSyntaxLine( text, args );
         }
-        public SyntaxBuilder Statement<T>(T[] objects, string text, Func<T, object> argument) {
+        public void Statement<T>(T[] objects, string text, Func<T, object> argument) {
             foreach (var @object in objects) {
                 var arg = argument( @object );
-                AppendSyntax( Builder, text, arg ).AppendLine();
+                AppendSyntaxLine( text, arg );
             }
-            return this;
         }
-        public SyntaxBuilder Statement<T>(T[] objects, string text, Func<T, (object, object)> arguments) {
+        public void Statement<T>(T[] objects, string text, Func<T, (object, object)> arguments) {
             foreach (var @object in objects) {
                 var args = arguments( @object );
-                AppendSyntax( Builder, text, args.Item1, args.Item2 ).AppendLine();
+                AppendSyntaxLine( text, args.Item1, args.Item2 );
             }
-            return this;
         }
 
         // Comment
-        public StringBuilder Comment(string text, params object?[] args) {
-            return AppendSyntax( Builder, text, args ).AppendLine();
+        public void Comment(string text, params object?[] args) {
+            AppendSyntaxLine( text, args );
         }
 
         // EndOfLine
-        public StringBuilder EndOfLine() {
-            return Builder.AppendLine();
+        public void EndOfLine() {
+            Builder.AppendLine();
+        }
+
+        // Indent
+        private void AppendSyntaxLine(string text, params object?[] args) {
+            if (text.StartsWith( "}" )) Level--;
+            Builder.Append( ' ', Level * 4 );
+            AppendTemplate( Builder, text, args );
+            Builder.AppendLine();
+            if (text.EndsWith( "{" )) Level++;
         }
 
 
         // Utils
         public override string ToString() {
-            return Builder.ToString();
+            return Builder.ToString().TrimEnd( '\r', '\n' );
         }
 
 
         // Helpers
-        private static StringBuilder AppendSyntax(StringBuilder builder, string text, params object?[] args) {
+        private static StringBuilder AppendTemplate(StringBuilder builder, string text, params object?[] args) {
             for (int i = 0, j = 0; i < text.Length;) {
                 if (IsPlaceholder( text, i )) {
                     var placeholder = GetPlaceholder( text, i );

@@ -82,7 +82,6 @@ namespace ProjectArchitectureDesigner.Model {
             typeof( SyntaxFormatterHelper2 ),
             typeof( SyntaxFormatterHelper3 ),
             typeof( SyntaxBuilder ),
-            typeof( SyntaxFactory2 ),
             typeof( SyntaxUtils )
         );
     }

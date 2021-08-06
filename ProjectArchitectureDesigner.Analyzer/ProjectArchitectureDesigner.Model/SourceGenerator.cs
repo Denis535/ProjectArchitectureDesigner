@@ -42,7 +42,6 @@ namespace ProjectArchitectureDesigner.Model {
             var receiver = (SyntaxReceiver) context.SyntaxReceiver!;
             var compilation = context.Compilation;
             foreach (var unit in receiver.Units) {
-                //var model = new Lazy<SemanticModel>( () => compilation.GetSemanticModel( unit.SyntaxTree ) );
                 if (unit.SyntaxTree.FilePath.Contains( ".nuget" )) continue;
                 if (unit.SyntaxTree.FilePath.Contains( "\\obj\\Debug\\" )) continue;
                 if (unit.SyntaxTree.FilePath.Contains( "\\obj\\Release\\" )) continue;
@@ -56,8 +55,8 @@ namespace ProjectArchitectureDesigner.Model {
         }
         private static void Execute(GeneratorExecutionContext context, CompilationUnitSyntax unit) {
             var name = GetGeneratedName( unit );
-            var source = Generate( unit )?.Format().ToFullString();
-            if (source != null) {
+            var source = Generate( unit );
+            if (source.IsNotEmpty()) {
                 Debug.WriteLine( "Generated source: " + name );
                 Debug.WriteLine( source );
                 context.AddSource( name, source );
@@ -65,32 +64,67 @@ namespace ProjectArchitectureDesigner.Model {
         }
 
 
-        // Helpers
-        private static CompilationUnitSyntax? Generate(CompilationUnitSyntax unit) {
-            var members_generated = Generate( unit.Members ).ToArray();
-            if (members_generated.Any()) {
-                return SyntaxFactory2.CompilationUnit( unit ).AddMembers( members_generated );
-            }
-            return null;
+        // Helpers/Syntax
+        private static string Generate(CompilationUnitSyntax unit) {
+            var builder = new SyntaxBuilder();
+            CompilationUnit( builder, unit );
+            return builder.ToString();
         }
-        private static IEnumerable<MemberDeclarationSyntax> Generate(IEnumerable<MemberDeclarationSyntax> members) {
-            foreach (var member in members) {
-                if (member is NamespaceDeclarationSyntax @namespace) {
-                    var members_generated = Generate( @namespace.Members ).ToArray();
-                    if (members_generated.Any()) {
-                        yield return SyntaxFactory2.NamespaceDeclaration( @namespace ).AddMembers( members_generated );
-                    }
-                } else
-                if (member is ClassDeclarationSyntax @class) {
-                    if (@class.IsPartial() && @class.IsProject()) {
-                        yield return SyntaxGenerator.CreateProjectClass( @class, @class.GetProjectInfo() );
-                    }
-                    if (@class.IsPartial() && @class.IsModule()) {
-                        yield return SyntaxGenerator.CreateModuleClass( @class, @class.GetModuleInfo() );
-                    }
+        private static void CompilationUnit(SyntaxBuilder builder, CompilationUnitSyntax unit) {
+            if (!GetTypes( unit ).Any( IsProjectOrModule )) return;
+            builder.UsingDirective( unit.Usings );
+            builder.ExternAliasDirective( unit.Externs );
+            foreach (var child in unit.Members) {
+                if (child is NamespaceDeclarationSyntax @namespace) {
+                    Namespace( builder, @namespace );
+                }
+                if (child is ClassDeclarationSyntax @class) {
+                    Class( builder, @class );
                 }
             }
         }
+        private static void Namespace(SyntaxBuilder builder, NamespaceDeclarationSyntax @namespace) {
+            if (!GetTypes( @namespace ).Any( IsProjectOrModule )) return;
+            builder.Namespace( "namespace $name {", @namespace.Name );
+            {
+                builder.UsingDirective( @namespace.Usings );
+                builder.ExternAliasDirective( @namespace.Externs );
+                foreach (var child in @namespace.Members) {
+                    if (child is NamespaceDeclarationSyntax namespace_) {
+                        Namespace( builder, namespace_ );
+                    }
+                    if (child is ClassDeclarationSyntax @class) {
+                        Class( builder, @class );
+                    }
+                }
+            }
+            builder.Namespace( "}" );
+        }
+        private static void Class(SyntaxBuilder builder, ClassDeclarationSyntax @class) {
+            if (@class.IsPartial() && @class.IsProject()) {
+                builder.ProjectClass( @class, @class.GetProjectInfo() );
+            }
+            if (@class.IsPartial() && @class.IsModule()) {
+                builder.ModuleClass( @class, @class.GetModuleInfo() );
+            }
+        }
+        // Helpers/Syntax
+        private static IEnumerable<BaseTypeDeclarationSyntax> GetTypes(CompilationUnitSyntax unit) {
+            return unit.Members.SelectMany( GetTypes );
+        }
+        private static IEnumerable<BaseTypeDeclarationSyntax> GetTypes(MemberDeclarationSyntax member) {
+            if (member is NamespaceDeclarationSyntax @namespace) {
+                return @namespace.Members.SelectMany( GetTypes );
+            }
+            if (member is BaseTypeDeclarationSyntax type) {
+                return type.ToEnumerable();
+            }
+            return Enumerable.Empty<BaseTypeDeclarationSyntax>();
+        }
+        private static bool IsProjectOrModule(BaseTypeDeclarationSyntax type) {
+            return type is ClassDeclarationSyntax @class && @class.IsPartial() && (@class.IsProject() || @class.IsModule());
+        }
+        // Helpers/Syntax
         private static string GetGeneratedName(CompilationUnitSyntax unit) {
             return Path.GetFileNameWithoutExtension( unit.SyntaxTree.FilePath ) + ".Generated.cs";
         }
