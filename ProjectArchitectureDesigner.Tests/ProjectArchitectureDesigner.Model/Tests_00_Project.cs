@@ -73,27 +73,27 @@ namespace ProjectArchitectureDesigner.Model {
         // Render
         [Test]
         public void Test_10_Render_Text() {
-            var renderer = new TextProjectRenderer( new TextNodeRenderer() );
+            var renderer = new TextProjectRenderer( new MarkdownHighlighter( new TextNodeRenderer() ) );
             TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
         }
         [Test]
         public void Test_11_Render_Text_LeftAligned() {
-            var renderer = new TextProjectRenderer( new LeftAlignedTextNodeRenderer() );
+            var renderer = new TextProjectRenderer( new MarkdownHighlighter( new LeftAlignedTextNodeRenderer() ) );
             TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
         }
         [Test]
         public void Test_12_Render_Text_RightAligned() {
-            var renderer = new TextProjectRenderer( new RightAlignedTextNodeRenderer() );
+            var renderer = new TextProjectRenderer( new MarkdownHighlighter( new RightAlignedTextNodeRenderer() ) );
             TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
         }
         [Test]
         public void Test_13_Render_HierarchicalText() {
-            var renderer = new HierarchicalTextProjectRenderer( new TextNodeRenderer() );
+            var renderer = new HierarchicalTextProjectRenderer( new MarkdownHighlighter( new TextNodeRenderer() ) );
             TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
         }
         [Test]
         public void Test_14_Render_MarkdownDocument() {
-            var renderer = new MarkdownDocumentProjectRenderer( new TextNodeRenderer() );
+            var renderer = new MarkdownDocumentProjectRenderer();
             TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
         }
 

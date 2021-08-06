@@ -10,23 +10,30 @@ It will give you:
 
 # The api overview
 
-```
-Project: ——— ProjectArchitectureDesigner
-Module: ———— ProjectArchitectureDesigner
-Namespace: — ProjectArchitectureDesigner.Model
-Group: ————— ArchNode
-Type: —————— ArchNode
-Group: ————— ArchNode/Children
-Type: —————— ProjectArchNode
-Type: —————— ModuleArchNode
-Type: —————— NamespaceArchNode
-Type: —————— GroupArchNode
-Type: —————— TypeArchNode
-Namespace: — ProjectArchitectureDesigner.Renderers
-Type: —————— ProjectAlignedTextRenderer
-Type: —————— ProjectHierarchicalTextRenderer
-Type: —————— ProjectMarkdownRenderer
-```
+    **Project: ProjectArchitectureDesigner**
+| - **Module: ProjectArchitectureDesigner**
+    | - **Namespace: ProjectArchitectureDesigner.Model**
+    |   | - **ArchNode**
+    |   |   ArchNode
+    |   | - **ArchNode/Children**
+    |   |   ProjectArchNode
+    |   |   ModuleArchNode
+    |   |   NamespaceArchNode
+    |   |   GroupArchNode
+    |   |   TypeArchNode
+    | - **Namespace: ProjectArchitectureDesigner.Model.Renderers**
+        | - **ProjectRenderer**
+        |   ProjectRenderer
+        |   TextProjectRenderer
+        |   HierarchicalTextProjectRenderer
+        |   MarkdownDocumentProjectRenderer
+        | - **NodeRenderer**
+        |   INodeRenderer
+        |   DelegateNodeRenderer
+        |   TextNodeRenderer
+        |   LeftAlignedTextNodeRenderer
+        |   RightAlignedTextNodeRenderer
+        |   MarkdownHighlighter
 
 # The getting started
 

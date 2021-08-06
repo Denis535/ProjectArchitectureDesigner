@@ -64,7 +64,7 @@ namespace ProjectArchitectureDesigner.Model {
         }
 
 
-        // Helpers/Syntax
+        // Helpers/Generate
         private static string Generate(CompilationUnitSyntax unit) {
             var builder = new SyntaxBuilder();
             CompilationUnit( builder, unit );

@@ -56,7 +56,8 @@ namespace ProjectArchitectureDesigner.Model {
             typeof( DelegateNodeRenderer ),
             typeof( TextNodeRenderer ),
             typeof( LeftAlignedTextNodeRenderer ),
-            typeof( RightAlignedTextNodeRenderer )
+            typeof( RightAlignedTextNodeRenderer ),
+            typeof( MarkdownHighlighter )
         );
     }
 

@@ -19,31 +19,32 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
 
         // Render
         public abstract string Render(ProjectArchNode project, Func<TypeArchNode, bool> predicate);
-        protected void RenderProject(ProjectArchNode project, Func<TypeArchNode, bool> predicate) {
-            RenderProject( project, Renderer.Render( project ), predicate );
+        // Render/Node
+        protected virtual void RenderProject(ProjectArchNode project, Func<TypeArchNode, bool> predicate) {
+            foreach (var module in GetModules( project, predicate )) {
+                RenderModule( module, predicate );
+            }
+        }
+        protected virtual void RenderModule(ModuleArchNode module, Func<TypeArchNode, bool> predicate) {
+            foreach (var @namespace in GetNamespaces( module, predicate )) {
+                RenderNamespace( @namespace, predicate );
+            }
+        }
+        protected virtual void RenderNamespace(NamespaceArchNode @namespace, Func<TypeArchNode, bool> predicate) {
+            foreach (var group in GetGroup( @namespace, predicate )) {
+                RenderGroup( group, predicate );
+            }
+        }
+        protected virtual void RenderGroup(GroupArchNode group, Func<TypeArchNode, bool> predicate) {
+            foreach (var type in GetTypes( group, predicate )) {
+                RenderType( type );
+            }
+        }
+        protected virtual void RenderType(TypeArchNode type) {
         }
         // Render/Node
-        protected virtual void RenderProject(ProjectArchNode project, string text, Func<TypeArchNode, bool> predicate) {
-            foreach (var module in GetModules( project, predicate )) {
-                RenderModule( module, Renderer.Render( module ), predicate );
-            }
-        }
-        protected virtual void RenderModule(ModuleArchNode module, string text, Func<TypeArchNode, bool> predicate) {
-            foreach (var @namespace in GetNamespaces( module, predicate )) {
-                RenderNamespace( @namespace, Renderer.Render( @namespace ), predicate );
-            }
-        }
-        protected virtual void RenderNamespace(NamespaceArchNode @namespace, string text, Func<TypeArchNode, bool> predicate) {
-            foreach (var group in GetGroup( @namespace, predicate )) {
-                RenderGroup( group, Renderer.Render( group ), predicate );
-            }
-        }
-        protected virtual void RenderGroup(GroupArchNode group, string text, Func<TypeArchNode, bool> predicate) {
-            foreach (var type in GetTypes( group, predicate )) {
-                RenderType( type, Renderer.Render( type ) );
-            }
-        }
-        protected virtual void RenderType(TypeArchNode type, string text) {
+        protected virtual string Render(ArchNode node) {
+            return Renderer.Highlight( node, Renderer.Render( node ) );
         }
 
 

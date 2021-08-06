@@ -21,25 +21,24 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
             return Builder.ToString();
         }
         // Render/Node
-        protected override void RenderProject(ProjectArchNode project, string text, Func<TypeArchNode, bool> predicate) {
-            Builder.AppendLine( text );
-            base.RenderProject( project, text, predicate );
+        protected override void RenderProject(ProjectArchNode project, Func<TypeArchNode, bool> predicate) {
+            Builder.AppendLine( Render( project ) );
+            base.RenderProject( project, predicate );
         }
-        protected override void RenderModule(ModuleArchNode module, string text, Func<TypeArchNode, bool> predicate) {
-            Builder.AppendLine( text );
-            base.RenderModule( module, text, predicate );
+        protected override void RenderModule(ModuleArchNode module, Func<TypeArchNode, bool> predicate) {
+            Builder.AppendLine( Render( module ) );
+            base.RenderModule( module, predicate );
         }
-        protected override void RenderNamespace(NamespaceArchNode @namespace, string text, Func<TypeArchNode, bool> predicate) {
-            Builder.AppendLine( text );
-            base.RenderNamespace( @namespace, text, predicate );
+        protected override void RenderNamespace(NamespaceArchNode @namespace, Func<TypeArchNode, bool> predicate) {
+            Builder.AppendLine( Render( @namespace ) );
+            base.RenderNamespace( @namespace, predicate );
         }
-        protected override void RenderGroup(GroupArchNode group, string text, Func<TypeArchNode, bool> predicate) {
-            if (!group.IsDefault) Builder.AppendLine( text );
-            base.RenderGroup( group, text, predicate );
+        protected override void RenderGroup(GroupArchNode group, Func<TypeArchNode, bool> predicate) {
+            if (!group.IsDefault) Builder.AppendLine( Render( group ) );
+            base.RenderGroup( group, predicate );
         }
-        protected override void RenderType(TypeArchNode type, string text) {
-            Builder.AppendLine( text );
-            base.RenderType( type, text );
+        protected override void RenderType(TypeArchNode type) {
+            Builder.AppendLine( Render( type ) );
         }
 
 
