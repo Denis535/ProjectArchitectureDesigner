@@ -11,29 +11,29 @@ It will give you:
 # The api overview
 
 > **Project: ProjectArchitectureDesigner**
-| - **Module: ProjectArchitectureDesigner**
-    | - **Namespace: ProjectArchitectureDesigner.Model**
-    |   | - **ArchNode**
-    |   |   ArchNode
-    |   | - **ArchNode/Children**
-    |   |   ProjectArchNode
-    |   |   ModuleArchNode
-    |   |   NamespaceArchNode
-    |   |   GroupArchNode
-    |   |   TypeArchNode
-    | - **Namespace: ProjectArchitectureDesigner.Model.Renderers**
-        | - **ProjectRenderer**
-        |   ProjectRenderer
-        |   TextProjectRenderer
-        |   HierarchicalTextProjectRenderer
-        |   MarkdownDocumentProjectRenderer
-        | - **NodeRenderer**
-        |   INodeRenderer
-        |   DelegateNodeRenderer
-        |   TextNodeRenderer
-        |   LeftAlignedTextNodeRenderer
-        |   RightAlignedTextNodeRenderer
-        |   MarkdownHighlighter
+> | - **Module: ProjectArchitectureDesigner**
+>     | - **Namespace: ProjectArchitectureDesigner.Model**
+>     |   | - **ArchNode**
+>     |   |   ArchNode
+>     |   | - **ArchNode/Children**
+>     |   |   ProjectArchNode
+>     |   |   ModuleArchNode
+>     |   |   NamespaceArchNode
+>     |   |   GroupArchNode
+>     |   |   TypeArchNode
+>     | - **Namespace: ProjectArchitectureDesigner.Model.Renderers**
+>         | - **ProjectRenderer**
+>         |   ProjectRenderer
+>         |   TextProjectRenderer
+>         |   HierarchicalTextProjectRenderer
+>         |   MarkdownDocumentProjectRenderer
+>         | - **NodeRenderer**
+>         |   INodeRenderer
+>         |   DelegateNodeRenderer
+>         |   TextNodeRenderer
+>         |   LeftAlignedTextNodeRenderer
+>         |   RightAlignedTextNodeRenderer
+>         |   MarkdownHighlighter
 
 # The getting started
 
