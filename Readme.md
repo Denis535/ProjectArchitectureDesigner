@@ -10,8 +10,7 @@ It will give you:
 
 # The api overview
 
->
-**Project: ProjectArchitectureDesigner**
+> **Project: ProjectArchitectureDesigner**
 | - **Module: ProjectArchitectureDesigner**
     | - **Namespace: ProjectArchitectureDesigner.Model**
     |   | - **ArchNode**
