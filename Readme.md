@@ -10,24 +10,24 @@ It will give you:
 
 # The api overview
 
-- **Project: ——— ProjectArchitectureDesigner**
-- **Module: ———— ProjectArchitectureDesigner**
-- **Namespace: — ProjectArchitectureDesigner.Model**
-- **Group: ————— ArchNode**
+- Project: ——— ProjectArchitectureDesigner
+- Module: ———— ProjectArchitectureDesigner
+- Namespace: — ProjectArchitectureDesigner.Model
+- Group: ————— ArchNode
 - Type: —————— ArchNode
-- **Group: ————— ArchNode/Children**
+- Group: ————— ArchNode/Children
 - Type: —————— ProjectArchNode
 - Type: —————— ModuleArchNode
 - Type: —————— NamespaceArchNode
 - Type: —————— GroupArchNode
 - Type: —————— TypeArchNode
-- **Namespace: — ProjectArchitectureDesigner.Model.Renderers**
-- **Group: ————— ProjectRenderer**
+- Namespace: — ProjectArchitectureDesigner.Model.Renderers
+- Group: ————— ProjectRenderer
 - Type: —————— ProjectRenderer
 - Type: —————— TextProjectRenderer
 - Type: —————— HierarchicalTextProjectRenderer
 - Type: —————— MarkdownDocumentProjectRenderer
-- **Group: ————— NodeRenderer**
+- Group: ————— NodeRenderer
 - Type: —————— INodeRenderer
 - Type: —————— DelegateNodeRenderer
 - Type: —————— TextNodeRenderer
