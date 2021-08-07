@@ -10,30 +10,30 @@ It will give you:
 
 # The api overview
 
-- **Project: ProjectArchitectureDesigner**
-- | - **Module: ProjectArchitectureDesigner**
--     | - **Namespace: ProjectArchitectureDesigner.Model**
--     |   | - **ArchNode**
--     |   |   ArchNode
--     |   | - **ArchNode/Children**
--     |   |   ProjectArchNode
--     |   |   ModuleArchNode
--     |   |   NamespaceArchNode
--     |   |   GroupArchNode
--     |   |   TypeArchNode
--     | - **Namespace: ProjectArchitectureDesigner.Model.Renderers**
--         | - **ProjectRenderer**
--         |   ProjectRenderer
--         |   TextProjectRenderer
--         |   HierarchicalTextProjectRenderer
--         |   MarkdownDocumentProjectRenderer
--         | - **NodeRenderer**
--         |   INodeRenderer
--         |   DelegateNodeRenderer
--         |   TextNodeRenderer
--         |   LeftAlignedTextNodeRenderer
--         |   RightAlignedTextNodeRenderer
--         |   MarkdownHighlighter
+**Project: ——— ProjectArchitectureDesigner**
+**Module: ———— ProjectArchitectureDesigner**
+**Namespace: — ProjectArchitectureDesigner.Model**
+**Group: ————— ArchNode**
+Type: —————— ArchNode
+**Group: ————— ArchNode/Children**
+Type: —————— ProjectArchNode
+Type: —————— ModuleArchNode
+Type: —————— NamespaceArchNode
+Type: —————— GroupArchNode
+Type: —————— TypeArchNode
+**Namespace: — ProjectArchitectureDesigner.Model.Renderers**
+**Group: ————— ProjectRenderer**
+Type: —————— ProjectRenderer
+Type: —————— TextProjectRenderer
+Type: —————— HierarchicalTextProjectRenderer
+Type: —————— MarkdownDocumentProjectRenderer
+**Group: ————— NodeRenderer**
+Type: —————— INodeRenderer
+Type: —————— DelegateNodeRenderer
+Type: —————— TextNodeRenderer
+Type: —————— LeftAlignedTextNodeRenderer
+Type: —————— RightAlignedTextNodeRenderer
+Type: —————— MarkdownHighlighter
 
 # The getting started
 

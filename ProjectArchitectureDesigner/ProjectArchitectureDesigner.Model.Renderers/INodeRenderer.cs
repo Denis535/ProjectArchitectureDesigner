@@ -14,12 +14,18 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         }
     }
     public class DelegateNodeRenderer : INodeRenderer {
-        private readonly Func<ArchNode, string> @delegate;
-        public DelegateNodeRenderer(Func<ArchNode, string> @delegate) {
-            this.@delegate = @delegate;
+        private readonly Func<ArchNode, string> renderer;
+        private readonly Func<ArchNode, string, string>? highlighter;
+        public DelegateNodeRenderer(Func<ArchNode, string> renderer, Func<ArchNode, string, string>? highlighter) {
+            this.renderer = renderer;
+            this.highlighter = highlighter;
         }
         public string Render(ArchNode node) {
-            return @delegate( node );
+            if (highlighter != null) {
+                return highlighter( node, renderer( node ) );
+            } else {
+                return renderer( node );
+            }
         }
     }
     public class TextNodeRenderer : INodeRenderer {
