@@ -83,34 +83,34 @@ namespace System.Collections.Generic {
         }
 
         // Unflatten
-        public static IEnumerable<(T? Key, IReadOnlyList<T> Children)> Unflatten<T>(this IEnumerable<T> source, Predicate<T> isKey) {
+        public static IEnumerable<(T? Key, IReadOnlyList<T> Values)> Unflatten<T>(this IEnumerable<T> source, Predicate<T> isKey) {
             var source_enumerator = source.GetPeekableEnumerator();
-            var children = new List<T>();
+            var values = new List<T>();
             while (source_enumerator.HasNext()) {
                 source_enumerator.TakeIf( isKey, out var key );
-                children.Clear();
-                children.AddRange( source_enumerator.TakeUntil( isKey ) );
-                yield return (key, children);
+                values.Clear();
+                values.AddRange( source_enumerator.TakeUntil( isKey ) );
+                yield return (key, values.ToArray());
             }
         }
 
         // Split
-        public static IEnumerable<IReadOnlyList<T>> SplitByFirst<T>(this IEnumerable<T> source, Predicate<T> isFirst) {
+        public static IEnumerable<T[]> SplitByFirst<T>(this IEnumerable<T> source, Predicate<T> isFirst) {
             var source_enumerator = source.GetPeekableEnumerator();
             var slice = new List<T>();
             while (source_enumerator.HasNext()) {
                 slice.Clear();
                 slice.AddRange( source_enumerator.TakeSliceByFirst( isFirst ) );
-                yield return slice;
+                yield return slice.ToArray();
             }
         }
-        public static IEnumerable<IReadOnlyList<T>> SplitByLast<T>(this IEnumerable<T> source, Predicate<T> isLast) {
+        public static IEnumerable<T[]> SplitByLast<T>(this IEnumerable<T> source, Predicate<T> isLast) {
             var source_enumerator = source.GetPeekableEnumerator();
             var slice = new List<T>();
             while (source_enumerator.HasNext()) {
                 slice.Clear();
                 slice.AddRange( source_enumerator.TakeSliceByLast( isLast ) );
-                yield return slice;
+                yield return slice.ToArray();
             }
         }
 

@@ -28,11 +28,11 @@ namespace System.Text {
             }
         }
 
-        public const string IndentPrefix = "|   ";
-        public const string IndentPrefix_Empty = "    ";
         public const string TitlePrefix = "";
         public const string SectionPrefix = "| - ";
         public const string LinePrefix = "| - ";
+        public const string IndentPrefix = "|   ";
+        public const string IndentPrefix_Empty = "    ";
 
         private List<Node> Nodes { get; }
         private int Level { get; set; }
@@ -84,9 +84,9 @@ namespace System.Text {
 
         // Utils
         public override string ToString() {
-            if (Level != 0) throw new InvalidOperationException( "Level is invalid: " + Level );
+            EnsureLevelIsZero( Level );
             var builder = new StringBuilder();
-            AppendHierarchy( builder, ToHierarchy( Nodes ) );
+            AppendHierarchy( builder, Nodes, 0, "" );
             return builder.ToString();
         }
 
@@ -100,59 +100,16 @@ namespace System.Text {
             if (level > 0) return;
             throw new InvalidOperationException( "Level must be not zero: " + level );
         }
-        // Helpers/ToHierarchy
-        private static IReadOnlyList<object> ToHierarchy(IReadOnlyList<Node> nodes) {
-            var index = 0;
-            return ToHierarchy( nodes, 0, ref index );
-        }
-        private static IReadOnlyList<object> ToHierarchy(IReadOnlyList<Node> nodes, int level, ref int index) {
-            var result = new List<object>();
-            for (; index < nodes.Count;) {
-                var node = nodes[ index ];
-                if (node.Level == level) {
-                    result.Add( node );
-                    index++;
-                } else
-                if (node.Level > level) {
-                    result.Add( ToHierarchy( nodes, node.Level, ref index ) );
-                } else
-                if (node.Level < level) {
-                    break;
+        // Helpers/AppendHierarchy
+        private static void AppendHierarchy(StringBuilder builder, IEnumerable<Node> nodes, int level, string indent) {
+            foreach (var ((node, children), isLast) in nodes.Unflatten( i => i.Level == level ).TagLast()) {
+                builder.AppendLine( indent + node.Prefix + node.Text );
+                if (level == 0) {
+                    AppendHierarchy( builder, children, level + 1, indent );
+                } else {
+                    var indent2 = !isLast ? IndentPrefix : IndentPrefix_Empty;
+                    AppendHierarchy( builder, children, level + 1, indent + indent2 );
                 }
-            }
-            return result;
-        }
-        // Helpers/StringBuilder
-        private static void AppendHierarchy(StringBuilder builder, IReadOnlyList<object> hierarchy) {
-            foreach (var item in hierarchy) {
-                if (item is Node node) {
-                    builder.AppendLine( node.Text );
-                    continue;
-                }
-                if (item is IReadOnlyList<object> children) {
-                    AppendHierarchy( builder, children, "" );
-                    continue;
-                }
-                throw new Exception( "Hierarchy item is invalid: " + item );
-            }
-        }
-        private static void AppendHierarchy(StringBuilder builder, IReadOnlyList<object> hierarchy, string indent) {
-            for (var i = 0; i < hierarchy.Count; i++) {
-                var item = hierarchy[ i ];
-                var isLast = i == hierarchy.Count - 1;
-                if (item is Node node) {
-                    builder.Append( indent ).Append( node.Prefix ).AppendLine( node.Text );
-                    continue;
-                }
-                if (item is IReadOnlyList<object> children) {
-                    if (!isLast) {
-                        AppendHierarchy( builder, children, indent + IndentPrefix );
-                    } else {
-                        AppendHierarchy( builder, children, indent + IndentPrefix_Empty );
-                    }
-                    continue;
-                }
-                throw new Exception( "Hierarchy item is invalid: " + item );
             }
         }
         // Helpers/String
