@@ -10,14 +10,12 @@ namespace ProjectArchitectureDesigner.Model {
     public abstract class NamespaceArchNode : ArchNode {
 
         public bool IsGlobal => Name is (null or "" or "Global");
-        // Ancestors
-        public ProjectArchNode Project => Module.Project;
+        // Parent
         public ModuleArchNode Module { get; }
-        // Descendant
-        public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
-        public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
+        // Children
         public abstract GroupArchNode[] Groups { get; }
-        public TypeArchNode[] Types => Groups.SelectMany( i => i.Types ).ToArray();
+        // Descendant
+        public IEnumerable<TypeArchNode> Types => Groups.SelectMany( i => i.Types ).ToArray();
 
 
         public NamespaceArchNode(ModuleArchNode module) {

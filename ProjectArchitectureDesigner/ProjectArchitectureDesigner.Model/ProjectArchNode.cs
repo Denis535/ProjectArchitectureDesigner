@@ -11,13 +11,12 @@ namespace ProjectArchitectureDesigner.Model {
     public abstract class ProjectArchNode : ArchNode {
 
         public virtual Assembly[] Assemblies => Modules.Select( i => i.Assembly ).OfType<Assembly>().ToArray();
-        // Descendant
-        public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
-        public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
+        // Children
         public abstract ModuleArchNode[] Modules { get; }
-        public NamespaceArchNode[] Namespaces => Modules.SelectMany( i => i.Namespaces ).ToArray();
-        public GroupArchNode[] Groups => Modules.SelectMany( i => i.Namespaces ).SelectMany( i => i.Groups ).ToArray();
-        public TypeArchNode[] Types => Modules.SelectMany( i => i.Namespaces ).SelectMany( i => i.Groups ).SelectMany( i => i.Types ).ToArray();
+        // Descendant
+        public IEnumerable<NamespaceArchNode> Namespaces => Modules.SelectMany( i => i.Namespaces );
+        public IEnumerable<GroupArchNode> Groups => Modules.SelectMany( i => i.Namespaces ).SelectMany( i => i.Groups );
+        public IEnumerable<TypeArchNode> Types => Modules.SelectMany( i => i.Namespaces ).SelectMany( i => i.Groups ).SelectMany( i => i.Types );
 
 
         public ProjectArchNode() {
@@ -34,14 +33,14 @@ namespace ProjectArchitectureDesigner.Model {
         // Testing
         public IEnumerable<TypeArchNode> GetTypesWithInvalidModule() {
             foreach (var type in Types) {
-                if (type.Module.Name != type.Value.Assembly.GetName().Name) {
+                if (type.Group.Namespace.Module.Name != type.Value.Assembly.GetName().Name) {
                     yield return type;
                 }
             }
         }
         public IEnumerable<TypeArchNode> GetTypesWithInvalidNamespace() {
             foreach (var type in Types) {
-                if (type.Namespace.Name != type.Value.Namespace) {
+                if (type.Group.Namespace.Name != type.Value.Namespace) {
                     yield return type;
                 }
             }

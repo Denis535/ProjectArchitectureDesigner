@@ -11,14 +11,13 @@ namespace ProjectArchitectureDesigner.Model {
     public abstract class ModuleArchNode : ArchNode {
 
         public virtual Assembly? Assembly { get; }
-        // Ancestors
+        // Parent
         public ProjectArchNode Project { get; }
-        // Descendant
-        public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
-        public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
+        // Children
         public abstract NamespaceArchNode[] Namespaces { get; }
-        public GroupArchNode[] Groups => Namespaces.SelectMany( i => i.Groups ).ToArray();
-        public TypeArchNode[] Types => Namespaces.SelectMany( i => i.Groups ).SelectMany( i => i.Types ).ToArray();
+        // Descendant
+        public IEnumerable<GroupArchNode> Groups => Namespaces.SelectMany( i => i.Groups ).ToArray();
+        public IEnumerable<TypeArchNode> Types => Namespaces.SelectMany( i => i.Groups ).SelectMany( i => i.Types ).ToArray();
 
 
         public ModuleArchNode(ProjectArchNode project) {

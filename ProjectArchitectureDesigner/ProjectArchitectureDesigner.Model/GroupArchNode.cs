@@ -4,19 +4,14 @@
 namespace ProjectArchitectureDesigner.Model {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text;
 
     public abstract class GroupArchNode : ArchNode {
 
         public bool IsDefault => Name is (null or "" or "Default");
-        // Ancestors
-        public ProjectArchNode Project => Namespace.Module.Project;
-        public ModuleArchNode Module => Namespace.Module;
+        // Parent
         public NamespaceArchNode Namespace { get; }
-        // Descendant
-        public ArchNode[] DescendantNodes => GetDescendantNodes( this ).ToArray();
-        public ArchNode[] DescendantNodesAndSelf => GetDescendantNodes( this ).Prepend( this ).ToArray();
+        // Children
         public abstract TypeArchNode[] Types { get; }
 
 
