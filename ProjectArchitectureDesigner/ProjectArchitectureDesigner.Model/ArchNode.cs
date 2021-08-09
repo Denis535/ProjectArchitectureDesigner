@@ -11,12 +11,6 @@ namespace ProjectArchitectureDesigner.Model {
     public abstract class ArchNode {
 
         public abstract string Name { get; }
-        // Children
-        public IEnumerable<ArchNode> Children => GetChildren( this );
-        public IEnumerable<ArchNode> ChildrenAndSelf => GetChildren( this ).Prepend( this );
-        // Descendant
-        public IEnumerable<ArchNode> Descendant => GetDescendant( this );
-        public IEnumerable<ArchNode> DescendantAndSelf => GetDescendant( this ).Prepend( this );
 
 
         // Utils
@@ -52,27 +46,6 @@ namespace ProjectArchitectureDesigner.Model {
             return
                 property.PropertyType.Equals( typeof( T ) ) ||
                 property.PropertyType.IsSubclassOf( typeof( T ) );
-        }
-        // Helpers/GetChildren
-        private static IEnumerable<ArchNode> GetChildren(ArchNode node) {
-            if (node is ProjectArchNode project) return project.Modules;
-            if (node is ModuleArchNode module) return module.Namespaces;
-            if (node is NamespaceArchNode @namespace) return @namespace.Groups;
-            if (node is GroupArchNode group) return group.Types;
-            if (node is TypeArchNode) return Enumerable.Empty<ArchNode>();
-            throw new ArgumentException( "Node is invalid: " + node );
-        }
-        // Helpers/GetDescendant
-        private static IEnumerable<ArchNode> GetDescendant(ArchNode node) {
-            if (node is ProjectArchNode project) return project.Modules.SelectMany( GetDescendantAndSelf );
-            if (node is ModuleArchNode module) return module.Namespaces.SelectMany( GetDescendantAndSelf );
-            if (node is NamespaceArchNode @namespace) return @namespace.Groups.SelectMany( GetDescendantAndSelf );
-            if (node is GroupArchNode group) return group.Types;
-            if (node is TypeArchNode) return Enumerable.Empty<ArchNode>();
-            throw new ArgumentException( "Node is invalid: " + node );
-        }
-        private static IEnumerable<ArchNode> GetDescendantAndSelf(ArchNode node) {
-            return GetDescendant( node ).Prepend( node );
         }
 
 

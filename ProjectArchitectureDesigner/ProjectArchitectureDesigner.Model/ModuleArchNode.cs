@@ -4,7 +4,6 @@
 namespace ProjectArchitectureDesigner.Model {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Reflection;
     using System.Text;
 
@@ -15,9 +14,6 @@ namespace ProjectArchitectureDesigner.Model {
         public ProjectArchNode Project { get; }
         // Children
         public abstract NamespaceArchNode[] Namespaces { get; }
-        // Descendant
-        public IEnumerable<GroupArchNode> Groups => Namespaces.SelectMany( i => i.Groups ).ToArray();
-        public IEnumerable<TypeArchNode> Types => Namespaces.SelectMany( i => i.Groups ).SelectMany( i => i.Types ).ToArray();
 
 
         public ModuleArchNode(ProjectArchNode project) {
