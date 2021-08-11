@@ -82,6 +82,12 @@ namespace System.Text.Markdown {
         }
 
 
+        // Clear
+        public void Clear() {
+            Builder.Clear();
+        }
+
+
         // Utils
         public override string ToString() {
             return Builder.ToString();

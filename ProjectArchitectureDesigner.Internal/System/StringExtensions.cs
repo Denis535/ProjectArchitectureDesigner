@@ -4,6 +4,7 @@
 namespace System {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Text;
 
@@ -45,10 +46,10 @@ namespace System {
             return string.Format( format, args );
         }
 
-        public static bool IsEmpty(this string? value) {
+        public static bool IsEmpty([NotNullWhen( false )] this string? value) {
             return string.IsNullOrEmpty( value );
         }
-        public static bool IsNotEmpty(this string? value) {
+        public static bool IsNotEmpty([NotNullWhen( true )] this string? value) {
             return !string.IsNullOrEmpty( value );
         }
 

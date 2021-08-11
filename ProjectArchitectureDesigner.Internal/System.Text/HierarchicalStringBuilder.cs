@@ -82,6 +82,12 @@ namespace System.Text {
         }
 
 
+        // Clear
+        public void Clear() {
+            Nodes.Clear();
+        }
+
+
         // Utils
         public override string ToString() {
             EnsureLevelIsZero( Level );
@@ -103,7 +109,7 @@ namespace System.Text {
         // Helpers/AppendHierarchy
         private static void AppendHierarchy(StringBuilder builder, IEnumerable<Node> nodes, int level, string indent) {
             foreach (var ((node, children), isLast) in nodes.Unflatten( i => i.Level == level ).TagLast()) {
-                builder.AppendLine( indent + node.Prefix + node.Text );
+                builder.Append( indent ).Append( node.Value.Prefix ).AppendLine( node.Value.Text );
                 if (level == 0) {
                     AppendHierarchy( builder, children, level + 1, indent );
                 } else {

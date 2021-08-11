@@ -4,10 +4,10 @@
 namespace System {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Text;
 
-    // Note: don't override true, false operators!
     public static class Option {
         public static int Compare<T>(Option<T> opt1, Option<T> opt2) {
             if (opt1.HasValue && !opt2.HasValue) return 1;
@@ -19,9 +19,9 @@ namespace System {
             if (!opt1.HasValue && opt2.HasValue) return false;
             return EqualityComparer<T>.Default.Equals( opt1.Value, opt2.Value );
         }
-        public static Type? GetUnderlyingType(Type optionType) {
-            if (optionType is null) throw new ArgumentNullException( nameof( optionType ) );
-            if (GetUnboundType( optionType ) == typeof( Option<> )) return optionType.GetGenericArguments().First();
+        public static Type? GetUnderlyingType(Type type) {
+            if (type is null) throw new ArgumentNullException( nameof( type ) );
+            if (GetUnboundType( type ) == typeof( Option<> )) return type.GetGenericArguments().First();
             return null;
         }
         private static Type GetUnboundType(Type type) {
@@ -32,8 +32,12 @@ namespace System {
             }
         }
     }
+    // Note: don't override true, false operators!
+    // Note: when HasValue == true then value may be null (it's allowed)
+    // Note: when HasValue == false then value always is null
+    // Note: we need something like [MemberMaybeNullWhen( false, nameof( ValueOrDefault ) )]
     [Serializable]
-    public readonly struct Option<T> {
+    public readonly struct Option<T> : IEquatable<Option<T>> {
 
         private readonly bool hasValue;
         private readonly T value;
@@ -46,31 +50,55 @@ namespace System {
             this.value = value;
         }
 
-        // GetValueOrDefault
-        public T? GetValueOrDefault(T? @default) {
-            return hasValue ? value : @default;
+        // TryGetValue
+        public bool TryGetValue([MaybeNullWhen( false )] out T value) {
+            value = hasValue ? this.value : default;
+            return hasValue;
         }
 
         // Utils
         public override string ToString() {
-            return value?.ToString() ?? "";
+            if (hasValue) return value?.ToString() ?? "";
+            return "";
         }
         public override bool Equals(object? other) {
-            if (value is null) return other is null;
-            if (other is null) return false;
-            return value.Equals( other );
+            if (other is Option<T> other_) return Equals( other_ );
+            return false;
+        }
+        public bool Equals(Option<T> other) {
+            if (!hasValue) return !other.hasValue;
+            if (!other.hasValue) return !hasValue;
+            return AreEqual( value, other.value );
         }
         public override int GetHashCode() {
-            return value?.GetHashCode() ?? 0;
+            if (hasValue) return value?.GetHashCode() ?? 0;
+            return 0;
         }
 
-        // Operators
+        // Conversions
         public static implicit operator Option<T>(T value) {
             return new Option<T>( value );
         }
         public static explicit operator T(Option<T> value) {
             return value.Value;
         }
+
+        // Operators
+        public static bool operator ==(Option<T> left, Option<T> right) {
+            return left.Equals( right );
+        }
+        public static bool operator !=(Option<T> left, Option<T> right) {
+            return !left.Equals( right );
+        }
+
+
+        // Helpers
+        private static bool AreEqual(T v1, T v2) {
+            if (v1 is null) return v2 is null;
+            if (v2 is null) return v1 is null;
+            return v1.Equals( v2 );
+        }
+
 
     }
 }

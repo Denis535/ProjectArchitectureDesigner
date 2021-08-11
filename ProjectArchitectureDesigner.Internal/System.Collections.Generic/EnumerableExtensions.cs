@@ -19,24 +19,6 @@ namespace System.Collections.Generic {
         }
 
         // With
-        public static IEnumerable<(T Current, Option<T> Prev)> WithPrevious<T>(this IEnumerable<T> source) {
-            using var source_enumerator = source.GetPeekableEnumerator();
-            var prev = default( Option<T> );
-            while (source_enumerator.MoveNext( out var current )) {
-                yield return (current, prev);
-                prev = current;
-            }
-        }
-        public static IEnumerable<(T Current, Option<T> Next)> WithNext<T>(this IEnumerable<T> source) {
-            using var source_enumerator = source.GetPeekableEnumerator();
-            while (source_enumerator.MoveNext( out var current )) {
-                if (source_enumerator.PeekNext( out var next )) {
-                    yield return (current, next);
-                } else {
-                    yield return (current, default);
-                }
-            }
-        }
         public static IEnumerable<T> WithPrefix<T>(this IEnumerable<T> source, T prefix) {
             foreach (var item in source) {
                 yield return prefix;
@@ -58,65 +40,96 @@ namespace System.Collections.Generic {
         }
         public static IEnumerable<T> WithSeparator<T>(this IEnumerable<T> source, T separator) {
             using var source_enumerator = source.GetPeekableEnumerator();
-            while (source_enumerator.MoveNext( out var current )) {
+            while (source_enumerator.TryTake( out var current )) {
                 yield return current;
-                if (source_enumerator.HasNext()) yield return separator;
+                if (source_enumerator.HasNext) yield return separator;
+            }
+        }
+
+        // With
+        public static IEnumerable<(T Current, Option<T> Prev)> WithPrevious<T>(this IEnumerable<T> source) {
+            using var source_enumerator = source.GetEnumerator();
+            var prev = default( Option<T> );
+            while (source_enumerator.TryTake( out var current )) {
+                yield return (current, prev);
+                prev = current;
+            }
+        }
+        public static IEnumerable<(T Current, Option<T> Next)> WithNext<T>(this IEnumerable<T> source) {
+            using var source_enumerator = source.GetPeekableEnumerator();
+            while (source_enumerator.TryTake( out var current )) {
+                yield return (current, source_enumerator.Peek());
             }
         }
 
         // Tag
         public static IEnumerable<(T Value, bool IsFirst)> TagFirst<T>(this IEnumerable<T> source) {
             using var source_enumerator = source.GetEnumerator();
-            if (source_enumerator.MoveNext( out var first )) {
+            if (source_enumerator.TryTake( out var first )) {
                 yield return (first, true);
             }
-            while (source_enumerator.MoveNext( out var value )) {
+            while (source_enumerator.TryTake( out var value )) {
                 yield return (value, false);
             }
         }
         public static IEnumerable<(T Value, bool IsLast)> TagLast<T>(this IEnumerable<T> source) {
             using var source_enumerator = source.GetPeekableEnumerator();
-            while (source_enumerator.MoveNext( out var value )) {
-                var isLast = !source_enumerator.HasNext();
-                yield return (value, isLast);
+            while (source_enumerator.HasNext && source_enumerator.TryTake( out var value )) {
+                yield return (value, false);
+            }
+            if (source_enumerator.TryTake( out var last )) {
+                yield return (last, true);
             }
         }
 
         // Unflatten
-        public static IEnumerable<(T? Key, IReadOnlyList<T> Values)> Unflatten<T>(this IEnumerable<T> source, Predicate<T> isKey) {
+        public static IEnumerable<(Option<T> Key, T[] Values)> Unflatten<T>(this IEnumerable<T> source, Predicate<T> predicate) {
             var source_enumerator = source.GetPeekableEnumerator();
             var values = new List<T>();
-            while (source_enumerator.HasNext()) {
-                source_enumerator.TakeIf( isKey, out var key );
+            while (source_enumerator.HasNext) {
+                var key = source_enumerator.TakeIf( predicate );
                 values.Clear();
-                values.AddRange( source_enumerator.TakeUntil( isKey ) );
+                values.AddRange( source_enumerator.TakeUntil( predicate ) );
                 yield return (key, values.ToArray());
             }
         }
 
         // Split
-        public static IEnumerable<T[]> SplitByFirst<T>(this IEnumerable<T> source, Predicate<T> isFirst) {
+        public static IEnumerable<T[]> SplitByFirst<T>(this IEnumerable<T> source, Predicate<T> predicate) {
             var source_enumerator = source.GetPeekableEnumerator();
             var slice = new List<T>();
-            while (source_enumerator.HasNext()) {
+            while (source_enumerator.HasNext) {
                 slice.Clear();
-                slice.AddRange( source_enumerator.TakeSliceByFirst( isFirst ) );
+                slice.AddRange( source_enumerator.TakeSliceByFirst( predicate ) );
                 yield return slice.ToArray();
             }
         }
-        public static IEnumerable<T[]> SplitByLast<T>(this IEnumerable<T> source, Predicate<T> isLast) {
+        public static IEnumerable<T[]> SplitByLast<T>(this IEnumerable<T> source, Predicate<T> predicate) {
             var source_enumerator = source.GetPeekableEnumerator();
             var slice = new List<T>();
-            while (source_enumerator.HasNext()) {
+            while (source_enumerator.HasNext) {
                 slice.Clear();
-                slice.AddRange( source_enumerator.TakeSliceByLast( isLast ) );
+                slice.AddRange( source_enumerator.TakeSliceByLast( predicate ) );
+                yield return slice.ToArray();
+            }
+        }
+        public static IEnumerable<T[]> SplitByLast<T>(this IEnumerable<T> source, Func<T, T, bool> predicate) {
+            var source_enumerator = source.GetPeekableEnumerator();
+            var slice = new List<T>();
+            while (source_enumerator.HasNext) {
+                slice.Clear();
+                slice.AddRange( source_enumerator.TakeSliceByLast( predicate ) );
                 yield return slice.ToArray();
             }
         }
 
-        // WhereNot
-        public static IEnumerable<T> WhereNot<T>(this IEnumerable<T> source, Func<T, bool> predicate) {
-            return source.Where( i => !predicate( i ) );
+        // Take
+        public static bool TryTake<T>(this IEnumerator<T> enumerator, [MaybeNullWhen( false )] out T current) {
+            return enumerator.Take().TryGetValue( out current );
+        }
+        public static Option<T> Take<T>(this IEnumerator<T> enumerator) {
+            if (enumerator.MoveNext()) return enumerator.Current;
+            return default;
         }
 
         // Concat
@@ -124,9 +137,6 @@ namespace System.Collections.Generic {
             return new[] { first, second };
         }
         // Append
-        //public static IEnumerable<T> Append<T>(this IEnumerable<T> firsts, T second) {
-        //    return Enumerable.Append( firsts, second );
-        //}
         public static IEnumerable<T> Append<T>(this T first, IEnumerable<T> seconds) {
             return seconds.Prepend( first );
         }
@@ -134,28 +144,9 @@ namespace System.Collections.Generic {
         public static IEnumerable<T> ToEnumerable<T>(this T element) {
             return new[] { element };
         }
-
-        // GetPeekableEnumerator
-        public static PeekableEnumerator<T> GetPeekableEnumerator<T>(this IEnumerable<T> enumerable) {
-            return new PeekableEnumerator<T>( enumerable.GetEnumerator() );
-        }
-
-        // MoveNext
-        //public static Option<T> MoveNext<T>(this IEnumerator<T> enumerator) {
-        //    if (enumerator.MoveNext()) {
-        //        return enumerator.Current;
-        //    } else {
-        //        return default;
-        //    }
-        //}
-        public static bool MoveNext<T>(this IEnumerator<T> enumerator, [MaybeNullWhen( false )] out T value) {
-            if (enumerator.MoveNext()) {
-                value = enumerator.Current;
-                return true;
-            } else {
-                value = default;
-                return false;
-            }
+        // WhereNot
+        public static IEnumerable<T> WhereNot<T>(this IEnumerable<T> source, Func<T, bool> predicate) {
+            return source.Where( i => !predicate( i ) );
         }
 
 

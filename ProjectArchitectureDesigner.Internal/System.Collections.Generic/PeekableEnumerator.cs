@@ -8,49 +8,61 @@ namespace System.Collections.Generic {
     using System.Text;
 
     public static class PeekableEnumeratorExtensions {
+        // GetPeekableEnumerator
+        public static PeekableEnumerator<T> GetPeekableEnumerator<T>(this IEnumerable<T> enumerable) {
+            return new PeekableEnumerator<T>( enumerable.GetEnumerator() );
+        }
         // Take/While
         public static IEnumerable<T> TakeWhile<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate) {
             // true, true, [break], false
-            while (enumerator.TakeIf( predicate, out var value )) {
-                yield return value;
+            while (enumerator.TryTakeIf( predicate, out var current )) {
+                yield return current;
             }
         }
         // Take/Until
         public static IEnumerable<T> TakeUntil<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate) {
             // false, false, [break], true
-            while (enumerator.TakeIfNot( predicate, out var value )) {
-                yield return value;
+            while (enumerator.TryTakeIfNot( predicate, out var current )) {
+                yield return current;
             }
         }
         // Take/Slice
-        public static IEnumerable<T> TakeSliceByFirst<T>(this PeekableEnumerator<T> enumerator, Predicate<T> isFirst) {
+        public static IEnumerable<T> TakeSliceByFirst<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate) {
             // first, last, [break], first
-            while (enumerator.MoveNext( out var curr )) {
-                yield return curr;
-                if (enumerator.PeekNext( out var next ) && isFirst( next )) yield break;
+            while (enumerator.TryTake( out var current )) {
+                yield return current;
+                if (enumerator.TryPeek( out var next ) && predicate( next )) yield break;
             }
         }
-        public static IEnumerable<T> TakeSliceByLast<T>(this PeekableEnumerator<T> enumerator, Predicate<T> isLast) {
-            // first, last, [break]
-            while (enumerator.MoveNext( out var curr )) {
-                yield return curr;
-                if (isLast( curr )) yield break;
+        public static IEnumerable<T> TakeSliceByLast<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate) {
+            // first, last, [break], first
+            while (enumerator.TryTake( out var current )) {
+                yield return current;
+                if (predicate( current )) yield break;
+            }
+        }
+        public static IEnumerable<T> TakeSliceByLast<T>(this PeekableEnumerator<T> enumerator, Func<T, T, bool> predicate) {
+            // aaa [break] bbb
+            while (enumerator.TryTake( out var current )) {
+                yield return current;
+                if (enumerator.TryPeek( out var next ) && predicate( current, next )) yield break;
             }
         }
         // Take/If
-        public static bool TakeIf<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate, [MaybeNullWhen( false )] out T value) {
-            if (enumerator.PeekNext( out var next ) && predicate( next )) {
-                return enumerator.MoveNext( out value );
-            }
-            value = default;
-            return false;
+        public static bool TryTakeIf<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate, [MaybeNullWhen( false )] out T current) {
+            return enumerator.TakeIf( predicate ).TryGetValue( out current );
         }
-        public static bool TakeIfNot<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate, [MaybeNullWhen( false )] out T value) {
-            if (enumerator.PeekNext( out var next ) && !predicate( next )) {
-                return enumerator.MoveNext( out value );
-            }
-            value = default;
-            return false;
+        public static Option<T> TakeIf<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate) {
+            if (enumerator.TryPeek( out var next ) && predicate( next )) return enumerator.Take();
+            return default;
+        }
+        // Take/If/Not
+        public static bool TryTakeIfNot<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate, [MaybeNullWhen( false )] out T current) {
+            return enumerator.TakeIfNot( predicate ).TryGetValue( out current );
+        }
+        public static Option<T> TakeIfNot<T>(this PeekableEnumerator<T> enumerator, Predicate<T> predicate) {
+            if (enumerator.TryPeek( out var next ) && !predicate( next )) return enumerator.Take();
+            return default;
         }
     }
     public class PeekableEnumerator<T> : IEnumerator<T> {
@@ -58,79 +70,72 @@ namespace System.Collections.Generic {
 
         private IEnumerator<T> Source { get; }
         private State_ State { get; set; }
-
-        T IEnumerator<T>.Current => Current.Value;
-        object? IEnumerator.Current => Current.Value;
+        private Option<T> Current { get; set; }
+        private Option<T> Next { get; set; }
 
         public bool IsStarted => State == State_.Started;
         public bool IsFinished => State == State_.Finished;
-        public Option<T> Current { get; private set; }
-        public Option<T> Next { get; private set; }
+        public bool HasNext => PeekInternal().HasValue;
 
 
         public PeekableEnumerator(IEnumerator<T> source) {
             Source = source ?? throw new ArgumentNullException( nameof( source ) );
             State = State_.Uninitialized;
-            (Current, Next) = (default, default);
+            Current = default;
+            Next = default;
         }
         public void Dispose() {
             Source.Dispose();
         }
 
-        // MoveNext
-        bool IEnumerator.MoveNext() {
-            State = State_.Started;
-            (Current, Next) = MoveNext( Source, Next );
-            State = Current.HasValue ? State_.Started : State_.Finished;
-            return Current.HasValue;
+
+        // IEnumerator
+        T IEnumerator<T>.Current => Current.Value;
+        object? IEnumerator.Current => Current.Value;
+        bool IEnumerator.MoveNext() => TakeInternal().HasValue;
+
+
+        // Take
+        public bool TryTake([MaybeNullWhen( false )] out T current) {
+            return TakeInternal().TryGetValue( out current );
         }
-        public Option<T> MoveNext() {
+        public Option<T> Take() {
+            return TakeInternal();
+        }
+        private Option<T> TakeInternal() {
             State = State_.Started;
-            (Current, Next) = MoveNext( Source, Next );
+            Current = GetNext( Source, Next );
+            Next = default;
             State = Current.HasValue ? State_.Started : State_.Finished;
             return Current;
         }
-        public bool MoveNext([MaybeNullWhen( false )] out T value) {
-            State = State_.Started;
-            (Current, Next) = MoveNext( Source, Next );
-            State = Current.HasValue ? State_.Started : State_.Finished;
-            value = Current.ValueOrDefault;
-            return Current.HasValue;
+        // Peek
+        public bool TryPeek([MaybeNullWhen( false )] out T next) {
+            return PeekInternal().TryGetValue( out next );
         }
-        // HasNext
-        public bool HasNext() {
-            Next = PeekNext( Source, Next );
-            return Next.HasValue;
+        public Option<T> Peek() {
+            return PeekInternal();
         }
-        // PeekNext
-        public Option<T> PeekNext() {
-            Next = PeekNext( Source, Next );
+        private Option<T> PeekInternal() {
+            Next = GetNext( Source, Next );
             return Next;
-        }
-        public bool PeekNext([MaybeNullWhen( false )] out T value) {
-            Next = PeekNext( Source, Next );
-            value = Next.ValueOrDefault;
-            return Next.HasValue;
         }
         // Reset
         public void Reset() {
             Source.Reset();
             State = State_.Uninitialized;
-            (Current, Next) = (default, default);
+            Current = default;
+            Next = default;
         }
 
+
         // Helpers
-        private static (Option<T>, Option<T>) MoveNext(IEnumerator<T> enumerator, Option<T> next) {
-            var value = next.HasValue ? next.Value : GetNext( enumerator );
-            return (value, default);
+        private static Option<T> GetNext(IEnumerator<T> enumerator, Option<T> next) {
+            if (next.HasValue) return next;
+            if (enumerator.MoveNext()) return enumerator.Current;
+            return default;
         }
-        private static Option<T> PeekNext(IEnumerator<T> enumerator, Option<T> next) {
-            return next.HasValue ? next.Value : GetNext( enumerator );
-        }
-        private static Option<T> GetNext(IEnumerator<T> enumerator) {
-            var hasValue = enumerator.MoveNext();
-            return hasValue ? (Option<T>) enumerator.Current : default;
-        }
+
 
     }
 }

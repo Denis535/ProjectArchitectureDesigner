@@ -8,7 +8,6 @@ namespace System.Diagnostics.CodeAnalysis {
     [AttributeUsage( AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property, Inherited = false )]
     internal sealed class AllowNullAttribute : Attribute {
     }
-
     // DisallowNull
     [AttributeUsage( AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property, Inherited = false )]
     internal sealed class DisallowNullAttribute : Attribute {
@@ -21,8 +20,10 @@ namespace System.Diagnostics.CodeAnalysis {
     // MaybeNull/When
     [AttributeUsage( AttributeTargets.Parameter, Inherited = false )]
     internal sealed class MaybeNullWhenAttribute : Attribute {
-        public MaybeNullWhenAttribute(bool returnValue) => ReturnValue = returnValue;
         public bool ReturnValue { get; }
+        public MaybeNullWhenAttribute(bool returnValue) {
+            ReturnValue = returnValue;
+        }
     }
 
     // NotNull
@@ -32,26 +33,36 @@ namespace System.Diagnostics.CodeAnalysis {
     // NotNull/When
     [AttributeUsage( AttributeTargets.Parameter, Inherited = false )]
     internal sealed class NotNullWhenAttribute : Attribute {
-        public NotNullWhenAttribute(bool returnValue) => ReturnValue = returnValue;
         public bool ReturnValue { get; }
+        public NotNullWhenAttribute(bool returnValue) {
+            ReturnValue = returnValue;
+        }
     }
     // NotNull/IfNotNull
     [AttributeUsage( AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue, AllowMultiple = true, Inherited = false )]
     internal sealed class NotNullIfNotNullAttribute : Attribute {
-        public NotNullIfNotNullAttribute(string parameterName) => ParameterName = parameterName;
         public string ParameterName { get; }
+        public NotNullIfNotNullAttribute(string parameterName) {
+            ParameterName = parameterName;
+        }
     }
 
     // MemberNotNull
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true )]
     internal sealed class MemberNotNullAttribute : Attribute {
-        public MemberNotNullAttribute(string member) => Members = new[] { member };
-        public MemberNotNullAttribute(params string[] members) => Members = members;
         public string[] Members { get; }
+        public MemberNotNullAttribute(string member) {
+            Members = new[] { member };
+        }
+        public MemberNotNullAttribute(params string[] members) {
+            Members = members;
+        }
     }
     // MemberNotNull/When
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true )]
     internal sealed class MemberNotNullWhenAttribute : Attribute {
+        public bool ReturnValue { get; }
+        public string[] Members { get; }
         public MemberNotNullWhenAttribute(bool returnValue, string member) {
             ReturnValue = returnValue;
             Members = new[] { member };
@@ -60,8 +71,6 @@ namespace System.Diagnostics.CodeAnalysis {
             ReturnValue = returnValue;
             Members = members;
         }
-        public bool ReturnValue { get; }
-        public string[] Members { get; }
     }
 
     // DoesNotReturn
@@ -71,8 +80,10 @@ namespace System.Diagnostics.CodeAnalysis {
     // DoesNotReturn/If
     [AttributeUsage( AttributeTargets.Parameter, Inherited = false )]
     internal sealed class DoesNotReturnIfAttribute : Attribute {
-        public DoesNotReturnIfAttribute(bool parameterValue) => ParameterValue = parameterValue;
         public bool ParameterValue { get; }
+        public DoesNotReturnIfAttribute(bool parameterValue) {
+            ParameterValue = parameterValue;
+        }
     }
 
 }
