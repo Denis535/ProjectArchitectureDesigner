@@ -144,7 +144,7 @@ namespace System.Collections.Generic {
         public static IEnumerable<T> ToEnumerable<T>(this T element) {
             return new[] { element };
         }
-        // WhereNot
+        // Where/Not
         public static IEnumerable<T> WhereNot<T>(this IEnumerable<T> source, Func<T, bool> predicate) {
             return source.Where( i => !predicate( i ) );
         }

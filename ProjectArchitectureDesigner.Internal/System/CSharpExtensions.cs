@@ -1,12 +1,6 @@
 ﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-namespace System.Runtime.CompilerServices {
-    using System.ComponentModel;
-    [EditorBrowsable( EditorBrowsableState.Never )]
-    internal class IsExternalInit {
-    }
-}
 namespace System {
     using System;
     using System.Collections;
@@ -19,6 +13,10 @@ namespace System {
             return selector( source );
         }
 
+        public static Func<T, bool> AsFunc<T>(this Predicate<T> predicate) {
+            return new Func<T, bool>( predicate );
+        }
+
     }
     public sealed class DelegateDisposable : IDisposable {
         private readonly Action? @delegate;
@@ -29,10 +27,10 @@ namespace System {
             @delegate?.Invoke();
         }
     }
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-public sealed class DelegateAsyncDisposable : IAsyncDisposable {
+#if NETSTANDARD2_1_OR_GREATER
+public sealed class AsyncDelegateDisposable : IAsyncDisposable {
     private readonly Func<ValueTask>? @delegate;
-    public DelegateAsyncDisposable(Func<ValueTask>? @delegate) {
+    public AsyncDelegateDisposable(Func<ValueTask>? @delegate) {
         this.@delegate = @delegate;
     }
     public ValueTask DisposeAsync() {
