@@ -15,38 +15,42 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
 
         private MarkdownBuilder Builder { get; } = new MarkdownBuilder();
 
-        public MarkdownDocumentProjectRenderer() : base( new TextNodeRenderer() ) {
+
+        public MarkdownDocumentProjectRenderer() : base( new TextNodeRenderer( null ) ) {
         }
-        public MarkdownDocumentProjectRenderer(INodeRenderer renderer) : base( renderer ) {
+        public MarkdownDocumentProjectRenderer(NodeRenderer renderer) : base( renderer ) {
         }
 
 
         // Render
-        public override string Render(ProjectArchNode project, Func<TypeArchNode, bool> predicate) {
-            RenderProject( project, predicate );
+        public override string Render(ProjectArchNode project) {
+            Builder.Clear();
+            AppendHierarchy( project );
             return Builder.ToString();
         }
-        // Render/Node
-        protected override void RenderProject(ProjectArchNode project, Func<TypeArchNode, bool> predicate) {
-            Builder.AppendHeader( Render( project ), 1 );
-            base.RenderProject( project, predicate );
+
+
+        // AppendLine
+        protected override void AppendLine(ProjectArchNode project, string text) {
+            Builder.AppendHeader( text, 1 );
         }
-        protected override void RenderModule(ModuleArchNode module, Func<TypeArchNode, bool> predicate) {
-            Builder.AppendHeader( Render( module ), 2 );
-            base.RenderModule( module, predicate );
+        protected override void AppendLine(ModuleArchNode module, string text) {
+            Builder.AppendHeader( text, 2 );
         }
-        protected override void RenderNamespace(NamespaceArchNode @namespace, Func<TypeArchNode, bool> predicate) {
-            Builder.AppendHeader( Render( @namespace ), 3 );
-            base.RenderNamespace( @namespace, predicate );
+        protected override void AppendLine(NamespaceArchNode @namespace, string text) {
+            Builder.AppendHeader( text, 3 );
         }
-        protected override void RenderGroup(GroupArchNode group, Func<TypeArchNode, bool> predicate) {
-            if (!group.IsDefault) Builder.AppendItem( Render( group ).Bold(), 1 );
-            base.RenderGroup( group, predicate );
+        protected override void AppendLine(GroupArchNode group, string text) {
+            if (group.IsDefault()) return;
+            Builder.AppendItem( text.Bold(), 1 );
         }
-        protected override void RenderType(TypeArchNode type) {
-            Builder.AppendItem( Render( type ), 1 );
+        protected override void AppendLine(TypeArchNode type, string text) {
+            Builder.AppendItem( text, 1 );
             //AppendTypeInfo( Builder, type.TypeInfo );
         }
+
+
+        // Helpers/AppendTypeInfo
         private static void AppendTypeInfo(MarkdownBuilder builder, TypeInfo type) {
             builder.AppendCSharpCodeBlockStart();
             builder.AppendLine( type.GetTypeSyntax() );

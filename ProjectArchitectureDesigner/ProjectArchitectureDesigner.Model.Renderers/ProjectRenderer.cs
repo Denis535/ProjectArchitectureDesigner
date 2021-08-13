@@ -4,62 +4,75 @@
 namespace ProjectArchitectureDesigner.Model.Renderers {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text;
     using ProjectArchitectureDesigner.Model;
 
     public abstract class ProjectRenderer {
 
-        private INodeRenderer Renderer { get; }
+        private NodeRenderer Renderer { get; }
 
-        public ProjectRenderer(INodeRenderer renderer) {
+
+        public ProjectRenderer(NodeRenderer renderer) {
             Renderer = renderer;
         }
 
 
         // Render
-        public abstract string Render(ProjectArchNode project, Func<TypeArchNode, bool> predicate);
-        // Render/Node
-        protected virtual void RenderProject(ProjectArchNode project, Func<TypeArchNode, bool> predicate) {
-            foreach (var module in GetModules( project, predicate )) {
-                RenderModule( module, predicate );
+        public abstract string Render(ProjectArchNode project);
+
+
+        // AppendHierarchy
+        protected virtual void AppendHierarchy(ProjectArchNode project) {
+            AppendLine( project, GetString( project ) );
+            foreach (var module in project.Modules) {
+                AppendHierarchy( module );
             }
         }
-        protected virtual void RenderModule(ModuleArchNode module, Func<TypeArchNode, bool> predicate) {
-            foreach (var @namespace in GetNamespaces( module, predicate )) {
-                RenderNamespace( @namespace, predicate );
+        protected virtual void AppendHierarchy(ModuleArchNode module) {
+            AppendLine( module, GetString( module ) );
+            foreach (var @namespace in module.Namespaces) {
+                AppendHierarchy( @namespace );
             }
         }
-        protected virtual void RenderNamespace(NamespaceArchNode @namespace, Func<TypeArchNode, bool> predicate) {
-            foreach (var group in GetGroup( @namespace, predicate )) {
-                RenderGroup( group, predicate );
+        protected virtual void AppendHierarchy(NamespaceArchNode @namespace) {
+            AppendLine( @namespace, GetString( @namespace ) );
+            foreach (var group in @namespace.Groups) {
+                AppendHierarchy( group );
             }
         }
-        protected virtual void RenderGroup(GroupArchNode group, Func<TypeArchNode, bool> predicate) {
-            foreach (var type in GetTypes( group, predicate )) {
-                RenderType( type );
+        protected virtual void AppendHierarchy(GroupArchNode group) {
+            AppendLine( group, GetString( group ) );
+            foreach (var type in group.Types) {
+                AppendLine( type, GetString( type ) );
             }
-        }
-        protected virtual void RenderType(TypeArchNode type) {
-        }
-        // Render/Node
-        protected virtual string Render(ArchNode node) {
-            return Renderer.Highlight( node, Renderer.Render( node ) );
         }
 
 
-        // Helpers/GetChildren
-        private static IEnumerable<ModuleArchNode> GetModules(ProjectArchNode project, Func<TypeArchNode, bool> predicate) {
-            return project.Modules.Where( i => i.Types.Any( predicate ) );
+        // AppendLine
+        protected virtual void AppendLine(ProjectArchNode project, string text) {
         }
-        private static IEnumerable<NamespaceArchNode> GetNamespaces(ModuleArchNode module, Func<TypeArchNode, bool> predicate) {
-            return module.Namespaces.Where( i => i.Types.Any( predicate ) );
+        protected virtual void AppendLine(ModuleArchNode module, string text) {
         }
-        private static IEnumerable<GroupArchNode> GetGroup(NamespaceArchNode @namespace, Func<TypeArchNode, bool> predicate) {
-            return @namespace.Groups.Where( i => i.Types.Any( predicate ) );
+        protected virtual void AppendLine(NamespaceArchNode @namespace, string text) {
         }
-        private static IEnumerable<TypeArchNode> GetTypes(GroupArchNode group, Func<TypeArchNode, bool> predicate) {
-            return group.Types.Where( predicate );
+        protected virtual void AppendLine(GroupArchNode group, string text) {
+        }
+        protected virtual void AppendLine(TypeArchNode type, string text) {
+        }
+
+
+        // GetString
+        protected virtual string GetString(ArchNode node) {
+            return GetString( Renderer, node, node.GetName() );
+        }
+
+
+        // Helpers/GetString
+        private static string GetString(NodeRenderer renderer, ArchNode node, string text) {
+            if (renderer.Source != null) text = GetString( renderer.Source, node, text );
+            text = renderer.Render( node, text );
+            text = renderer.Highlight( node, text );
+            return text;
         }
 
 
