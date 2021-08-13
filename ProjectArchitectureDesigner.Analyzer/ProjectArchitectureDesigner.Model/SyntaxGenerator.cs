@@ -17,13 +17,12 @@ namespace ProjectArchitectureDesigner.Model {
             builder.Class( "$modifiers class $identifier : ProjectArchNode {", @class.Modifiers, @class.Identifier );
             {
                 builder.Comment( "/// Properties" );
-                builder.Property( "public override string Name { get; } = \"$name\";", project.Name );
-                builder.Property( "public override ModuleArchNode[] Modules { get; }" );
+                builder.Property( "public override string Name => \"$name\";", project.Name );
                 builder.Property( project.Modules, "public $type $property { get; }", i => (i.Type, i.Property) );
                 builder.Comment( "/// Constructor" );
                 builder.Constructor( "public $type() {", project.Type );
                 {
-                    builder.Statement( "this.Modules = new ModuleArchNode[] {" );
+                    builder.Statement( "base.Modules = new ModuleArchNode[] {" );
                     builder.Statement( project.Modules, "this.$property = new $type( this ),", i => (i.Property, i.Type) );
                     builder.Statement( "};" );
                 }
@@ -38,13 +37,13 @@ namespace ProjectArchitectureDesigner.Model {
             builder.Class( "$modifiers class $identifier : ModuleArchNode {", @class.Modifiers, @class.Identifier );
             {
                 builder.Comment( "/// Properties" );
-                builder.Property( "public override string Name { get; } = \"$name\";", module.Name );
-                builder.Property( "public override NamespaceArchNode[] Namespaces { get; }" );
+                builder.Property( "public override string Name => \"$name\";", module.Name );
                 builder.Property( module.Namespaces, "public $type $property { get; }", i => (i.Type, i.Property) );
                 builder.Comment( "/// Constructor" );
-                builder.Constructor( "public $type(ProjectArchNode project) : base( project ) {", module.Type );
+                builder.Constructor( "public $type(ProjectArchNode project) {", module.Type );
                 {
-                    builder.Statement( "this.Namespaces = new NamespaceArchNode[] {" );
+                    builder.Statement( "base.Project = project;" );
+                    builder.Statement( "base.Namespaces = new NamespaceArchNode[] {" );
                     builder.Statement( module.Namespaces, "this.$property = new $type( this ),", i => (i.Property, i.Type) );
                     builder.Statement( "};" );
                 }
@@ -63,13 +62,13 @@ namespace ProjectArchitectureDesigner.Model {
             builder.Class( "public class $identifier : NamespaceArchNode {", @namespace.Type );
             {
                 builder.Comment( "/// Properties" );
-                builder.Property( "public override string Name { get; } = \"$name\";", @namespace.Name );
-                builder.Property( "public override GroupArchNode[] Groups { get; }" );
+                builder.Property( "public override string Name => \"$name\";", @namespace.Name );
                 builder.Property( @namespace.Groups, "public $type $property { get; }", i => (i.Type, i.Property) );
                 builder.Comment( "/// Constructor" );
-                builder.Constructor( "public $type(ModuleArchNode module) : base( module ) {", @namespace.Type );
+                builder.Constructor( "public $type(ModuleArchNode module) {", @namespace.Type );
                 {
-                    builder.Statement( "this.Groups = new GroupArchNode[] {" );
+                    builder.Statement( "base.Module = module;" );
+                    builder.Statement( "base.Groups = new GroupArchNode[] {" );
                     builder.Statement( @namespace.Groups, "this.$property = new $type( this ),", i => (i.Property, i.Type) );
                     builder.Statement( "};" );
                 }
@@ -86,12 +85,12 @@ namespace ProjectArchitectureDesigner.Model {
             builder.Class( "public class $identifier : GroupArchNode {", group.Type );
             {
                 builder.Comment( "/// Properties" );
-                builder.Property( "public override string Name { get; } = \"$name\";", group.Name );
-                builder.Property( "public override TypeArchNode[] Types { get; }" );
+                builder.Property( "public override string Name => \"$name\";", group.Name );
                 builder.Comment( "/// Constructor" );
-                builder.Constructor( "public $type(NamespaceArchNode @namespace) : base( @namespace ) {", group.Type );
+                builder.Constructor( "public $type(NamespaceArchNode @namespace) {", group.Type );
                 {
-                    builder.Statement( "this.Types = new TypeArchNode[] {" );
+                    builder.Statement( "base.Namespace = @namespace;" );
+                    builder.Statement( "base.Types = new TypeArchNode[] {" );
                     builder.Statement( group.Types, "new TypeArchNode( typeof($type), this ),", i => i.Type );
                     builder.Statement( "};" );
                 }

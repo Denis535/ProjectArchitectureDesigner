@@ -6,23 +6,32 @@ namespace ProjectArchitectureDesigner.Model {
     using System.Collections.Generic;
     using System.Text;
 
-    public abstract class GroupArchNode : ArchNode {
+    public class GroupArchNode : ArchNode {
 
-        public bool IsDefault => Name is (null or "" or "Default");
-        // Parent
-        public NamespaceArchNode Namespace { get; }
-        // Children
-        public abstract TypeArchNode[] Types { get; }
+        public virtual string Name { get; }
+        public NamespaceArchNode Namespace { get; protected set; }
+        public TypeArchNode[] Types { get; protected init; }
 
 
-        public GroupArchNode(NamespaceArchNode @namespace) {
-            Namespace = @namespace;
+        protected GroupArchNode() {
+            Name = null!;
+            Namespace = null!;
+            Types = null!;
+        }
+        public GroupArchNode(string name, TypeArchNode[] types) {
+            Name = name;
+            Namespace = null!;
+            Types = TypeArchNode.SetGroup( types, this );
         }
 
 
         // Utils
         public override string ToString() {
             return "Group: " + Name;
+        }
+        internal static GroupArchNode[] SetNamespace(GroupArchNode[] groups, NamespaceArchNode @namespace) {
+            foreach (var group in groups) group.Namespace = @namespace;
+            return groups;
         }
 
 

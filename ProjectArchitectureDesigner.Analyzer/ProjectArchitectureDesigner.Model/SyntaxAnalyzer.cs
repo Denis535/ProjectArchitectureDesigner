@@ -24,6 +24,7 @@ namespace ProjectArchitectureDesigner.Model {
                 .SingleOrDefault()?
                 .GetBody()?
                 .DescendantNodes()
+                .Where( IsModuleEntry )
                 .GetModuleEntries()
                 .ToArray();
             return new ProjectInfo( type, modules ?? Array.Empty<ModuleEntry>() );
@@ -41,6 +42,7 @@ namespace ProjectArchitectureDesigner.Model {
                 .SingleOrDefault()?
                 .GetBody()?
                 .DescendantNodes()
+                .Where( IsNamespaceOrTypeEntry )
                 .GetNamespaceEntries()
                 .ToArray();
             return new ModuleInfo( type, namespaces ?? Array.Empty<NamespaceEntry>() );
@@ -49,13 +51,13 @@ namespace ProjectArchitectureDesigner.Model {
 
         // Helpers/GetEntries
         private static IEnumerable<ModuleEntry> GetModuleEntries(this IEnumerable<SyntaxNode> nodes) {
-            foreach (var module in nodes.Where( IsModuleEntry )) {
+            foreach (var module in nodes) {
                 yield return new ModuleEntry( module.GetModuleEntry() );
             }
         }
         private static IEnumerable<NamespaceEntry> GetNamespaceEntries(this IEnumerable<SyntaxNode> nodes) {
-            foreach (var (@namespace, types) in nodes.Where( IsNamespaceOrTypeEntry ).Unflatten( IsNamespaceEntry )) {
-                var namespace_ = @namespace?.GetNamespaceEntry() ?? "Global";
+            foreach (var (@namespace, types) in nodes.Unflatten( IsNamespaceEntry )) {
+                var namespace_ = @namespace.ValueOrDefault?.GetNamespaceEntry() ?? "Global";
                 var groups = types.GetGroupEntries().ToArray();
                 yield return new NamespaceEntry( namespace_, groups );
             }

@@ -10,14 +10,6 @@ namespace ProjectArchitectureDesigner.Model {
 
     public abstract class ArchNode {
 
-        public abstract string Name { get; }
-
-
-        // Utils
-        public override string ToString() {
-            return "Node: " + Name;
-        }
-
 
         // Helpers/GetName
         protected static string GetName(ProjectArchNode project) {

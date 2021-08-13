@@ -10,12 +10,11 @@ namespace ProjectArchitectureDesigner.Model {
     using System.Text;
     using System.Text.CSharp;
 
-    public sealed class TypeArchNode : ArchNode {
+    public class TypeArchNode : ArchNode {
 
         public Type Value { get; }
-        public override string Name => Value.GetIdentifier();
-        // Parent
-        public GroupArchNode Group { get; }
+        public string Name => Value.GetIdentifier();
+        public GroupArchNode Group { get; private set; }
         // TypeInfo
         public TypeInfo TypeInfo => Value.GetTypeInfo();
         public IEnumerable<MemberInfo> DeclaredMembers => Value.GetTypeInfo().DeclaredMembers.Where( IsUserDefined );
@@ -27,6 +26,10 @@ namespace ProjectArchitectureDesigner.Model {
         public IEnumerable<MethodInfo> DeclaredMethods => Value.GetTypeInfo().DeclaredMethods.Where( IsUserDefined );
 
 
+        public TypeArchNode(Type value) {
+            Value = value;
+            Group = null!;
+        }
         public TypeArchNode(Type value, GroupArchNode group) {
             Value = value;
             Group = group;
@@ -36,6 +39,10 @@ namespace ProjectArchitectureDesigner.Model {
         // Utils
         public override string ToString() {
             return "Type: " + Name;
+        }
+        internal static TypeArchNode[] SetGroup(TypeArchNode[] types, GroupArchNode group) {
+            foreach (var type in types) type.Group = group;
+            return types;
         }
 
 

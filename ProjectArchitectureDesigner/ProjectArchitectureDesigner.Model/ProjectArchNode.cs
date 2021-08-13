@@ -4,18 +4,21 @@
 namespace ProjectArchitectureDesigner.Model {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
     using System.Text;
 
-    public abstract class ProjectArchNode : ArchNode {
+    public class ProjectArchNode : ArchNode {
 
-        public virtual Assembly[] Assemblies => Modules.Select( i => i.Assembly ).OfType<Assembly>().ToArray();
-        // Children
-        public abstract ModuleArchNode[] Modules { get; }
+        public virtual string Name { get; }
+        public ModuleArchNode[] Modules { get; protected init; }
 
 
-        public ProjectArchNode() {
+        protected ProjectArchNode() {
+            Name = null!;
+            Modules = null!;
+        }
+        public ProjectArchNode(string name, ModuleArchNode[] modules) {
+            Name = name;
+            Modules = ModuleArchNode.SetProject( modules, this );
         }
 
 
