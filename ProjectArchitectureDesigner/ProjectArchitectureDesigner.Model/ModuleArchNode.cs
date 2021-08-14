@@ -9,23 +9,19 @@ namespace ProjectArchitectureDesigner.Model {
 
     public class ModuleArchNode : ArchNode {
 
-        public virtual Assembly? Assembly { get; }
-        public virtual string Name { get; }
-        public ProjectArchNode Project { get; protected set; }
-        public NamespaceArchNode[] Namespaces { get; protected init; }
+        private readonly NamespaceArchNode[] namespaces = default!;
+        public virtual Assembly? Assembly { get; protected init; } = default!;
+        public virtual string Name { get; protected init; } = default!;
+        public ProjectArchNode Project { get; private set; } = default!;
+        public NamespaceArchNode[] Namespaces { get => namespaces; protected init => namespaces = NamespaceArchNode.WithModule( value, this ); }
 
 
         protected ModuleArchNode() {
-            Assembly = null!;
-            Name = null!;
-            Project = null!;
-            Namespaces = null!;
         }
         public ModuleArchNode(Assembly? assembly, string name, NamespaceArchNode[] namespaces) {
             Assembly = assembly;
             Name = name;
-            Project = null!;
-            Namespaces = NamespaceArchNode.SetModule( namespaces, this );
+            Namespaces = namespaces;
         }
 
 
@@ -40,7 +36,7 @@ namespace ProjectArchitectureDesigner.Model {
         public override string ToString() {
             return "Module: " + Name;
         }
-        internal static ModuleArchNode[] SetProject(ModuleArchNode[] modules, ProjectArchNode project) {
+        internal static ModuleArchNode[] WithProject(ModuleArchNode[] modules, ProjectArchNode project) {
             foreach (var module in modules) module.Project = project;
             return modules;
         }

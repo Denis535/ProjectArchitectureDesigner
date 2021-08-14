@@ -8,17 +8,16 @@ namespace ProjectArchitectureDesigner.Model {
 
     public class ProjectArchNode : ArchNode {
 
-        public virtual string Name { get; }
-        public ModuleArchNode[] Modules { get; protected init; }
+        private readonly ModuleArchNode[] modules = default!;
+        public virtual string Name { get; protected init; } = default!;
+        public ModuleArchNode[] Modules { get => modules; protected init => modules = ModuleArchNode.WithProject( value, this ); }
 
 
         protected ProjectArchNode() {
-            Name = null!;
-            Modules = null!;
         }
         public ProjectArchNode(string name, ModuleArchNode[] modules) {
             Name = name;
-            Modules = ModuleArchNode.SetProject( modules, this );
+            Modules = modules;
         }
 
 

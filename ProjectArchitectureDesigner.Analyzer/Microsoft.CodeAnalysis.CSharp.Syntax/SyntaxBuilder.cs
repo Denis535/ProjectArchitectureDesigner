@@ -47,6 +47,12 @@ namespace Microsoft.CodeAnalysis.CSharp.Syntax {
                 AppendSyntaxLine( text, args.Item1, args.Item2 );
             }
         }
+        public void Property<T>(T[] objects, string text, Func<T, (object, object, object)> arguments) {
+            foreach (var @object in objects) {
+                var args = arguments( @object );
+                AppendSyntaxLine( text, args.Item1, args.Item2, args.Item3 );
+            }
+        }
 
         // Constructor
         public void Constructor(string text, params object?[] args) {

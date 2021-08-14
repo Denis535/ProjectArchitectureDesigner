@@ -8,20 +8,17 @@ namespace ProjectArchitectureDesigner.Model {
 
     public class GroupArchNode : ArchNode {
 
-        public virtual string Name { get; }
-        public NamespaceArchNode Namespace { get; protected set; }
-        public TypeArchNode[] Types { get; protected init; }
+        private readonly TypeArchNode[] types = default!;
+        public virtual string Name { get; protected init; } = default!;
+        public NamespaceArchNode Namespace { get; private set; } = default!;
+        public TypeArchNode[] Types { get => types; protected init => types = TypeArchNode.WithGroup( value, this ); }
 
 
         protected GroupArchNode() {
-            Name = null!;
-            Namespace = null!;
-            Types = null!;
         }
         public GroupArchNode(string name, TypeArchNode[] types) {
             Name = name;
-            Namespace = null!;
-            Types = TypeArchNode.SetGroup( types, this );
+            Types = types;
         }
 
 
@@ -29,7 +26,7 @@ namespace ProjectArchitectureDesigner.Model {
         public override string ToString() {
             return "Group: " + Name;
         }
-        internal static GroupArchNode[] SetNamespace(GroupArchNode[] groups, NamespaceArchNode @namespace) {
+        internal static GroupArchNode[] WithNamespace(GroupArchNode[] groups, NamespaceArchNode @namespace) {
             foreach (var group in groups) group.Namespace = @namespace;
             return groups;
         }

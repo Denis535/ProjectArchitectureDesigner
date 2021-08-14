@@ -102,10 +102,10 @@ namespace ProjectArchitectureDesigner.Model {
         }
         private static void Class(SyntaxBuilder builder, ClassDeclarationSyntax @class) {
             if (@class.IsPartial() && @class.IsProject()) {
-                builder.ProjectClass( @class, @class.GetProjectInfo() );
+                builder.ProjectClass( @class.GetProjectInfo(), @class );
             }
             if (@class.IsPartial() && @class.IsModule()) {
-                builder.ModuleClass( @class, @class.GetModuleInfo() );
+                builder.ModuleClass( @class.GetModuleInfo(), @class );
             }
         }
         // Helpers/Syntax
