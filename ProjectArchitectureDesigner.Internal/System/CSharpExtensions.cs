@@ -12,6 +12,9 @@ namespace System {
         public static TResult Map<TSource, TResult>(this TSource source, Func<TSource, TResult> selector) {
             return selector( source );
         }
+        public static TResult Map<TSource, TArg, TResult>(this TSource source, Func<TSource, TArg, TResult> selector, TArg arg) {
+            return selector( source, arg );
+        }
 
         public static Func<T, bool> AsFunc<T>(this Predicate<T> predicate) {
             return new Func<T, bool>( predicate );

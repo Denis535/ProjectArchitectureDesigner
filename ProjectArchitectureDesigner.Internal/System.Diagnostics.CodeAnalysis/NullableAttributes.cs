@@ -6,20 +6,20 @@ namespace System.Diagnostics.CodeAnalysis {
 
     // AllowNull
     [AttributeUsage( AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property, Inherited = false )]
-    internal sealed class AllowNullAttribute : Attribute {
+    public sealed class AllowNullAttribute : Attribute {
     }
     // DisallowNull
     [AttributeUsage( AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property, Inherited = false )]
-    internal sealed class DisallowNullAttribute : Attribute {
+    public sealed class DisallowNullAttribute : Attribute {
     }
 
     // MaybeNull
     [AttributeUsage( AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue, Inherited = false )]
-    internal sealed class MaybeNullAttribute : Attribute {
+    public sealed class MaybeNullAttribute : Attribute {
     }
     // MaybeNull/When
     [AttributeUsage( AttributeTargets.Parameter, Inherited = false )]
-    internal sealed class MaybeNullWhenAttribute : Attribute {
+    public sealed class MaybeNullWhenAttribute : Attribute {
         public bool ReturnValue { get; }
         public MaybeNullWhenAttribute(bool returnValue) {
             ReturnValue = returnValue;
@@ -28,11 +28,11 @@ namespace System.Diagnostics.CodeAnalysis {
 
     // NotNull
     [AttributeUsage( AttributeTargets.Field | AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue, Inherited = false )]
-    internal sealed class NotNullAttribute : Attribute {
+    public sealed class NotNullAttribute : Attribute {
     }
     // NotNull/When
     [AttributeUsage( AttributeTargets.Parameter, Inherited = false )]
-    internal sealed class NotNullWhenAttribute : Attribute {
+    public sealed class NotNullWhenAttribute : Attribute {
         public bool ReturnValue { get; }
         public NotNullWhenAttribute(bool returnValue) {
             ReturnValue = returnValue;
@@ -40,7 +40,7 @@ namespace System.Diagnostics.CodeAnalysis {
     }
     // NotNull/IfNotNull
     [AttributeUsage( AttributeTargets.Parameter | AttributeTargets.Property | AttributeTargets.ReturnValue, AllowMultiple = true, Inherited = false )]
-    internal sealed class NotNullIfNotNullAttribute : Attribute {
+    public sealed class NotNullIfNotNullAttribute : Attribute {
         public string ParameterName { get; }
         public NotNullIfNotNullAttribute(string parameterName) {
             ParameterName = parameterName;
@@ -49,7 +49,7 @@ namespace System.Diagnostics.CodeAnalysis {
 
     // MemberNotNull
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true )]
-    internal sealed class MemberNotNullAttribute : Attribute {
+    public sealed class MemberNotNullAttribute : Attribute {
         public string[] Members { get; }
         public MemberNotNullAttribute(string member) {
             Members = new[] { member };
@@ -60,7 +60,7 @@ namespace System.Diagnostics.CodeAnalysis {
     }
     // MemberNotNull/When
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true )]
-    internal sealed class MemberNotNullWhenAttribute : Attribute {
+    public sealed class MemberNotNullWhenAttribute : Attribute {
         public bool ReturnValue { get; }
         public string[] Members { get; }
         public MemberNotNullWhenAttribute(bool returnValue, string member) {
@@ -75,11 +75,11 @@ namespace System.Diagnostics.CodeAnalysis {
 
     // DoesNotReturn
     [AttributeUsage( AttributeTargets.Method, Inherited = false )]
-    internal sealed class DoesNotReturnAttribute : Attribute {
+    public sealed class DoesNotReturnAttribute : Attribute {
     }
     // DoesNotReturn/If
     [AttributeUsage( AttributeTargets.Parameter, Inherited = false )]
-    internal sealed class DoesNotReturnIfAttribute : Attribute {
+    public sealed class DoesNotReturnIfAttribute : Attribute {
         public bool ParameterValue { get; }
         public DoesNotReturnIfAttribute(bool parameterValue) {
             ParameterValue = parameterValue;
