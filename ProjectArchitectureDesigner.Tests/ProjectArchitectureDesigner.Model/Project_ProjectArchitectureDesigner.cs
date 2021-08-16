@@ -27,8 +27,8 @@ namespace ProjectArchitectureDesigner.Model {
         public override bool IsVisible(TypeArchNode type) {
             return
                 base.IsVisible( type ) &&
-                !type.Module.Name.EndsWith( ".Internal" ) &&
-                !type.Module.Name.EndsWith( ".Analyzer" );
+                !type.Group.Namespace.Module.Name.EndsWith( ".Internal" ) &&
+                !type.Group.Namespace.Module.Name.EndsWith( ".Analyzer" );
         }
     }
 
@@ -39,6 +39,7 @@ namespace ProjectArchitectureDesigner.Model {
             "ProjectArchitectureDesigner.Model",
             /// Group: ArchNode
             typeof( ArchNode ),
+            typeof( ArchNodeExtensions ),
             /// Group: ArchNode/Children
             typeof( ProjectArchNode ),
             typeof( ModuleArchNode ),
@@ -49,15 +50,16 @@ namespace ProjectArchitectureDesigner.Model {
             /// Group: ProjectRenderer
             typeof( ProjectRenderer ),
             typeof( TextProjectRenderer ),
-            typeof( HierarchicalTextProjectRenderer ),
             typeof( MarkdownDocumentProjectRenderer ),
             /// Group: NodeRenderer
-            typeof( INodeRenderer ),
-            typeof( DelegateNodeRenderer ),
+            typeof( NodeRenderer ),
             typeof( TextNodeRenderer ),
             typeof( LeftAlignedTextNodeRenderer ),
             typeof( RightAlignedTextNodeRenderer ),
-            typeof( MarkdownHighlighter )
+            /// Group: NodeHighlighter
+            typeof( HierarchyNodeHighlighter ),
+            typeof( HierarchyNodeHighlighterHelper ),
+            typeof( MarkdownNodeHighlighter )
         );
     }
 
@@ -95,6 +97,7 @@ namespace ProjectArchitectureDesigner.Model {
             typeof( Option ),
             typeof( Option<> ),
             typeof( CSharpExtensions ),
+            typeof( DelegateDisposable ),
             typeof( StringExtensions ),
             typeof( TypeExtensions ),
             "System.Collections.Generic",

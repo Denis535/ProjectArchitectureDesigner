@@ -34,32 +34,29 @@ namespace ProjectArchitectureDesigner.Model {
                 Assert.NotNull( module.Project );
                 Assert.NotNull( module.Namespaces );
             }
-            foreach (var @namespace in Project.Namespaces) {
+            foreach (var @namespace in Project.GetNamespaces()) {
                 Assert.NotNull( @namespace.Name );
                 Assert.NotNull( @namespace.Module );
                 Assert.NotNull( @namespace.Groups );
             }
-            foreach (var group in Project.Groups) {
+            foreach (var group in Project.GetGroups()) {
                 Assert.NotNull( group.Name );
                 Assert.NotNull( group.Namespace );
                 Assert.NotNull( group.Types );
             }
-            foreach (var type in Project.Types) {
+            foreach (var type in Project.GetTypes()) {
                 Assert.NotNull( type.Value );
                 Assert.NotNull( type.Name );
                 Assert.NotNull( type.Group );
             }
         }
         [Test]
-        public void Test_01_Modules_AreValid() {
+        public void Test_01_Types_AreValid() {
             foreach (var type in Project.GetTypesWithInvalidModule()) {
-                Assert.Fail( "Type '{0}' has invalid module: {1}", type.Name, type.Module.Name );
+                Assert.Fail( "Type '{0}' has invalid module: {1}", type.Name, type.Group.Namespace.Module.Name );
             }
-        }
-        [Test]
-        public void Test_02_Namespaces_AreValid() {
             foreach (var type in Project.GetTypesWithInvalidNamespace()) {
-                Assert.Fail( "Type '{0}' has invalid namespace: {1}", type.Name, type.Namespace.Name );
+                Assert.Fail( "Type '{0}' has invalid namespace: {1}", type.Name, type.Group.Namespace.Name );
             }
         }
         [Test]
@@ -73,28 +70,32 @@ namespace ProjectArchitectureDesigner.Model {
         // Render
         [Test]
         public void Test_10_Render_Text() {
-            var renderer = new TextProjectRenderer( new MarkdownHighlighter( new TextNodeRenderer() ) );
-            TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
+            var renderer = new TextNodeRenderer( null );
+            var renderer2 = new TextProjectRenderer( renderer );
+            TestContext.WriteLine( renderer2.Render( Project.WithVisibleOnly() ) );
         }
         [Test]
         public void Test_11_Render_Text_LeftAligned() {
-            var renderer = new TextProjectRenderer( new MarkdownHighlighter( new LeftAlignedTextNodeRenderer() ) );
-            TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
+            var renderer = new LeftAlignedTextNodeRenderer();
+            var renderer2 = new TextProjectRenderer( renderer );
+            TestContext.WriteLine( renderer2.Render( Project.WithVisibleOnly() ) );
         }
         [Test]
         public void Test_12_Render_Text_RightAligned() {
-            var renderer = new TextProjectRenderer( new MarkdownHighlighter( new RightAlignedTextNodeRenderer() ) );
-            TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
+            var renderer = new RightAlignedTextNodeRenderer();
+            var renderer2 = new TextProjectRenderer( renderer );
+            TestContext.WriteLine( renderer2.Render( Project.WithVisibleOnly() ) );
         }
         [Test]
-        public void Test_13_Render_HierarchicalText() {
-            var renderer = new HierarchicalTextProjectRenderer( new MarkdownHighlighter( new TextNodeRenderer() ) );
-            TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
+        public void Test_13_Render_Text_Hierarchical() {
+            var renderer = new HierarchyNodeHighlighter( new TextNodeRenderer( new MarkdownNodeHighlighter() ) );
+            var renderer2 = new TextProjectRenderer( renderer );
+            TestContext.WriteLine( renderer2.Render( Project.WithVisibleOnly() ) );
         }
         [Test]
         public void Test_14_Render_MarkdownDocument() {
-            var renderer = new MarkdownDocumentProjectRenderer();
-            TestContext.WriteLine( renderer.Render( Project, Project.IsVisible ) );
+            var renderer2 = new MarkdownDocumentProjectRenderer();
+            TestContext.WriteLine( renderer2.Render( Project.WithVisibleOnly() ) );
         }
 
 

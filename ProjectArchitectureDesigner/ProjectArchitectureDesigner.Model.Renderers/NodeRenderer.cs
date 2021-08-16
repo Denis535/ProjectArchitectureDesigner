@@ -20,7 +20,7 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         }
     }
     public class TextNodeRenderer : NodeRenderer {
-        public TextNodeRenderer(NodeRenderer? source) : base( source ) {
+        public TextNodeRenderer(NodeRenderer? source = null) : base( source ) {
         }
         public override string Render(ArchNode node, string text) {
             return node switch {
@@ -31,16 +31,16 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
                 NamespaceArchNode
                 => "Namespace: {0}".Format( text ),
                 GroupArchNode
-                => text,
+                => "{0}".Format( text ),
                 TypeArchNode
-                => text,
+                => "{0}".Format( text ),
                 { } => throw new ArgumentException( "Node is invalid: " + node ),
                 null => throw new ArgumentNullException( nameof( node ), "Node is null" ),
             };
         }
     }
     public class LeftAlignedTextNodeRenderer : NodeRenderer {
-        public LeftAlignedTextNodeRenderer(NodeRenderer? source) : base( source ) {
+        public LeftAlignedTextNodeRenderer(NodeRenderer? source = null) : base( source ) {
         }
         public override string Render(ArchNode node, string text) {
             return node switch {
@@ -60,7 +60,7 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         }
     }
     public class RightAlignedTextNodeRenderer : NodeRenderer {
-        public RightAlignedTextNodeRenderer(NodeRenderer? source) : base( source ) {
+        public RightAlignedTextNodeRenderer(NodeRenderer? source = null) : base( source ) {
         }
         public override string Render(ArchNode node, string text) {
             return node switch {
@@ -79,30 +79,31 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
             };
         }
     }
-    public class HierarchicalTextNodeRenderer : NodeRenderer {
-        public HierarchicalTextNodeRenderer(NodeRenderer? source) : base( source ) {
+    public class HierarchyNodeHighlighter : NodeRenderer {
+        public HierarchyNodeHighlighter(NodeRenderer? source = null) : base( source ) {
         }
-        public override string Render(ArchNode node, string text) {
+        public override string Highlight(ArchNode node, string text) {
             return node switch {
                 ProjectArchNode
-                => "Project: {0}".Format( text ),
+                => "{0}".Format( text ),
                 ModuleArchNode module
-                => "Module: {0}".Format( text ).Map( Indent, module ),
+                => "{0}".Format( text ).Indent( module ),
                 NamespaceArchNode @namespace
-                => "Namespace: {0}".Format( text ).Map( Indent, @namespace ),
+                => "{0}".Format( text ).Indent( @namespace ),
                 GroupArchNode group
-                => "{0}".Format( text ).Map( Indent, group ),
+                => "{0}".Format( text ).Indent( group ),
                 TypeArchNode type
-                => "{0}".Format( text ).Map( Indent, type ),
+                => "{0}".Format( text ).Indent( type ),
                 { } => throw new ArgumentException( "Node is invalid: " + node ),
                 null => throw new ArgumentNullException( nameof( node ), "Node is null" ),
             };
         }
-        // Helpers/GetIndent
-        private static string Indent(string text, ModuleArchNode module) {
+    }
+    internal static class HierarchyNodeHighlighterHelper {
+        public static string Indent(this string text, ModuleArchNode module) {
             return "| - " + text;
         }
-        private static string Indent(string text, NamespaceArchNode @namespace) {
+        public static string Indent(this string text, NamespaceArchNode @namespace) {
             const string indent1 = "|   | - ";
             const string indent2 = "    | - ";
 
@@ -111,7 +112,7 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
                 false => indent2 + text,
             };
         }
-        private static string Indent(string text, GroupArchNode group) {
+        public static string Indent(this string text, GroupArchNode group) {
             const string indent1 = "|   |   | - ";
             const string indent2 = "|       | - ";
             const string indent3 = "    |   | - ";
@@ -124,7 +125,7 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
                 (false, false ) => indent4 + text,
             };
         }
-        private static string Indent(string text, TypeArchNode type) {
+        public static string Indent(this string text, TypeArchNode type) {
             const string indent1 = "|   |   |   ";
             const string indent2 = "|       |   ";
             const string indent3 = "    |   |   ";
@@ -138,8 +139,8 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
             };
         }
     }
-    public class MarkdownHighlighter : NodeRenderer {
-        public MarkdownHighlighter(NodeRenderer? source) : base( source ) {
+    public class MarkdownNodeHighlighter : NodeRenderer {
+        public MarkdownNodeHighlighter(NodeRenderer? source = null) : base( source ) {
         }
         public override string Highlight(ArchNode node, string text) {
             return node switch {
