@@ -1,13 +1,14 @@
 ﻿// This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: http://www.viva64.com
 
-namespace ProjectArchitectureDesigner.Model {
+namespace ProjectArchitectureDesigner.ApiReference {
     using System;
     using System.Collections.Generic;
     using System.Text;
     using System.Text.CSharp;
     using System.Text.Markdown;
     using Microsoft.CodeAnalysis.CSharp.Syntax;
+    using ProjectArchitectureDesigner.Model;
     using ProjectArchitectureDesigner.Model.Renderers;
 
     // Project/ProjectArchitectureDesigner

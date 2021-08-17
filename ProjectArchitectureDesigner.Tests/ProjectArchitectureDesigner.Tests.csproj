@@ -12,8 +12,8 @@
 
     <ItemGroup>
         <ProjectReference Include="..\ProjectArchitectureDesigner\ProjectArchitectureDesigner.csproj" />
-        <ProjectReference Include="..\ProjectArchitectureDesigner.Analyzer\ProjectArchitectureDesigner.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
         <ProjectReference Include="..\ProjectArchitectureDesigner.Internal\ProjectArchitectureDesigner.Internal.csproj" />
+        <ProjectReference Include="..\ProjectArchitectureDesigner.ApiReference\ProjectArchitectureDesigner.ApiReference.csproj" />
     </ItemGroup>
 
 </Project>
