@@ -12,15 +12,31 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         private StringBuilder Builder { get; } = new StringBuilder();
 
 
+        public TextProjectRenderer() : base( new TextNodeRenderer() ) {
+        }
         public TextProjectRenderer(NodeRenderer renderer) : base( renderer ) {
         }
 
 
         // Render
-        public override string Render(ProjectArchNode project) {
+        public override TextProjectRenderer Render(ProjectArchNode project) {
             Builder.Clear();
             AppendHierarchy( project );
-            return Builder.ToString();
+            return this;
+        }
+        public TextProjectRenderer WithNonBreakingSpace() {
+            Builder.Replace( " ", "&nbsp" );
+            return this;
+        }
+        public TextProjectRenderer WithCodeBlock() {
+            Builder.Insert( 0, "```" + Environment.NewLine );
+            Builder.AppendLine( "```" );
+            return this;
+        }
+        public TextProjectRenderer WithDiffCodeBlock() {
+            Builder.Insert( 0, "```diff" + Environment.NewLine );
+            Builder.AppendLine( "```" );
+            return this;
         }
 
 
@@ -40,6 +56,12 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         }
         protected override void AppendLine(TypeArchNode type, string text) {
             Builder.AppendLine( text );
+        }
+
+
+        // Utils
+        public override string ToString() {
+            return Builder.ToString();
         }
 
 

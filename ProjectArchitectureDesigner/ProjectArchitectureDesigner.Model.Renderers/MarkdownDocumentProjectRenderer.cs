@@ -16,17 +16,33 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         private MarkdownBuilder Builder { get; } = new MarkdownBuilder();
 
 
-        public MarkdownDocumentProjectRenderer() : base( new TextNodeRenderer( null ) ) {
+        public MarkdownDocumentProjectRenderer() : base( new TextNodeRenderer() ) {
         }
         public MarkdownDocumentProjectRenderer(NodeRenderer renderer) : base( renderer ) {
         }
 
 
         // Render
-        public override string Render(ProjectArchNode project) {
+        public override MarkdownDocumentProjectRenderer Render(ProjectArchNode project) {
             Builder.Clear();
+            AppendTableOfContents( project );
             AppendHierarchy( project );
-            return Builder.ToString();
+            return this;
+        }
+
+
+        // AppendTableOfContents
+        private void AppendTableOfContents(ProjectArchNode project) {
+            var prevs = new List<string>();
+            Builder.AppendHeader( "Table of Contents", 1 );
+            Builder.AppendItemLink( GetString( project ), 1, prevs );
+            foreach (var module in project.Modules) {
+                Builder.AppendItemLink( GetString( module ), 2, prevs );
+                foreach (var @namespace in module.Namespaces) {
+                    Builder.AppendItemLink( GetString( @namespace ), 3, prevs );
+                }
+            }
+            Builder.AppendLine();
         }
 
 
@@ -47,6 +63,12 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         protected override void AppendLine(TypeArchNode type, string text) {
             Builder.AppendItem( text, 1 );
             //AppendTypeInfo( Builder, type.TypeInfo );
+        }
+
+
+        // Utils
+        public override string ToString() {
+            return Builder.ToString();
         }
 
 

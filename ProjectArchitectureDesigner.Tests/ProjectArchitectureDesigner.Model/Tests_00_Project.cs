@@ -72,30 +72,35 @@ namespace ProjectArchitectureDesigner.Model {
         public void Test_10_Render_Text() {
             var renderer = new TextNodeRenderer( null );
             var renderer2 = new TextProjectRenderer( renderer );
-            TestContext.WriteLine( renderer2.Render( Project.WithVisibleOnly() ) );
+            var text = renderer2.Render( Project.WithVisibleOnly() ).WithCodeBlock().ToString();
+            TestContext.WriteLine( text );
         }
         [Test]
         public void Test_11_Render_Text_LeftAligned() {
             var renderer = new LeftAlignedTextNodeRenderer();
             var renderer2 = new TextProjectRenderer( renderer );
-            TestContext.WriteLine( renderer2.Render( Project.WithVisibleOnly() ) );
+            var text = renderer2.Render( Project.WithVisibleOnly() ).WithCodeBlock().ToString();
+            TestContext.WriteLine( text );
         }
         [Test]
         public void Test_12_Render_Text_RightAligned() {
             var renderer = new RightAlignedTextNodeRenderer();
             var renderer2 = new TextProjectRenderer( renderer );
-            TestContext.WriteLine( renderer2.Render( Project.WithVisibleOnly() ) );
+            var text = renderer2.Render( Project.WithVisibleOnly() ).WithCodeBlock().ToString();
+            TestContext.WriteLine( text );
         }
         [Test]
         public void Test_13_Render_Text_Hierarchical() {
             var renderer = new HierarchyNodeHighlighter( new TextNodeRenderer( new MarkdownNodeHighlighter() ) );
             var renderer2 = new TextProjectRenderer( renderer );
-            TestContext.WriteLine( renderer2.Render( Project.WithVisibleOnly() ) );
+            var text = renderer2.Render( Project.WithVisibleOnly() ).WithCodeBlock().ToString();
+            TestContext.WriteLine( text );
         }
         [Test]
         public void Test_14_Render_MarkdownDocument() {
             var renderer2 = new MarkdownDocumentProjectRenderer();
-            TestContext.WriteLine( renderer2.Render( Project.WithVisibleOnly() ) );
+            var text = renderer2.Render( Project.WithVisibleOnly() ).ToString();
+            TestContext.WriteLine( text );
         }
 
 

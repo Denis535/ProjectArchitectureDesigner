@@ -18,32 +18,32 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
 
 
         // Render
-        public abstract string Render(ProjectArchNode project);
+        public abstract ProjectRenderer Render(ProjectArchNode project);
 
 
         // AppendHierarchy
         protected virtual void AppendHierarchy(ProjectArchNode project) {
-            AppendLine( project, GetString( project ) );
+            AppendLine( project, GetStringWithHighlight( project ) );
             foreach (var module in project.Modules) {
                 AppendHierarchy( module );
             }
         }
         protected virtual void AppendHierarchy(ModuleArchNode module) {
-            AppendLine( module, GetString( module ) );
+            AppendLine( module, GetStringWithHighlight( module ) );
             foreach (var @namespace in module.Namespaces) {
                 AppendHierarchy( @namespace );
             }
         }
         protected virtual void AppendHierarchy(NamespaceArchNode @namespace) {
-            AppendLine( @namespace, GetString( @namespace ) );
+            AppendLine( @namespace, GetStringWithHighlight( @namespace ) );
             foreach (var group in @namespace.Groups) {
                 AppendHierarchy( group );
             }
         }
         protected virtual void AppendHierarchy(GroupArchNode group) {
-            AppendLine( group, GetString( group ) );
+            AppendLine( group, GetStringWithHighlight( group ) );
             foreach (var type in group.Types) {
-                AppendLine( type, GetString( type ) );
+                AppendLine( type, GetStringWithHighlight( type ) );
             }
         }
 
@@ -63,13 +63,21 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
 
         // GetString
         protected virtual string GetString(ArchNode node) {
-            return GetString( Renderer, node, node.GetName() );
+            return Render( Renderer, node, node.GetName() );
+        }
+        protected virtual string GetStringWithHighlight(ArchNode node) {
+            return RenderAndHighlight( Renderer, node, node.GetName() );
         }
 
 
-        // Helpers/GetString
-        private static string GetString(NodeRenderer renderer, ArchNode node, string text) {
-            if (renderer.Source != null) text = GetString( renderer.Source, node, text );
+        // Helpers/Render
+        private static string Render(NodeRenderer renderer, ArchNode node, string text) {
+            if (renderer.Source != null) text = Render( renderer.Source, node, text );
+            text = renderer.Render( node, text );
+            return text;
+        }
+        private static string RenderAndHighlight(NodeRenderer renderer, ArchNode node, string text) {
+            if (renderer.Source != null) text = RenderAndHighlight( renderer.Source, node, text );
             text = renderer.Render( node, text );
             text = renderer.Highlight( node, text );
             return text;

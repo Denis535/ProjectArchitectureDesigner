@@ -8,7 +8,15 @@ namespace System.Text.Markdown {
 
     public class MarkdownBuilder {
 
-        private StringBuilder Builder { get; } = new StringBuilder();
+        private StringBuilder Builder { get; }
+
+
+        public MarkdownBuilder() {
+            Builder = new StringBuilder();
+        }
+        public MarkdownBuilder(StringBuilder builder) {
+            Builder = builder;
+        }
 
 
         // Append/Block
