@@ -10,30 +10,34 @@ It will give you:
 
 # The api overview
 
-- **Project:&nbspProjectArchitectureDesigner**
-- | - **Module:&nbspProjectArchitectureDesigner**
--     | - **Namespace:&nbspProjectArchitectureDesigner.Model**
--     |   | - **ArchNode**
--     |   |   ArchNode
--     |   | - **ArchNode/Children**
--     |   |   ProjectArchNode
--     |   |   ModuleArchNode
--     |   |   NamespaceArchNode
--     |   |   GroupArchNode
--     |   |   TypeArchNode
--     | - **Namespace:&nbspProjectArchitectureDesigner.Model.Renderers**
--         | - **ProjectRenderer**
--         |   ProjectRenderer
--         |   TextProjectRenderer
--         |   HierarchicalTextProjectRenderer
--         |   MarkdownDocumentProjectRenderer
--         | - **NodeRenderer**
--         |   INodeRenderer
--         |   DelegateNodeRenderer
--         |   TextNodeRenderer
--         |   LeftAlignedTextNodeRenderer
--         |   RightAlignedTextNodeRenderer
--         |   MarkdownHighlighter
+```diff
+@@ Project: ProjectArchitectureDesigner @@
+- | - Module: ProjectArchitectureDesigner
+!     | - Namespace: ProjectArchitectureDesigner.Model
++     |   | - ArchNode
+#     |   |   ArchNode
+#     |   |   ArchNodeExtensions
++     |   | - ArchNode/Children
+#     |   |   ProjectArchNode
+#     |   |   ModuleArchNode
+#     |   |   NamespaceArchNode
+#     |   |   GroupArchNode
+#     |   |   TypeArchNode
+!     | - Namespace: ProjectArchitectureDesigner.Model.Renderers
++         | - ProjectRenderer
+#         |   ProjectRenderer
+#         |   TextProjectRenderer
+#         |   MarkdownDocumentProjectRenderer
++         | - NodeRenderer
+#         |   NodeRenderer
+#         |   TextRenderer
+#         |   LeftAlignedTextRenderer
+#         |   RightAlignedTextRenderer
++         | - NodeHighlighter
+#         |   HierarchyHighlighter
+#         |   MarkdownHighlighter
+#         |   ColorHighlighter
+```
 
 # The getting started
 
@@ -557,7 +561,7 @@ public sealed partial class Module_ProjectArchitectureDesigner_Internal {
     * `Utility` - Set of useful methods.
     * `Object` - Low-level data structure.
 - Understand the semantic of your type's members. [I can distinguish the following semantic categories](https://softwareengineering.stackexchange.com/a/404752/352915):
-    * `Property` - Name, Background, Color, Data, Content, Value, Children, Parent.
+    * `Property` (`information`) - Name, Background, Color, Data, Content, Value, Children, Parent.
     * `Query` (`question`) - IsInitialized, IsRunning, HasValue, CanRun, DoesEqual(value), Equals(value), AreEqual(v1, v2), GetValue().
     * `Directive` - IgnoreXml, RunOnLoad, CloseWhenError.
     * `Event` - OnChange, OnChanged.
