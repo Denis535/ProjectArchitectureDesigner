@@ -11,7 +11,7 @@ It will give you:
 # The api overview
 
 ```diff
-@@ Project: ProjectArchitectureDesigner @@
+- Project: ProjectArchitectureDesigner
 - | - Module: ProjectArchitectureDesigner
 !     | - Namespace: ProjectArchitectureDesigner.Model
 +     |   | - ArchNode
