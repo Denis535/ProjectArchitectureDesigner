@@ -14,29 +14,29 @@ It will give you:
 - Project: ProjectArchitectureDesigner
 - | - Module: ProjectArchitectureDesigner
 !     | - Namespace: ProjectArchitectureDesigner.Model
-#     |   | - ArchNode
-+     |   |   ArchNode
-+     |   |   ArchNodeExtensions
-#     |   | - ArchNode/Children
-+     |   |   ProjectArchNode
-+     |   |   ModuleArchNode
-+     |   |   NamespaceArchNode
-+     |   |   GroupArchNode
-+     |   |   TypeArchNode
++     |   | - ArchNode
+#     |   |   ArchNode
+#     |   |   ArchNodeExtensions
++     |   | - ArchNode/Children
+#     |   |   ProjectArchNode
+#     |   |   ModuleArchNode
+#     |   |   NamespaceArchNode
+#     |   |   GroupArchNode
+#     |   |   TypeArchNode
 !     | - Namespace: ProjectArchitectureDesigner.Model.Renderers
-#         | - ProjectRenderer
-+         |   ProjectRenderer
-+         |   TextProjectRenderer
-+         |   MarkdownDocumentProjectRenderer
-#         | - NodeRenderer
-+         |   NodeRenderer
-+         |   TextRenderer
-+         |   LeftAlignedTextRenderer
-+         |   RightAlignedTextRenderer
-#         | - NodeHighlighter
-+         |   HierarchyHighlighter
-+         |   MarkdownHighlighter
-+         |   ColorHighlighter
++         | - ProjectRenderer
+#         |   ProjectRenderer
+#         |   TextProjectRenderer
+#         |   MarkdownDocumentProjectRenderer
++         | - NodeRenderer
+#         |   NodeRenderer
+#         |   TextRenderer
+#         |   LeftAlignedTextRenderer
+#         |   RightAlignedTextRenderer
++         | - NodeHighlighter
+#         |   HierarchyHighlighter
+#         |   MarkdownHighlighter
+#         |   ColorHighlighter
 ```
 
 # The getting started
