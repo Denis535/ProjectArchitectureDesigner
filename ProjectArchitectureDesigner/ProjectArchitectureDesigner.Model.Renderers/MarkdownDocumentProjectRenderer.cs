@@ -16,7 +16,7 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         private MarkdownBuilder Builder { get; } = new MarkdownBuilder();
 
 
-        public MarkdownDocumentProjectRenderer() : base( new TextNodeRenderer() ) {
+        public MarkdownDocumentProjectRenderer() : base( new TextRenderer() ) {
         }
         public MarkdownDocumentProjectRenderer(NodeRenderer renderer) : base( renderer ) {
         }
@@ -24,8 +24,12 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
 
         // Render
         public override MarkdownDocumentProjectRenderer Render(ProjectArchNode project) {
-            Builder.Clear();
             AppendTableOfContents( project );
+            AppendHierarchy( project );
+            return this;
+        }
+        public MarkdownDocumentProjectRenderer Render(ProjectArchNode project, bool withTableOfContents) {
+            if (withTableOfContents) AppendTableOfContents( project );
             AppendHierarchy( project );
             return this;
         }
@@ -46,21 +50,21 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         }
 
 
-        // AppendLine
-        protected override void AppendLine(ProjectArchNode project, string text) {
+        // AppendNode
+        protected override void AppendNode(ProjectArchNode project, string text) {
             Builder.AppendHeader( text, 1 );
         }
-        protected override void AppendLine(ModuleArchNode module, string text) {
+        protected override void AppendNode(ModuleArchNode module, string text) {
             Builder.AppendHeader( text, 2 );
         }
-        protected override void AppendLine(NamespaceArchNode @namespace, string text) {
+        protected override void AppendNode(NamespaceArchNode @namespace, string text) {
             Builder.AppendHeader( text, 3 );
         }
-        protected override void AppendLine(GroupArchNode group, string text) {
+        protected override void AppendNode(GroupArchNode group, string text) {
             if (group.IsDefault()) return;
             Builder.AppendItem( text.Bold(), 1 );
         }
-        protected override void AppendLine(TypeArchNode type, string text) {
+        protected override void AppendNode(TypeArchNode type, string text) {
             Builder.AppendItem( text, 1 );
             //AppendTypeInfo( Builder, type.TypeInfo );
         }
