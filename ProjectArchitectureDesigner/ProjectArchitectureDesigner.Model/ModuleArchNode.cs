@@ -9,16 +9,16 @@ namespace ProjectArchitectureDesigner.Model {
 
     public class ModuleArchNode : ArchNode {
 
-        private readonly NamespaceArchNode[] namespaces = default!;
-        public virtual Assembly? Assembly { get; protected init; } = default!;
-        public virtual string Name { get; protected init; } = default!;
+        private readonly NamespaceArchNode[] Namespaces_BackingField = default!;
         public ProjectArchNode Project { get; private set; } = default!;
-        public NamespaceArchNode[] Namespaces { get => namespaces; protected init => namespaces = NamespaceArchNode.WithModule( value, this ); }
+        public virtual Assembly? Assembly { get; init; } = default!;
+        public virtual string Name { get; init; } = default!;
+        public NamespaceArchNode[] Namespaces { get => Namespaces_BackingField; init => Namespaces_BackingField = NamespaceArchNode.WithModule( value, this ); }
 
 
-        protected ModuleArchNode() {
+        public ModuleArchNode() {
         }
-        public ModuleArchNode(Assembly? assembly, string name, NamespaceArchNode[] namespaces) {
+        public ModuleArchNode(Assembly? assembly, string name, params NamespaceArchNode[] namespaces) {
             Assembly = assembly;
             Name = name;
             Namespaces = namespaces;

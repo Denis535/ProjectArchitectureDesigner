@@ -38,7 +38,7 @@ namespace ProjectArchitectureDesigner.Model {
         // WithVisibleOnly
         public static ProjectArchNode WithVisibleOnly(this ProjectArchNode project) {
             var modules = project.Modules.GetVisibleOnly().ToArray();
-            return new ProjectArchNode( project.Name, modules );
+            return new ProjectArchNode( project.Assemblies, project.Name, modules );
         }
         private static IEnumerable<ModuleArchNode> GetVisibleOnly(this ModuleArchNode[] modules) {
             foreach (var module in modules) {
@@ -76,6 +76,7 @@ namespace ProjectArchitectureDesigner.Model {
         }
         // GetAssemblies
         public static Assembly[] GetAssemblies(this ProjectArchNode project) {
+            if (project.Assemblies != null) return project.Assemblies;
             return project.Modules.Select( i => i.Assembly ).OfType<Assembly>().ToArray();
         }
         // IsGlobal

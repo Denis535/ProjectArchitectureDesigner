@@ -8,15 +8,15 @@ namespace ProjectArchitectureDesigner.Model {
 
     public class GroupArchNode : ArchNode {
 
-        private readonly TypeArchNode[] types = default!;
-        public virtual string Name { get; protected init; } = default!;
+        private readonly TypeArchNode[] Types_BackingField = default!;
         public NamespaceArchNode Namespace { get; private set; } = default!;
-        public TypeArchNode[] Types { get => types; protected init => types = TypeArchNode.WithGroup( value, this ); }
+        public virtual string Name { get; init; } = default!;
+        public TypeArchNode[] Types { get => Types_BackingField; init => Types_BackingField = TypeArchNode.WithGroup( value, this ); }
 
 
-        protected GroupArchNode() {
+        public GroupArchNode() {
         }
-        public GroupArchNode(string name, TypeArchNode[] types) {
+        public GroupArchNode(string name, params TypeArchNode[] types) {
             Name = name;
             Types = types;
         }

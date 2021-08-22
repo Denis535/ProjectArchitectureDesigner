@@ -8,9 +8,46 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
 
     public abstract class NodeRenderer {
         internal NodeRenderer? Source { get; }
+
         public NodeRenderer(NodeRenderer? source) {
             Source = source;
         }
+
+        // Create
+        public static TNodeRenderer Create<TNodeRenderer>()
+            where TNodeRenderer : NodeRenderer {
+            return Create<TNodeRenderer>( null );
+        }
+        public static TNodeRenderer1 Create<TNodeRenderer1, TNodeRenderer2>()
+            where TNodeRenderer1 : NodeRenderer
+            where TNodeRenderer2 : NodeRenderer {
+            return Create<TNodeRenderer1>( Create<TNodeRenderer2>( null ) );
+        }
+        public static TNodeRenderer1 Create<TNodeRenderer1, TNodeRenderer2, TNodeRenderer3>()
+            where TNodeRenderer1 : NodeRenderer
+            where TNodeRenderer2 : NodeRenderer
+            where TNodeRenderer3 : NodeRenderer {
+            return Create<TNodeRenderer1>( Create<TNodeRenderer2>( Create<TNodeRenderer3>( null ) ) );
+        }
+        public static TNodeRenderer1 Create<TNodeRenderer1, TNodeRenderer2, TNodeRenderer3, TNodeRenderer4>()
+            where TNodeRenderer1 : NodeRenderer
+            where TNodeRenderer2 : NodeRenderer
+            where TNodeRenderer3 : NodeRenderer
+            where TNodeRenderer4 : NodeRenderer {
+            return Create<TNodeRenderer1>( Create<TNodeRenderer2>( Create<TNodeRenderer3>( Create<TNodeRenderer4>( null ) ) ) );
+        }
+        public static TNodeRenderer1 Create<TNodeRenderer1, TNodeRenderer2, TNodeRenderer3, TNodeRenderer4, TNodeRenderer5>()
+            where TNodeRenderer1 : NodeRenderer
+            where TNodeRenderer2 : NodeRenderer
+            where TNodeRenderer3 : NodeRenderer
+            where TNodeRenderer4 : NodeRenderer
+            where TNodeRenderer5 : NodeRenderer {
+            return Create<TNodeRenderer1>( Create<TNodeRenderer2>( Create<TNodeRenderer3>( Create<TNodeRenderer4>( Create<TNodeRenderer5>( null ) ) ) ) );
+        }
+        private static TNodeRenderer Create<TNodeRenderer>(NodeRenderer? renderer) where TNodeRenderer : NodeRenderer {
+            return (TNodeRenderer) Activator.CreateInstance( typeof( TNodeRenderer ), new NodeRenderer?[] { renderer } )!;
+        }
+
         public virtual string Render(ArchNode node, string text) {
             if (node is ProjectArchNode project) return Render( project, text );
             if (node is ModuleArchNode module) return Render( module, text );
@@ -24,6 +61,7 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         public virtual string Render(NamespaceArchNode @namespace, string text) => text;
         public virtual string Render(GroupArchNode group, string text) => text;
         public virtual string Render(TypeArchNode type, string text) => text;
+
         public virtual string Highlight(ArchNode node, string text) {
             if (node is ProjectArchNode project) return Highlight( project, text );
             if (node is ModuleArchNode module) return Highlight( module, text );

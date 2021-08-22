@@ -12,9 +12,9 @@ namespace ProjectArchitectureDesigner.Model {
 
     public sealed class TypeArchNode : ArchNode {
 
+        public GroupArchNode Group { get; private set; } = default!;
         public Type Value { get; }
         public string Name => Value.GetIdentifier();
-        public GroupArchNode Group { get; private set; } = default!;
         // TypeInfo
         public TypeInfo TypeInfo => Value.GetTypeInfo();
         public IEnumerable<MemberInfo> DeclaredMembers => Value.GetTypeInfo().DeclaredMembers.Where( IsUserDefined );

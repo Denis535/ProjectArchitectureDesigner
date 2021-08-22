@@ -4,7 +4,6 @@
 namespace ProjectArchitectureDesigner.Model.Renderers {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Reflection;
     using System.Text;
     using System.Text.CSharp;
@@ -13,12 +12,14 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
 
     public class MarkdownDocumentProjectRenderer : ProjectRenderer {
 
-        private MarkdownBuilder Builder { get; } = new MarkdownBuilder();
+        private new MarkdownBuilder Builder { get; }
 
 
         public MarkdownDocumentProjectRenderer() : base( new TextRenderer() ) {
+            Builder = new MarkdownBuilder( base.Builder );
         }
         public MarkdownDocumentProjectRenderer(NodeRenderer renderer) : base( renderer ) {
+            Builder = new MarkdownBuilder( base.Builder );
         }
 
 
@@ -50,49 +51,42 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         }
 
 
-        // AppendNode
-        protected override void AppendNode(ProjectArchNode project, string text) {
+        // AppendText
+        protected override void AppendText(ProjectArchNode project, string text) {
             Builder.AppendHeader( text, 1 );
         }
-        protected override void AppendNode(ModuleArchNode module, string text) {
+        protected override void AppendText(ModuleArchNode module, string text) {
             Builder.AppendHeader( text, 2 );
         }
-        protected override void AppendNode(NamespaceArchNode @namespace, string text) {
+        protected override void AppendText(NamespaceArchNode @namespace, string text) {
             Builder.AppendHeader( text, 3 );
         }
-        protected override void AppendNode(GroupArchNode group, string text) {
-            if (group.IsDefault()) return;
+        protected override void AppendText(GroupArchNode group, string text) {
             Builder.AppendItem( text.Bold(), 1 );
         }
-        protected override void AppendNode(TypeArchNode type, string text) {
+        protected override void AppendText(TypeArchNode type, string text) {
             Builder.AppendItem( text, 1 );
             //AppendTypeInfo( Builder, type.TypeInfo );
         }
 
 
-        // Utils
-        public override string ToString() {
-            return Builder.ToString();
-        }
-
-
         // Helpers/AppendTypeInfo
-        private static void AppendTypeInfo(MarkdownBuilder builder, TypeInfo type) {
-            builder.AppendCSharpCodeBlockStart();
-            builder.AppendLine( type.GetTypeSyntax() );
-            AppendMembersInfo( builder, "Fields", type.DeclaredFields );
-            AppendMembersInfo( builder, "Properties", type.DeclaredProperties );
-            AppendMembersInfo( builder, "Events", type.DeclaredEvents );
-            AppendMembersInfo( builder, "Constructors", type.DeclaredConstructors );
-            AppendMembersInfo( builder, "Methods", type.DeclaredMethods );
-            builder.AppendCodeBlockEnd();
-        }
-        private static void AppendMembersInfo(MarkdownBuilder builder, string title, IEnumerable<MemberInfo> members) {
-            if (members.Any()) builder.Append( "// " ).AppendLine( title );
-            foreach (var member in members.OrderBy( i => i.MetadataToken )) {
-                builder.AppendLine( member.GetMemberSyntax() );
-            }
-        }
+        //private static void AppendTypeInfo(MarkdownBuilder builder, TypeInfo type) {
+        //    builder.AppendCSharpCodeBlockStart();
+        //    builder.AppendLine( type.GetTypeSyntax() );
+        //    AppendMembersInfo( builder, "Fields", type.DeclaredFields );
+        //    AppendMembersInfo( builder, "Properties", type.DeclaredProperties );
+        //    AppendMembersInfo( builder, "Events", type.DeclaredEvents );
+        //    AppendMembersInfo( builder, "Constructors", type.DeclaredConstructors );
+        //    AppendMembersInfo( builder, "Methods", type.DeclaredMethods );
+        //    builder.AppendCodeBlockEnd();
+        //}
+        //private static void AppendMembersInfo(MarkdownBuilder builder, string title, IEnumerable<MemberInfo> members) {
+        //    if (members.Any()) builder.Append( "// " ).AppendLine( title );
+        //    foreach (var member in members.OrderBy( i => i.MetadataToken )) {
+        //        builder.AppendLine( member.GetMemberSyntax() );
+        //    }
+        //}
 
 
     }

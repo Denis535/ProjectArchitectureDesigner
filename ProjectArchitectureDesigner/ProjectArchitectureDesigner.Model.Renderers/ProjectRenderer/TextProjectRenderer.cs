@@ -8,39 +8,29 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
     using ProjectArchitectureDesigner.Model;
 
     public class TextProjectRenderer : ProjectRenderer {
-
-        protected StringBuilder Builder { get; } = new StringBuilder();
-
-
         public TextProjectRenderer() : base( new TextRenderer() ) {
         }
         public TextProjectRenderer(NodeRenderer renderer) : base( renderer ) {
         }
-
-
         // Render
         public override TextProjectRenderer Render(ProjectArchNode project) {
+            Builder.AppendLine( "```" );
             AppendHierarchy( project );
+            Builder.AppendLine( "```" );
             return this;
         }
-        public TextProjectRenderer WithNonBreakingSpace() {
-            Builder.Replace( " ", "&nbsp" );
+    }
+    public class ColorTextProjectRenderer : ProjectRenderer {
+        public ColorTextProjectRenderer() : base( new ColorHighlighter( new TextRenderer() ) ) {
+        }
+        public ColorTextProjectRenderer(NodeRenderer renderer) : base( renderer ) {
+        }
+        // Render
+        public override ColorTextProjectRenderer Render(ProjectArchNode project) {
+            Builder.AppendLine( "```diff" );
+            AppendHierarchy( project );
+            Builder.AppendLine( "```" );
             return this;
         }
-
-
-        // AppendNode
-        protected override void AppendNode(ArchNode node, string text) {
-            if (node is GroupArchNode group && group.IsDefault()) return;
-            Builder.AppendLine( text );
-        }
-
-
-        // Utils
-        public override string ToString() {
-            return Builder.ToString();
-        }
-
-
     }
 }

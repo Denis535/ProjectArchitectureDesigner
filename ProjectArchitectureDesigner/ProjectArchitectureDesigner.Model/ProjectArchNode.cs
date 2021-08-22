@@ -4,18 +4,21 @@
 namespace ProjectArchitectureDesigner.Model {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Text;
 
     public class ProjectArchNode : ArchNode {
 
-        private readonly ModuleArchNode[] modules = default!;
-        public virtual string Name { get; protected init; } = default!;
-        public ModuleArchNode[] Modules { get => modules; protected init => modules = ModuleArchNode.WithProject( value, this ); }
+        private readonly ModuleArchNode[] Modules_BackingField = default!;
+        public virtual Assembly[]? Assemblies { get; init; }
+        public virtual string Name { get; init; } = default!;
+        public ModuleArchNode[] Modules { get => Modules_BackingField; init => Modules_BackingField = ModuleArchNode.WithProject( value, this ); }
 
 
-        protected ProjectArchNode() {
+        public ProjectArchNode() {
         }
-        public ProjectArchNode(string name, ModuleArchNode[] modules) {
+        public ProjectArchNode(Assembly[]? assemblies, string name, params ModuleArchNode[] modules) {
+            Assemblies = assemblies;
             Name = name;
             Modules = modules;
         }
