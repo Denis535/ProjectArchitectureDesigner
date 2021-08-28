@@ -4,7 +4,6 @@
 namespace ProjectArchitectureDesigner.Model.Renderers {
     using System;
     using System.Collections.Generic;
-    using System.Reflection;
     using System.Text;
     using System.Text.CSharp;
     using System.Text.Markdown;
@@ -12,61 +11,55 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
 
     public class MarkdownDocumentProjectRenderer : ProjectRenderer {
 
-        private new MarkdownBuilder Builder { get; }
+        private List<string> Uris { get; } = new List<string>();
 
 
         public MarkdownDocumentProjectRenderer() : base( new TextRenderer() ) {
-            Builder = new MarkdownBuilder( base.Builder );
         }
         public MarkdownDocumentProjectRenderer(NodeRenderer renderer) : base( renderer ) {
-            Builder = new MarkdownBuilder( base.Builder );
         }
 
 
-        // Render
-        public override MarkdownDocumentProjectRenderer Render(ProjectArchNode project) {
-            AppendTableOfContents( project );
-            AppendHierarchy( project );
-            return this;
-        }
-        public MarkdownDocumentProjectRenderer Render(ProjectArchNode project, bool withTableOfContents) {
-            if (withTableOfContents) AppendTableOfContents( project );
-            AppendHierarchy( project );
-            return this;
-        }
-
-
-        // AppendTableOfContents
-        private void AppendTableOfContents(ProjectArchNode project) {
-            var prevs = new List<string>();
-            Builder.AppendHeader( "Table of Contents", 1 );
-            Builder.AppendItemLink( GetString( project ), 1, prevs );
-            foreach (var module in project.Modules) {
-                Builder.AppendItemLink( GetString( module ), 2, prevs );
-                foreach (var @namespace in module.Namespaces) {
-                    Builder.AppendItemLink( GetString( @namespace ), 3, prevs );
-                }
-            }
+        // Append/TableOfContents
+        protected override void AppendTableOfContents(ProjectArchNode project) {
+            Builder.AppendLine( "Table of Contents".Header1() );
+            base.AppendTableOfContents( project );
             Builder.AppendLine();
         }
-
-
-        // AppendText
-        protected override void AppendText(ProjectArchNode project, string text) {
-            Builder.AppendHeader( text, 1 );
+        protected override void AppendTableOfContentsRow(ArchNode node) {
+            var text = GetStringWithHighlight( node );
+            if (node is ProjectArchNode) {
+                Builder.AppendLine( text.Link( Uris ).Item1() );
+            }
+            if (node is ModuleArchNode) {
+                Builder.AppendLine( text.Link( Uris ).Item2() );
+            }
+            if (node is NamespaceArchNode) {
+                Builder.AppendLine( text.Link( Uris ).Item3() );
+            }
         }
-        protected override void AppendText(ModuleArchNode module, string text) {
-            Builder.AppendHeader( text, 2 );
+        // Append/Content
+        protected override void AppendContent(ProjectArchNode project) {
+            base.AppendContent( project );
         }
-        protected override void AppendText(NamespaceArchNode @namespace, string text) {
-            Builder.AppendHeader( text, 3 );
-        }
-        protected override void AppendText(GroupArchNode group, string text) {
-            Builder.AppendItem( text.Bold(), 1 );
-        }
-        protected override void AppendText(TypeArchNode type, string text) {
-            Builder.AppendItem( text, 1 );
-            //AppendTypeInfo( Builder, type.TypeInfo );
+        protected override void AppendContentRow(ArchNode node) {
+            var text = GetStringWithHighlight( node );
+            if (node is ProjectArchNode) {
+                Builder.AppendLine( text.Header1() );
+            }
+            if (node is ModuleArchNode) {
+                Builder.AppendLine( text.Header2() );
+            }
+            if (node is NamespaceArchNode) {
+                Builder.AppendLine( text.Header3() );
+            }
+            if (node is GroupArchNode) {
+                Builder.AppendLine( text.Bold().Item1() );
+            }
+            if (node is TypeArchNode type) {
+                Builder.AppendLine( text.Item1() );
+                //AppendTypeInfo( Builder, type.TypeInfo );
+            }
         }
 
 

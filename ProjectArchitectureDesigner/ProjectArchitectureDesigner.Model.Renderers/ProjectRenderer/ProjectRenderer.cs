@@ -20,62 +20,61 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
 
 
         // Render
-        public abstract ProjectRenderer Render(ProjectArchNode project);
-
-
-        // AppendHierarchy
-        protected virtual void AppendHierarchy(ProjectArchNode project) {
-            AppendText( project );
-            foreach (var module in project.Modules) {
-                AppendHierarchy( module );
-            }
+        public string Render(ProjectArchNode project) {
+            RenderInternal( project, true );
+            return Builder.ToString();
         }
-        protected virtual void AppendHierarchy(ModuleArchNode module) {
-            AppendText( module );
-            foreach (var @namespace in module.Namespaces) {
-                AppendHierarchy( @namespace );
-            }
+        public string Render(ProjectArchNode project, bool withTableOfContents) {
+            RenderInternal( project, withTableOfContents );
+            return Builder.ToString();
         }
-        protected virtual void AppendHierarchy(NamespaceArchNode @namespace) {
-            AppendText( @namespace );
-            foreach (var group in @namespace.Groups) {
-                AppendHierarchy( group );
-            }
-        }
-        protected virtual void AppendHierarchy(GroupArchNode group) {
-            AppendText( group );
-            foreach (var type in group.Types) {
-                AppendText( type );
-            }
+        protected virtual void RenderInternal(ProjectArchNode project, bool withTableOfContents) {
+            if (withTableOfContents) AppendTableOfContents( project );
+            AppendContent( project );
         }
 
 
-        // AppendText
-        protected virtual void AppendText(ArchNode node) {
-            if (node is GroupArchNode group && group.IsDefault()) return;
-            AppendText( node, GetStringWithHighlight( node ) );
+        // Append/TableOfContents
+        protected virtual void AppendTableOfContents(ProjectArchNode project) {
+            AppendTableOfContentsRow( project );
+            foreach (var module in project.Modules) AppendTableOfContents( module );
         }
-        protected virtual void AppendText(ArchNode node, string text) {
-            if (node is ProjectArchNode project) AppendText( project, text );
-            if (node is ModuleArchNode module) AppendText( module, text );
-            if (node is NamespaceArchNode @namespace) AppendText( @namespace, text );
-            if (node is GroupArchNode group) AppendText( group, text );
-            if (node is TypeArchNode type) AppendText( type, text );
+        private void AppendTableOfContents(ModuleArchNode module) {
+            AppendTableOfContentsRow( module );
+            foreach (var @namespace in module.Namespaces) AppendTableOfContents( @namespace );
         }
-        protected virtual void AppendText(ProjectArchNode project, string text) {
-            Builder.AppendLine( text );
+        private void AppendTableOfContents(NamespaceArchNode @namespace) {
+            AppendTableOfContentsRow( @namespace );
         }
-        protected virtual void AppendText(ModuleArchNode module, string text) {
-            Builder.AppendLine( text );
+        // Append/TableOfContents/Row
+        protected virtual void AppendTableOfContentsRow(ArchNode node) {
+            Builder.AppendLine( GetStringWithHighlight( node ) );
         }
-        protected virtual void AppendText(NamespaceArchNode @namespace, string text) {
-            Builder.AppendLine( text );
+
+
+        // Append/Content
+        protected virtual void AppendContent(ProjectArchNode project) {
+            AppendContentRow( project );
+            foreach (var module in project.Modules) AppendContent( module );
         }
-        protected virtual void AppendText(GroupArchNode group, string text) {
-            Builder.AppendLine( text );
+        private void AppendContent(ModuleArchNode module) {
+            AppendContentRow( module );
+            foreach (var @namespace in module.Namespaces) AppendContent( @namespace );
         }
-        protected virtual void AppendText(TypeArchNode type, string text) {
-            Builder.AppendLine( text );
+        private void AppendContent(NamespaceArchNode @namespace) {
+            AppendContentRow( @namespace );
+            foreach (var group in @namespace.Groups) AppendContent( group );
+        }
+        private void AppendContent(GroupArchNode group) {
+            AppendContentRow( group );
+            foreach (var type in group.Types) AppendContent( type );
+        }
+        private void AppendContent(TypeArchNode type) {
+            AppendContentRow( type );
+        }
+        // Append/Content/Row
+        protected virtual void AppendContentRow(ArchNode node) {
+            Builder.AppendLine( GetStringWithHighlight( node ) );
         }
 
 

@@ -13,24 +13,80 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         public TextProjectRenderer(NodeRenderer renderer) : base( renderer ) {
         }
         // Render
-        public override TextProjectRenderer Render(ProjectArchNode project) {
+        protected override void RenderInternal(ProjectArchNode project, bool withTableOfContents) {
             Builder.AppendLine( "```" );
-            AppendHierarchy( project );
+            if (withTableOfContents) AppendTableOfContents( project );
+            AppendContent( project );
             Builder.AppendLine( "```" );
-            return this;
+        }
+        // Append/TableOfContents
+        protected override void AppendTableOfContents(ProjectArchNode project) {
+            Builder.AppendLine( "Table of Contents" );
+            base.AppendTableOfContents( project );
+            Builder.AppendLine();
+        }
+        protected override void AppendTableOfContentsRow(ArchNode node) {
+            Builder.AppendLine( GetStringWithHighlight( node ) );
+        }
+        // Append/Content
+        protected override void AppendContent(ProjectArchNode project) {
+            base.AppendContent( project );
+        }
+        protected override void AppendContentRow(ArchNode node) {
+            Builder.AppendLine( GetStringWithHighlight( node ) );
         }
     }
     public class ColorTextProjectRenderer : ProjectRenderer {
-        public ColorTextProjectRenderer() : base( new ColorHighlighter( new TextRenderer() ) ) {
+        public ColorTextProjectRenderer() : base( new TextRenderer() ) {
         }
         public ColorTextProjectRenderer(NodeRenderer renderer) : base( renderer ) {
         }
         // Render
-        public override ColorTextProjectRenderer Render(ProjectArchNode project) {
+        protected override void RenderInternal(ProjectArchNode project, bool withTableOfContents) {
             Builder.AppendLine( "```diff" );
-            AppendHierarchy( project );
+            if (withTableOfContents) AppendTableOfContents( project );
+            AppendContent( project );
             Builder.AppendLine( "```" );
-            return this;
+        }
+        // Append/TableOfContents
+        protected override void AppendTableOfContents(ProjectArchNode project) {
+            Builder.AppendLine( "Table of Contents" );
+            base.AppendTableOfContents( project );
+            Builder.AppendLine();
+        }
+        protected override void AppendTableOfContentsRow(ArchNode node) {
+            var text = GetStringWithHighlight( node );
+            if (node is ProjectArchNode) {
+                Builder.Append( "- " ).AppendLine( text );
+            }
+            if (node is ModuleArchNode) {
+                Builder.Append( "- " ).AppendLine( text );
+            }
+            if (node is NamespaceArchNode) {
+                Builder.Append( "! " ).AppendLine( text );
+            }
+        }
+        // Append/Content
+        protected override void AppendContent(ProjectArchNode project) {
+            base.AppendContent( project );
+        }
+        protected override void AppendContentRow(ArchNode node) {
+            var text = GetStringWithHighlight( node );
+            if (node is ProjectArchNode) {
+                Builder.Append( "- " ).AppendLine( text );
+            }
+            if (node is ModuleArchNode) {
+                Builder.Append( "- " ).AppendLine( text );
+            }
+            if (node is NamespaceArchNode) {
+                Builder.Append( "! " ).AppendLine( text );
+            }
+            if (node is GroupArchNode) {
+                Builder.Append( "+ " ).AppendLine( text );
+            }
+            if (node is TypeArchNode) {
+                Builder.Append( "# " ).AppendLine( text );
+            }
         }
     }
 }

@@ -51,16 +51,18 @@ namespace ProjectArchitectureDesigner.ApiReference {
             /// Group: ProjectRenderer
             typeof( ProjectRenderer ),
             typeof( TextProjectRenderer ),
+            typeof( ColorTextProjectRenderer ),
+            typeof( MarkdownProjectRenderer ),
             typeof( MarkdownDocumentProjectRenderer ),
             /// Group: NodeRenderer
             typeof( NodeRenderer ),
-            typeof( TextNodeRenderer ),
-            typeof( LeftAlignedTextNodeRenderer ),
-            typeof( RightAlignedTextNodeRenderer ),
+            typeof( TextRenderer ),
+            typeof( LeftAlignedTextRenderer ),
+            typeof( RightAlignedTextRenderer ),
             /// Group: NodeHighlighter
-            typeof( HierarchyNodeHighlighter ),
-            typeof( HierarchyNodeHighlighterHelper ),
-            typeof( MarkdownNodeHighlighter )
+            typeof( HierarchyHighlighter ),
+            typeof( HierarchyHighlighterHelper ),
+            typeof( MarkdownHighlighter )
         );
     }
 
@@ -116,7 +118,6 @@ namespace ProjectArchitectureDesigner.ApiReference {
             typeof( AccessLevelExtensions ),
             typeof( AccessLevel ),
             "System.Text.Markdown",
-            typeof( MarkdownBuilder ),
             typeof( MarkdownSyntaxFactory )
         );
     }

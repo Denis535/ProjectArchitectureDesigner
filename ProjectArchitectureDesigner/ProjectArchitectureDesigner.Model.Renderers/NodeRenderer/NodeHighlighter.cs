@@ -6,20 +6,6 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
     using System.Collections.Generic;
     using System.Text;
 
-    public class ColorHighlighter : NodeRenderer {
-        public ColorHighlighter(NodeRenderer? source = null) : base( source ) {
-        }
-        public override string Render(ProjectArchNode project, string text)
-            => "- {0}".Format( text );
-        public override string Render(ModuleArchNode module, string text)
-            => "- {0}".Format( text );
-        public override string Render(NamespaceArchNode @namespace, string text)
-            => "! {0}".Format( text );
-        public override string Render(GroupArchNode group, string text)
-            => "+ {0}".Format( text );
-        public override string Render(TypeArchNode type, string text)
-            => "# {0}".Format( text );
-    }
     public class HierarchyHighlighter : NodeRenderer {
         public HierarchyHighlighter(NodeRenderer? source = null) : base( source ) {
         }
