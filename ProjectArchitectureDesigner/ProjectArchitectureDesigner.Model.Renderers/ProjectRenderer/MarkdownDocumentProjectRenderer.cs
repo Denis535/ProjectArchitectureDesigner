@@ -29,13 +29,13 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         protected override void AppendTableOfContentsRow(ArchNode node) {
             var text = GetStringWithHighlight( node );
             if (node is ProjectArchNode) {
-                Builder.AppendLine( text.Link( Uris ).Item1() );
+                Builder.AppendLine( text.Link( text, Uris ).Item1() );
             }
             if (node is ModuleArchNode) {
-                Builder.AppendLine( text.Link( Uris ).Item2() );
+                Builder.AppendLine( text.Link( text, Uris ).Item2() );
             }
             if (node is NamespaceArchNode) {
-                Builder.AppendLine( text.Link( Uris ).Item3() );
+                Builder.AppendLine( text.Link( text, Uris ).Item3() );
             }
         }
         // Append/Content

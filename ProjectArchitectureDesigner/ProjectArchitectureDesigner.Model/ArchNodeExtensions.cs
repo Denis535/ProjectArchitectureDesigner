@@ -11,30 +11,6 @@ namespace ProjectArchitectureDesigner.Model {
     public static class ArchNodeExtensions {
 
 
-        // Testing
-        public static IEnumerable<TypeArchNode> GetTypesWithInvalidModule(this ProjectArchNode project) {
-            foreach (var type in project.GetTypes()) {
-                if (type.Group.Namespace.Module.Name != type.Value.Assembly.GetName().Name) {
-                    yield return type;
-                }
-            }
-        }
-        public static IEnumerable<TypeArchNode> GetTypesWithInvalidNamespace(this ProjectArchNode project) {
-            foreach (var type in project.GetTypes()) {
-                if (type.Group.Namespace.Name != type.Value.Namespace) {
-                    yield return type;
-                }
-            }
-        }
-        public static void GetMissingAndExtraTypes(this ProjectArchNode project, out Type[] missing, out TypeArchNode[] extra) {
-            var actual = project.GetTypes();
-            var expected = project.GetAssemblies().SelectMany( i => i.DefinedTypes ).Where( project.IsSupported );
-            var expected_ = new LinkedList<Type>( expected );
-            extra = actual.Where( i => !expected_.Remove( i.Value ) ).ToArray();
-            missing = expected_.ToArray();
-        }
-
-
         // WithVisibleOnly
         public static ProjectArchNode WithVisibleOnly(this ProjectArchNode project) {
             var modules = project.Modules.GetVisibleOnly().ToArray();
@@ -60,7 +36,7 @@ namespace ProjectArchitectureDesigner.Model {
         }
         private static IEnumerable<TypeArchNode> GetVisibleOnly(this TypeArchNode[] types) {
             foreach (var type in types) {
-                if (type.Group.Namespace.Module.Project.IsVisible( type )) yield return new TypeArchNode( type.Value );
+                if (type.GetProject().IsVisible( type )) yield return new TypeArchNode( type.Value );
             }
         }
 

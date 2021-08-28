@@ -10,6 +10,7 @@ namespace ProjectArchitectureDesigner.ApiReference {
     using Microsoft.CodeAnalysis.CSharp.Syntax;
     using ProjectArchitectureDesigner.Model;
     using ProjectArchitectureDesigner.Model.Renderers;
+    using ProjectArchitectureDesigner.Model.Testing;
 
     // Project/ProjectArchitectureDesigner
     public sealed partial class Project_ProjectArchitectureDesigner : ProjectArchNode {
@@ -47,6 +48,8 @@ namespace ProjectArchitectureDesigner.ApiReference {
             typeof( NamespaceArchNode ),
             typeof( GroupArchNode ),
             typeof( TypeArchNode ),
+            "ProjectArchitectureDesigner.Model.Testing",
+            typeof( ProjectTestingUtils ),
             "ProjectArchitectureDesigner.Model.Renderers",
             /// Group: ProjectRenderer
             typeof( ProjectRenderer ),

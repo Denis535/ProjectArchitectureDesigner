@@ -38,27 +38,20 @@ namespace System.Text.Markdown {
         public static string Bold(this string text) => "**{0}**".Format( text );
         public static string Code(this string text) => "`{0}`".Format( text );
         public static string Reference(this string text, int id) => "[{0}][{1}]".Format( text, id );
-        public static string Link(this string text, string uri) => "[{0}]({1})".Format( text, uri );
-        public static string Link(this string text, IList<string> uris) => "[{0}]({1})".Format( text, text.ToUri( uris ) );
-        public static string Link(this int id, string uri) => "[{0}]:{1}".Format( id, uri );
+        public static string Link(this string text, string uri, IList<string> uris) => "[{0}]({1})".Format( text, uri.ToUri().WithId( uris ) );
+        public static string Link(this int id, string uri, IList<string> uris) => "[{0}]:{1}".Format( id, uri.ToUri().WithId( uris ) );
 
 
-        // Utils
-        public static string ToUri(this string text, IList<string> uris) {
-            return ToUri( text ).GetUriWithId( uris );
-        }
-        public static string ToUri(this string text) {
+        // Helpers/Uri
+        private static string ToUri(this string text) {
             var chars = text.ToLowerInvariant().Trim().Replace( "  ", " " ).Replace( " ", "-" ).Where( IsValid );
             return string.Concat( chars );
         }
-        public static string GetUriWithId(this string uri, IList<string> uris) {
+        private static string WithId(this string uri, IList<string> uris) {
             var id = uris.Count( i => i == uri );
             uris.Add( uri );
             return (id != 0) ? (uri + "-" + id) : uri;
         }
-
-
-        // Helpers
         private static bool IsValid(char @char) {
             return char.IsLetterOrDigit( @char ) || @char is '-';
         }
