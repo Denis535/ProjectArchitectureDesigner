@@ -4,14 +4,13 @@
 namespace ProjectArchitectureDesigner.Model.Renderers {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text;
     using ProjectArchitectureDesigner.Model;
 
     public abstract class ProjectRenderer {
 
         protected StringBuilder Builder { get; } = new StringBuilder();
-        private NodeRenderer Renderer { get; }
+        protected NodeRenderer Renderer { get; }
 
 
         public ProjectRenderer(NodeRenderer renderer) {
@@ -36,82 +35,55 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
 
         // Append/TableOfContents
         protected virtual void AppendTableOfContents(ProjectArchNode project) {
-            AppendTableOfContentsRow( project );
+            var text = Renderer.Render( project );
+            AppendTableOfContentsRow( project, text );
             foreach (var module in project.Modules) AppendTableOfContents( module );
         }
         private void AppendTableOfContents(ModuleArchNode module) {
-            AppendTableOfContentsRow( module );
+            var text = Renderer.Render( module );
+            AppendTableOfContentsRow( module, text );
             foreach (var @namespace in module.Namespaces) AppendTableOfContents( @namespace );
         }
         private void AppendTableOfContents(NamespaceArchNode @namespace) {
-            AppendTableOfContentsRow( @namespace );
+            var text = Renderer.Render( @namespace );
+            AppendTableOfContentsRow( @namespace, text );
         }
         // Append/TableOfContents/Row
-        protected virtual void AppendTableOfContentsRow(ArchNode node) {
-            Builder.AppendLine( GetStringWithHighlight( node ) );
-        }
+        protected abstract void AppendTableOfContentsRow(ArchNode node, string text);
 
 
         // Append/Content
         protected virtual void AppendContent(ProjectArchNode project) {
-            AppendContentRow( project );
+            var text = Renderer.Render( project );
+            AppendContentRow( project, text );
             foreach (var module in project.Modules) AppendContent( module );
         }
         private void AppendContent(ModuleArchNode module) {
-            AppendContentRow( module );
+            var text = Renderer.Render( module );
+            AppendContentRow( module, text );
             foreach (var @namespace in module.Namespaces) AppendContent( @namespace );
         }
         private void AppendContent(NamespaceArchNode @namespace) {
-            AppendContentRow( @namespace );
+            var text = Renderer.Render( @namespace );
+            AppendContentRow( @namespace, text );
             foreach (var group in @namespace.Groups) AppendContent( group );
         }
         private void AppendContent(GroupArchNode group) {
-            AppendContentRow( group );
+            var text = Renderer.Render( group );
+            AppendContentRow( group, text );
             foreach (var type in group.Types) AppendContent( type );
         }
         private void AppendContent(TypeArchNode type) {
-            AppendContentRow( type );
+            var text = Renderer.Render( type );
+            AppendContentRow( type, text );
         }
         // Append/Content/Row
-        protected virtual void AppendContentRow(ArchNode node) {
-            Builder.AppendLine( GetStringWithHighlight( node ) );
-        }
-
-
-        // GetString
-        protected string GetString(ArchNode node) {
-            return Render( Renderer, node, node.GetName() );
-        }
-        protected string GetStringWithHighlight(ArchNode node) {
-            return RenderAndHighlight( Renderer, node, node.GetName() );
-        }
+        protected abstract void AppendContentRow(ArchNode node, string text);
 
 
         // Utils
         public override string ToString() {
             return Builder.ToString();
-        }
-
-
-        // Helpers/Render
-        private static string Render(NodeRenderer renderer, ArchNode node, string text) {
-            foreach (var renderer_ in Flatten( renderer ).Reverse()) {
-                text = renderer_.Render( node, text );
-            }
-            return text;
-        }
-        private static string RenderAndHighlight(NodeRenderer renderer, ArchNode node, string text) {
-            foreach (var renderer_ in Flatten( renderer ).Reverse()) {
-                text = renderer_.Render( node, text );
-                text = renderer_.Highlight( node, text );
-            }
-            return text;
-        }
-        private static IEnumerable<NodeRenderer> Flatten(NodeRenderer? renderer) {
-            while (renderer != null) {
-                yield return renderer;
-                renderer = renderer.Source;
-            }
         }
 
 

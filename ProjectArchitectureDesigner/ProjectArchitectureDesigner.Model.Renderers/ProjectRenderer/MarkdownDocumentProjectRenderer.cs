@@ -26,8 +26,7 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
             base.AppendTableOfContents( project );
             Builder.AppendLine();
         }
-        protected override void AppendTableOfContentsRow(ArchNode node) {
-            var text = GetStringWithHighlight( node );
+        protected override void AppendTableOfContentsRow(ArchNode node, string text) {
             if (node is ProjectArchNode) {
                 Builder.AppendLine( text.Link( text, Uris ).Item1() );
             }
@@ -42,8 +41,7 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         protected override void AppendContent(ProjectArchNode project) {
             base.AppendContent( project );
         }
-        protected override void AppendContentRow(ArchNode node) {
-            var text = GetStringWithHighlight( node );
+        protected override void AppendContentRow(ArchNode node, string text) {
             if (node is ProjectArchNode) {
                 Builder.AppendLine( text.Header1() );
             }

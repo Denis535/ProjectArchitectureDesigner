@@ -23,7 +23,6 @@ namespace ProjectArchitectureDesigner {
         }
 
 
-        // Project
         [Test]
         public void Test_00_Project_IsValid() {
             foreach (var type in Project.GetTypesWithInvalidModule()) {

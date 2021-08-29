@@ -9,29 +9,29 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
     public class HierarchyHighlighter : NodeRenderer {
         public HierarchyHighlighter(NodeRenderer? source = null) : base( source ) {
         }
-        public override string Render(ProjectArchNode project, string text)
+        protected override string Render(ProjectArchNode project, string text)
             => "{0}".Format( text );
-        public override string Render(ModuleArchNode module, string text)
+        protected override string Render(ModuleArchNode module, string text)
             => "{0}".Format( text ).Indent( module );
-        public override string Render(NamespaceArchNode @namespace, string text)
+        protected override string Render(NamespaceArchNode @namespace, string text)
             => "{0}".Format( text ).Indent( @namespace );
-        public override string Render(GroupArchNode group, string text)
+        protected override string Render(GroupArchNode group, string text)
             => "{0}".Format( text ).Indent( group );
-        public override string Render(TypeArchNode type, string text)
+        protected override string Render(TypeArchNode type, string text)
             => "{0}".Format( text ).Indent( type );
     }
     public class MarkdownHighlighter : NodeRenderer {
         public MarkdownHighlighter(NodeRenderer? source = null) : base( source ) {
         }
-        public override string Render(ProjectArchNode project, string text)
+        protected override string Render(ProjectArchNode project, string text)
             => "**{0}**".Format( text );
-        public override string Render(ModuleArchNode module, string text)
+        protected override string Render(ModuleArchNode module, string text)
             => "**{0}**".Format( text );
-        public override string Render(NamespaceArchNode @namespace, string text)
+        protected override string Render(NamespaceArchNode @namespace, string text)
             => "**{0}**".Format( text );
-        public override string Render(GroupArchNode group, string text)
+        protected override string Render(GroupArchNode group, string text)
             => "**{0}**".Format( text );
-        public override string Render(TypeArchNode type, string text)
+        protected override string Render(TypeArchNode type, string text)
             => "{0}".Format( text );
     }
     // Helpers

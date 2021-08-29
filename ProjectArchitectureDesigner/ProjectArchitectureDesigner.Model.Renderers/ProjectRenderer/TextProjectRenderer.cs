@@ -25,15 +25,15 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
             base.AppendTableOfContents( project );
             Builder.AppendLine();
         }
-        protected override void AppendTableOfContentsRow(ArchNode node) {
-            Builder.AppendLine( GetStringWithHighlight( node ) );
+        protected override void AppendTableOfContentsRow(ArchNode node, string text) {
+            Builder.AppendLine( text );
         }
         // Append/Content
         protected override void AppendContent(ProjectArchNode project) {
             base.AppendContent( project );
         }
-        protected override void AppendContentRow(ArchNode node) {
-            Builder.AppendLine( GetStringWithHighlight( node ) );
+        protected override void AppendContentRow(ArchNode node, string text) {
+            Builder.AppendLine( text );
         }
     }
     public class ColorTextProjectRenderer : ProjectRenderer {
@@ -54,8 +54,7 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
             base.AppendTableOfContents( project );
             Builder.AppendLine();
         }
-        protected override void AppendTableOfContentsRow(ArchNode node) {
-            var text = GetStringWithHighlight( node );
+        protected override void AppendTableOfContentsRow(ArchNode node, string text) {
             if (node is ProjectArchNode) {
                 Builder.Append( "- " ).AppendLine( text );
             }
@@ -70,8 +69,7 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         protected override void AppendContent(ProjectArchNode project) {
             base.AppendContent( project );
         }
-        protected override void AppendContentRow(ArchNode node) {
-            var text = GetStringWithHighlight( node );
+        protected override void AppendContentRow(ArchNode node, string text) {
             if (node is ProjectArchNode) {
                 Builder.Append( "- " ).AppendLine( text );
             }

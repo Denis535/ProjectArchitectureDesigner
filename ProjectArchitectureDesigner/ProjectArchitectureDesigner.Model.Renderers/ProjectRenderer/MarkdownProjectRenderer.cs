@@ -23,9 +23,8 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
             base.AppendTableOfContents( project );
             Builder.AppendLine();
         }
-        protected override void AppendTableOfContentsRow(ArchNode node) {
-            var text = GetStringWithHighlight( node );
-            //text = text.Replace( " ", "&nbsp" );
+        protected override void AppendTableOfContentsRow(ArchNode node, string text) {
+            text = text.Replace( " ", "&nbsp" );
             if (node is ProjectArchNode) {
                 Builder.AppendLine( text.Item1() );
             }
@@ -40,9 +39,8 @@ namespace ProjectArchitectureDesigner.Model.Renderers {
         protected override void AppendContent(ProjectArchNode project) {
             base.AppendContent( project );
         }
-        protected override void AppendContentRow(ArchNode node) {
-            var text = GetStringWithHighlight( node );
-            //text = text.Replace( " ", "&nbsp" );
+        protected override void AppendContentRow(ArchNode node, string text) {
+            text = text.Replace( " ", "&nbsp" );
             if (node is ProjectArchNode) {
                 Builder.AppendLine( text.Item1() );
             }
