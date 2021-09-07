@@ -1,10 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+        <PackageReference Include="NUnit" Version="3.13.2" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
         <ProjectReference Include="..\ProjectArchitectureDesigner\ProjectArchitectureDesigner.csproj" />
         <ProjectReference Include="..\ProjectArchitectureDesigner.Analyzer\ProjectArchitectureDesigner.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
         <ProjectReference Include="..\ProjectArchitectureDesigner.Internal\ProjectArchitectureDesigner.Internal.csproj" />

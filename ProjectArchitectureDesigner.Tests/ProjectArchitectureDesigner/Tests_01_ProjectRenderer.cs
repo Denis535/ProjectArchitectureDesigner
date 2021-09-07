@@ -10,7 +10,7 @@ namespace ProjectArchitectureDesigner {
     using ProjectArchitectureDesigner.Model;
     using ProjectArchitectureDesigner.Model.Renderers;
 
-    public class Tests_02_ProjectRenderer {
+    public class Tests_01_ProjectRenderer {
 
 
         // Text/Color

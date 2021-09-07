@@ -9,7 +9,7 @@ namespace ProjectArchitectureDesigner {
     using ProjectArchitectureDesigner.ApiReference;
     using ProjectArchitectureDesigner.Model;
 
-    public class Tests_01_Project {
+    public class Tests_00_Project {
 
 
         [Test]
