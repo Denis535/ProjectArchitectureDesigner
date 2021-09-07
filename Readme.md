@@ -551,23 +551,24 @@ public sealed partial class Module_ProjectArchitectureDesigner_Internal {
 
 # The best practices and tips to make your code design better
 
- - Separate low-level code from hight-level code. In more complex projects you can separate extra, unimportant, utility code. Do it on every level (low/hight-level modules, low/hight-level classes, low/hight-level functions). For example: Presentation, Application, Extensions, Domain, Infrastructure, Internal.
+ - Isolate high-level code from low-level code. Do it on every level: low/hight-level modules, low/hight-level classes, low/hight-level methods. For example: Presentation, Application, Extensions, Domain, Infrastructure, Internal.
+ - Put all your low-level code into existing namespaces: System, Microsoft, MyProject, ThirdPartyProject. Don't create special namespaces for low-level code: MyProject.Internal, MyProject.Utils, MyProject.Helpers.
  - Put all your code into folders reflecting the namespaces containing those code.
- - Put your low-level code into existing namespaces: System, Microsoft, MyProject, ThirdPartyProject instead of special namespaces: MyProject.Internal, MyProject.Helpers.
  - Understand the semantic of your types. I can distinguish the following semantic categories:
-    * `Attribute` - Set of constants.
-    * `Service` - Logic.
-    * `Entity` - Data, state and logic.
-    * `Utility` - Set of useful methods.
-    * `Object` - Low-level data structure.
-- Understand the semantic of your type's members. [I can distinguish the following semantic categories](https://softwareengineering.stackexchange.com/a/404752/352915):
-    * `Property` (`information`) - Name, Background, Color, Data, Content, Value, Children, Parent.
-    * `Query` (`question`) - IsInitialized, IsRunning, HasValue, CanRun, DoesEqual(value), Equals(value), AreEqual(v1, v2), GetValue().
-    * `Directive` - IgnoreXml, RunOnLoad, CloseWhenError.
-    * `Event` - OnChange, OnChanged.
-    * `Command` - Initialize(), Run(), Stop(), SetValue(value).
-    * `Handler` - OnChange(value), OnChanged(value).
-    * `Utility` - Sqrt(value), Cos(value), Sin(value), ToString(), GetHashCode().
+    * `Attribute` - metadata.
+    * `Entity` - data, state and behavior logic.
+    * `Service` - stateless behavior logic.
+    * `Object` - simple data.
+    * `Utility` - set of useful functions.
+- Understand the semantic of your type's members. I can distinguish the following semantic categories: ([More details](https://softwareengineering.stackexchange.com/a/404752/352915))
+    * `Property`
+    * `Question`
+    * `Directive`
+    * `Command`
+    * `Event trigger`
+    * `Event handler`
+    * `Data`
+    * `Utility`
 
 # The links
 
