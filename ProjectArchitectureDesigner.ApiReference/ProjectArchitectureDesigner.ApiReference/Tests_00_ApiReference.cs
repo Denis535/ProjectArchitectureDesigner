@@ -8,6 +8,7 @@ namespace ProjectArchitectureDesigner.ApiReference {
     using System.Linq;
     using System.Text;
     using NUnit.Framework;
+    using ProjectArchitectureDesigner.Model;
     using ProjectArchitectureDesigner.Model.Testing;
 
     public class Tests_00_ApiReference {
@@ -23,24 +24,28 @@ namespace ProjectArchitectureDesigner.ApiReference {
 
 
         [Test]
-        public void Test_00_Project_IsComplete_Missing() {
+        public void Test_00_Project_ShouldBe_Complete() {
             var types = Project.GetMissingTypes();
-            if (types.Any()) Assert.Warn( ProjectTestingUtils.GetMessage_ProjectHasMissingTypes( types ) );
+            if (types.Any()) Assert.Warn( ProjectTestingUtils.GetMessage_ProjectHasMissingTypes( Project, types ) );
         }
         [Test]
-        public void Test_01_Project_IsComplete_Extra() {
+        public void Test_01_Project_ShouldHaveNo_ExtraTypes() {
             var types = Project.GetExtraTypes();
-            if (types.Any()) Assert.Warn( ProjectTestingUtils.GetMessage_ProjectHasExtraTypes( types ) );
+            if (types.Any()) Assert.Warn( ProjectTestingUtils.GetMessage_ProjectHasExtraTypes( Project, types ) );
         }
         [Test]
-        public void Test_02_Project_IsValid_Module() {
-            var types = Project.GetTypesWithInvalidModule();
-            if (types.Any()) Assert.Fail( ProjectTestingUtils.GetMessage_ProjectHasTypeWithInvalidModule( types ) );
+        public void Test_02_Modules_ShouldHaveNo_ExtraTypes() {
+            foreach (var module in Project.Modules) {
+                var types = module.GetExtraTypes();
+                if (types.Any()) Assert.Warn( ProjectTestingUtils.GetMessage_ModuleHasExtraTypes( module, types ) );
+            }
         }
         [Test]
-        public void Test_03_Project_IsValid_Namespace() {
-            var types = Project.GetTypesWithInvalidNamespace();
-            if (types.Any()) Assert.Fail( ProjectTestingUtils.GetMessage_ProjectHasTypeWithInvalidNamespace( types ) );
+        public void Test_03_Namespaces_ShouldHaveNo_ExtraTypes() {
+            foreach (var @namespace in Project.GetNamespaces()) {
+                var types = @namespace.GetExtraTypes();
+                if (types.Any()) Assert.Warn( ProjectTestingUtils.GetMessage_NamespaceHasExtraTypes( @namespace, types ) );
+            }
         }
 
 

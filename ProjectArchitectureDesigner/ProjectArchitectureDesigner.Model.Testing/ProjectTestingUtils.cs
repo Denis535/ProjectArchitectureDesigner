@@ -10,65 +10,65 @@ namespace ProjectArchitectureDesigner.Model.Testing {
     public static class ProjectTestingUtils {
 
 
-        // GetTypes
+        // GetTypes/Missing
         public static Type[] GetMissingTypes(this ProjectArchNode project) {
             var actual = project.GetTypes();
             var expected_ = new LinkedList<Type>( project.GetAssemblies().SelectMany( i => i.DefinedTypes ).Where( project.IsSupported ) );
             foreach (var actual_ in actual) {
                 expected_.Remove( actual_.Value );
             }
-            return expected_.ToArray();
+            return expected_.ToArray(); // expected without actual
         }
+        // GetTypes/Extra
         public static TypeArchNode[] GetExtraTypes(this ProjectArchNode project) {
             var actual_ = new LinkedList<TypeArchNode>( project.GetTypes() );
             var expected = project.GetAssemblies().SelectMany( i => i.DefinedTypes ).Where( project.IsSupported );
             foreach (var expected_ in expected) {
                 actual_.Remove( i => i.Value == expected_ );
             }
-            return actual_.ToArray();
+            return actual_.ToArray(); // actual without expected
         }
-        public static IEnumerable<TypeArchNode> GetTypesWithInvalidModule(this ProjectArchNode project) {
-            foreach (var module in project.Modules) {
-                foreach (var type in module.GetTypes()) {
-                    if (type.Value.Assembly.GetName().Name != module.Name) {
-                        yield return type;
-                    }
+        // GetTypes/Extra
+        public static IEnumerable<TypeArchNode> GetExtraTypes(this ModuleArchNode module) {
+            foreach (var type in module.GetTypes()) {
+                if (type.Value.Assembly.GetName().Name != module.Name) {
+                    yield return type;
                 }
             }
         }
-        public static IEnumerable<TypeArchNode> GetTypesWithInvalidNamespace(this ProjectArchNode project) {
-            foreach (var @namespace in project.GetNamespaces()) {
-                foreach (var type in @namespace.GetTypes()) {
-                    if (type.Value.Namespace != @namespace.Name) {
-                        yield return type;
-                    }
+        public static IEnumerable<TypeArchNode> GetExtraTypes(this NamespaceArchNode @namespace) {
+            foreach (var type in @namespace.GetTypes()) {
+                if (type.Value.Namespace != @namespace.Name) {
+                    yield return type;
                 }
             }
         }
 
 
-        // GetMessage
-        public static string GetMessage_ProjectHasMissingTypes(IEnumerable<Type> types) {
+        // GetMessage/Missing
+        public static string GetMessage_ProjectHasMissingTypes(ProjectArchNode project, IEnumerable<Type> types) {
             var builder = new StringBuilder();
-            builder.AppendLine( "Project has missing types:" );
+            builder.AppendLineFormat( "Project '{0}' has missing types:", project.Name );
             builder.AppendTypes( types );
             return builder.ToString();
         }
-        public static string GetMessage_ProjectHasExtraTypes(IEnumerable<TypeArchNode> types) {
+        // GetMessage/Extra
+        public static string GetMessage_ProjectHasExtraTypes(ProjectArchNode project, IEnumerable<TypeArchNode> types) {
             var builder = new StringBuilder();
-            builder.AppendLine( "Project has extra types:" );
+            builder.AppendLineFormat( "Project '{0}' has extra types:", project.Name );
             builder.AppendTypes( types );
             return builder.ToString();
         }
-        public static string GetMessage_ProjectHasTypeWithInvalidModule(IEnumerable<TypeArchNode> types) {
+        // GetMessage/Extra
+        public static string GetMessage_ModuleHasExtraTypes(ModuleArchNode module, IEnumerable<TypeArchNode> types) {
             var builder = new StringBuilder();
-            builder.AppendLine( "Project has types with invalid module:" );
+            builder.AppendLineFormat( "Module '{0}/{0}' has extra types:", module.Project.Name, module.Name );
             builder.AppendTypes( types );
             return builder.ToString();
         }
-        public static string GetMessage_ProjectHasTypeWithInvalidNamespace(IEnumerable<TypeArchNode> types) {
+        public static string GetMessage_NamespaceHasExtraTypes(NamespaceArchNode @namespace, IEnumerable<TypeArchNode> types) {
             var builder = new StringBuilder();
-            builder.AppendLine( "Project has types with invalid namespace:" );
+            builder.AppendLineFormat( "Namespace '{0}/{0}/{0}' has extra types:", @namespace.GetProject().Name, @namespace.Module, @namespace.Name );
             builder.AppendTypes( types );
             return builder.ToString();
         }

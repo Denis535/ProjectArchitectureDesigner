@@ -562,12 +562,12 @@ public sealed partial class Module_ProjectArchitectureDesigner_Internal {
     * `Utility` - set of useful functions.
 - Understand the semantic of your type's members. I can distinguish the following semantic categories: ([More details](https://softwareengineering.stackexchange.com/a/404752/352915))
     * `Property`
-    * `Question`
-    * `Directive`
-    * `Command`
+    * `Property/Question`
+    * `Property/Directive`
+    * `Data`
     * `Event trigger`
     * `Event handler`
-    * `Data`
+    * `Command`
     * `Utility`
 
 # The links
