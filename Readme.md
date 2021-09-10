@@ -560,7 +560,7 @@ public sealed partial class Module_ProjectArchitectureDesigner_Internal {
     * `Service` - stateless behavior logic.
     * `Object` - simple data.
     * `Utility` - set of useful functions.
-- Understand the semantic of your type's members. I can distinguish the following semantic categories: ([More details](https://softwareengineering.stackexchange.com/a/404752/352915))
+- Understand the semantic of your type's members. I can distinguish the following semantic categories ([More details](https://softwareengineering.stackexchange.com/a/404752/352915)):
     * `Property`
     * `Property/Question`
     * `Property/Directive`
