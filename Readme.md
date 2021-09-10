@@ -556,9 +556,9 @@ public sealed partial class Module_ProjectArchitectureDesigner_Internal {
  - Put all your code into folders reflecting the namespaces containing those code.
  - Understand the semantic of your types. I can distinguish the following semantic categories:
     * `Attribute` - metadata.
-    * `Entity` - data, state and behavior logic.
-    * `Service` - stateless behavior logic.
-    * `Object` - simple data.
+    * `Entity` - data, state and logic.
+    * `Service` - logic.
+    * `Object` - simple data structure.
     * `Utility` - set of useful functions.
 - Understand the semantic of your type's members. I can distinguish the following semantic categories ([More details](https://softwareengineering.stackexchange.com/a/404752/352915)):
     * `Property`
